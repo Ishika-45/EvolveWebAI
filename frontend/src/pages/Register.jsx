@@ -1,4 +1,6 @@
 import { motion } from "framer-motion"
+import toast from "react-hot-toast";
+
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import api from "../services/api"
@@ -15,23 +17,30 @@ const Register = () => {
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match")
+      toast.error("Passwords do not match")
       return
     }
 
     setLoading(true)
 
     try {
-      await api.post("auth/register", {
+      await api.post("/auth/register", {
         name,
         email,
         password,
       })
+toast.success("Account created! Let’s build 🚀")
 
-      alert("Registration successful! Please login.")
-      navigate("/")
+
+setTimeout(() => {
+  navigate("/")
+}, 1200)
+
     } catch (error) {
-      alert("Registration failed")
+      toast.error(
+  error.response?.data?.message || "Registration failed"
+)
+
     }
 
     setLoading(false)

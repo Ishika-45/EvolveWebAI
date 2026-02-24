@@ -1,4 +1,6 @@
 import { motion } from "framer-motion"
+import toast from "react-hot-toast";
+
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import api from "../services/api"
@@ -20,9 +22,21 @@ const Login = () => {
       })
 
       localStorage.setItem("token", res.data.token)
-      navigate("/dashboard")
+
+toast.success("Welcome back to EvolveWeb AI ✨", {
+  duration: 3000,
+})
+
+
+setTimeout(() => {
+  navigate("/dashboard")
+}, 1000)
+
     } catch (error) {
-      alert("Invalid credentials")
+      toast.error(
+  error.response?.data?.message || "Invalid credentials"
+)
+
     }
 
     setLoading(false)
