@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../services/api";
 
+
 const Register = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
