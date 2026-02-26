@@ -46,6 +46,10 @@ const Landing = () => {
 
         </div>
       </section>
+      <div className="bg-red-500 text-white p-10">
+  TAILWIND IS WORKING
+</div>
+
     </>
   );
 };
