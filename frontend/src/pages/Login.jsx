@@ -3,6 +3,9 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../services/api";
+// import AiAnimation from "../components/AiAnimation";
+import BrandPulse from "../components/BrandPulse";
+import BrandMotion from "../components/BrandMotion";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -54,9 +57,21 @@ const Login = () => {
   <div className="blob blob-purple"></div>
   <div className="blob blob-indigo"></div>
 
+      
       {/* LEFT SIDE */}
+
+      {/* <div
+  style={{
+    filter: "drop-shadow(0 0 20px var(--glow))"
+  }}
+    
+>
+  <AiAnimation />
+</div>
+       */}
       <div className="hidden md:flex flex-col justify-center px-20 relative z-10
 ">
+  <BrandMotion />
 
         <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-8">
           EvolveWeb AI
