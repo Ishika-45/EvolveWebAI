@@ -65,8 +65,12 @@ const DashboardHome = () => {
           <div
             key={i}
             className="bg-white/5 backdrop-blur-xl
-                       border border-white/10
-                       rounded-2xl p-6 text-center"
+           border border-white/10
+           rounded-2xl p-6 text-center
+           hover:-translate-y-1
+           hover:bg-white/10
+           hover:shadow-lg
+           transition-all duration-300"
           >
             <p className="text-gray-400 text-sm">{item}</p>
             <h3 className="text-2xl font-semibold mt-2">0{i + 2}</h3>
@@ -75,31 +79,34 @@ const DashboardHome = () => {
       </div>
 
       {/* Recent Projects */}
-      <div className="w-full max-w-5xl mt-16">
-        <h2 className="text-xl font-semibold mb-6">
-          Recent Projects
-        </h2>
+      <div className="w-full max-w-5xl mt-20">
 
-        <div className="grid grid-cols-3 gap-6">
-          {[1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="bg-white/5 backdrop-blur-xl
-                         border border-white/10
-                         rounded-2xl p-6
-                         hover:bg-white/10
-                         transition"
-            >
-              <h3 className="text-lg font-medium">
-                Project {item}
-              </h3>
-              <p className="text-gray-400 text-sm mt-2">
-                AI Generated Website
-              </p>
-            </div>
-          ))}
-        </div>
+  <h2 className="text-xl font-semibold mb-6 text-gray-200">
+    Recent Projects
+  </h2>
+
+  <div className="grid grid-cols-3 gap-6">
+    {[1, 2, 3].map((item) => (
+      <div
+        key={item}
+        className="bg-white/5 backdrop-blur-xl
+                   border border-white/10
+                   rounded-2xl p-6
+                   hover:bg-white/10
+                   hover:-translate-y-2
+                   hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]
+                   transition-all duration-300"
+      >
+        <h3 className="text-lg font-medium">
+          Project {item}
+        </h3>
+        <p className="text-gray-400 text-sm mt-2">
+          AI Generated Website
+        </p>
       </div>
+    ))}
+  </div>
+</div>
 
     </div>
   );

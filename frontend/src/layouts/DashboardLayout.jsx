@@ -20,7 +20,29 @@ const DashboardLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex text-white bg-[#0f172a] relative overflow-hidden">
+    <div className="min-h-screen flex text-white relative overflow-hidden
+                bg-[#0f172a]">
+  
+  {/* Grid Overlay */}
+ <div className="absolute inset-0 animated-grid
+  bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),
+      linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)]
+  bg-[size:40px_40px]
+  pointer-events-none" />
+
+  {/* Radial Glow */}
+  <div className="absolute top-[-200px] left-1/2 -translate-x-1/2
+                  w-[900px] h-[900px]
+                  bg-indigo-500/15 blur-[160px]
+                  rounded-full pointer-events-none" />
+                  
+                  <div className="absolute w-3 h-3 bg-indigo-400/40 rounded-full
+                top-[20%] left-[30%]
+                animate-pulse blur-sm" />
+
+<div className="absolute w-2 h-2 bg-purple-400/40 rounded-full
+                top-[60%] left-[70%]
+                animate-pulse blur-sm delay-1000" />
 
       {/* Ambient Glow */}
       <div className="absolute top-[-300px] left-1/2 -translate-x-1/2
@@ -30,9 +52,11 @@ const DashboardLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`h-screen ${collapsed ? "w-20" : "w-64"}
-        bg-white/5 backdrop-blur-2xl border-r border-white/10
-        shadow-xl transition-all duration-300 flex flex-col`}
+       className={`min-h-screen flex-shrink-0
+  ${collapsed ? "w-20" : "w-64"}
+  bg-white/5 backdrop-blur-2xl
+  border-r border-white/10
+  transition-all duration-300 flex flex-col`}
       >
         <div className="flex items-center justify-between p-6">
           {!collapsed && (
@@ -97,9 +121,13 @@ const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-10 overflow-y-auto">
-          <Outlet />
-        </main>
+       <main className="flex-1 p-10 overflow-y-auto relative z-10">
+
+  <div className="max-w-7xl mx-auto">
+    <Outlet />
+  </div>
+
+</main>
 
       </div>
     </div>

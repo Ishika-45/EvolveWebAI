@@ -121,3 +121,23 @@ body {
     transform: translateY(60px) translateX(40px);
   }
 }
+
+/* Hide Scrollbar But Keep Scroll */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+body {
+  scrollbar-width: none;
+}
+
+/* Animated Grid Movement */
+@keyframes gridMove {
+  from { background-position: 0 0; }
+  to { background-position: 40px 40px; }
+}
+
+.animated-grid {
+  animation: gridMove 20s linear infinite;
+}
