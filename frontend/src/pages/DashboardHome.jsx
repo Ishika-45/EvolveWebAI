@@ -1,8 +1,59 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const DashboardHome = () => {
   const [idea, setIdea] = useState("");
+  const [projects, setProjects] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  const savedProjects = localStorage.getItem("ew_projects");
+  if (savedProjects) {
+    setProjects(JSON.parse(savedProjects));
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem("ew_projects", JSON.stringify(projects));
+}, [projects]);
+
+  const handleGenerate = () => {
+    if (!idea.trim()) return;
+
+    setIsGenerating(true);
+
+    setTimeout(() => {
+      const newProject = {
+        id: Date.now(),
+        title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
+        date: new Date().toLocaleString(),
+      };
+
+      setProjects([newProject, ...projects]);
+      setIdea("");
+      setIsGenerating(false);
+    }, 2500);
+  };
+  const LoadingDots = () => {
+  return (
+    <div className="flex gap-1 ml-2">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            delay: i * 0.2,
+          }}
+          className="w-2 h-2 bg-white rounded-full"
+        />
+      ))}
+    </div>
+  );
+};
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -26,87 +77,138 @@ const DashboardHome = () => {
       </div>
 
       {/* AI Command Card */}
-      <div className="w-full max-w-3xl relative
-                      bg-white/5 backdrop-blur-2xl
-                      border border-white/10
-                      rounded-3xl p-10
-                      shadow-[0_0_60px_rgba(99,102,241,0.15)]
-                      transition-all duration-300">
+      <div className={`w-full max-w-3xl relative
+                 bg-white/5 backdrop-blur-2xl
+                 border border-white/10
+                 rounded-3xl p-10
+                 transition-all duration-500
+                 ${
+                   isGenerating
+                     ? "shadow-[0_0_80px_rgba(99,102,241,0.35)]"
+                     : "shadow-[0_0_60px_rgba(99,102,241,0.15)]"
+                 }`}
+>
 
         <textarea
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-          placeholder="Describe the website you want to build..."
-          className="w-full h-36 bg-transparent resize-none
-                     outline-none text-gray-200
-                     placeholder-gray-500 text-lg leading-relaxed
-                     focus:ring-2 focus:ring-indigo-500/40
-                     rounded-xl p-4"
-        />
+  value={idea}
+  onChange={(e) => setIdea(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!isGenerating) handleGenerate();
+    }
+  }}
+  placeholder="Describe the website you want to build..."
+  className="w-full h-36 bg-transparent resize-none
+             outline-none text-gray-200
+             placeholder-gray-500 text-lg leading-relaxed
+             focus:ring-2 focus:ring-indigo-500/40
+             rounded-xl p-4"
+  disabled={isGenerating}
+/>
+
+{isGenerating && (
+  <motion.p
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="text-sm text-indigo-300 mt-4"
+  >
+    AI is analyzing your idea...
+  </motion.p>
+)}
 
         <div className="flex justify-end mt-6">
           <button
-            className="px-8 py-3 rounded-xl
-                       bg-gradient-to-r from-purple-500 to-indigo-500
-                       font-medium text-white
-                       shadow-lg shadow-indigo-500/30
-                       hover:scale-[1.03]
-                       active:scale-95
-                       transition-all duration-200"
-          >
-            Generate Website
-          </button>
+  onClick={handleGenerate}
+  disabled={isGenerating}
+  className={`px-8 py-3 rounded-xl
+             bg-gradient-to-r from-purple-500 to-indigo-500
+             font-medium text-white
+             shadow-lg shadow-indigo-500/30
+             flex items-center justify-center
+             transition-all duration-300
+             ${isGenerating 
+               ? "opacity-80 cursor-not-allowed"
+               : "hover:scale-[1.03] active:scale-95"
+             }`}
+>
+  {isGenerating ? (
+    <>
+      Generating
+      <LoadingDots />
+    </>
+  ) : (
+    "Generate Website"
+  )}
+</button>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
-        {["Projects", "Templates Used", "AI Generations"].map((item, i) => (
-          <div
-            key={i}
-            className="bg-white/5 backdrop-blur-xl
-           border border-white/10
-           rounded-2xl p-6 text-center
-           hover:-translate-y-1
-           hover:bg-white/10
-           hover:shadow-lg
-           transition-all duration-300"
-          >
-            <p className="text-gray-400 text-sm">{item}</p>
-            <h3 className="text-2xl font-semibold mt-2">0{i + 2}</h3>
-          </div>
-        ))}
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:-translate-y-1 transition-all duration-300">
+          <p className="text-gray-400 text-sm">Projects</p>
+          <h3 className="text-2xl font-semibold mt-2">
+            {projects.length}
+          </h3>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:-translate-y-1 transition-all duration-300">
+          <p className="text-gray-400 text-sm">Templates Used</p>
+          <h3 className="text-2xl font-semibold mt-2">12</h3>
+        </div>
+
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:-translate-y-1 transition-all duration-300">
+          <p className="text-gray-400 text-sm">AI Generations</p>
+          <h3 className="text-2xl font-semibold mt-2">
+            {projects.length}
+          </h3>
+        </div>
       </div>
 
       {/* Recent Projects */}
       <div className="w-full max-w-5xl mt-20">
+        <h2 className="text-xl font-semibold mb-6 text-gray-200">
+          Recent Projects
+        </h2>
 
-  <h2 className="text-xl font-semibold mb-6 text-gray-200">
-    Recent Projects
-  </h2>
+        <div className="grid grid-cols-3 gap-6">
 
-  <div className="grid grid-cols-3 gap-6">
-    {[1, 2, 3].map((item) => (
-      <div
-        key={item}
-        className="bg-white/5 backdrop-blur-xl
-                   border border-white/10
-                   rounded-2xl p-6
-                   hover:bg-white/10
-                   hover:-translate-y-2
-                   hover:shadow-[0_15px_40px_rgba(0,0,0,0.5)]
-                   transition-all duration-300"
-      >
-        <h3 className="text-lg font-medium">
-          Project {item}
-        </h3>
-        <p className="text-gray-400 text-sm mt-2">
-          AI Generated Website
-        </p>
+          <AnimatePresence>
+            {projects.map((project) => (
+              <motion.div
+  key={project.id}
+  onClick={() => navigate(`/dashboard/project/${project.id}`)}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.4 }}
+  className="group bg-white/5 backdrop-blur-xl
+             border border-white/10
+             rounded-2xl p-6
+             cursor-pointer
+             transition-all duration-300
+             hover:-translate-y-2
+             hover:scale-[1.02]
+             hover:bg-white/10
+             hover:border-indigo-400/30
+             hover:shadow-[0_20px_50px_rgba(99,102,241,0.35)]"
+>
+                <h3 className="text-lg font-medium">
+                  {project.title}
+                </h3>
+                <p className="text-gray-400 text-sm mt-2">
+                  Generated on {project.date}
+                </p>
+                <p className="text-indigo-400 text-sm mt-4 opacity-0 group-hover:opacity-100 transition duration-300">
+  Open Project →
+</p>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+        </div>
       </div>
-    ))}
-  </div>
-</div>
 
     </div>
   );

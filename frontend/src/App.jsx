@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DashboardLayout from "./layouts/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
+import ProjectDetails from "./pages/ProjectDetails";
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
   <Route index element={<DashboardHome />} />
+  <Route path="/dashboard/project/:id" element={<ProjectDetails />} />
 </Route>
+
         </Routes>
       </div>
     </Router>
