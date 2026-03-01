@@ -69,9 +69,22 @@ const Login = () => {
   <AiAnimation />
 </div>
        */}
-      <div className="hidden md:flex flex-col justify-center px-20 relative z-10
+      <div className="hidden md:flex flex-col justify-center px-20 relative z-10 
 ">
-  <BrandMotion />
+  {/* <BrandMotion /> */}
+
+  <div className="inline-flex items-center gap-2 
+                px-4 py-1.5 
+                rounded-full 
+                bg-white/5 
+                border border-white/10
+                text-sm text-purple-300
+                backdrop-blur-md
+                mb-6">
+
+  <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+  ⚡ Next-Gen AI Website Builder
+</div>
 
         <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-8">
           EvolveWeb AI

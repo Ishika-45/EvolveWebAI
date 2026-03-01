@@ -30,12 +30,12 @@ const BrandMotion = () => {
 
   if (specialAnimation) {
     return (
-      <div className="flex justify-center mb-8">
-        <div className="w-20 opacity-90 
-                        drop-shadow-[0_0_25px_rgba(139,92,246,0.4)]">
-          <Lottie animationData={specialAnimation} loop autoplay />
-        </div>
-      </div>
+      <div className="mb-6">
+  <div className="w-28 opacity-95 
+                  drop-shadow-[0_0_30px_rgba(139,92,246,0.4)]">
+    <Lottie animationData={specialAnimation} loop autoplay />
+  </div>
+</div>
     );
   }
 
