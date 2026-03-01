@@ -1,31 +1,42 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import {
+  LayoutDashboard,
+  Folder,
+  Sparkles,
+  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
+  const navItems = [
+    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "Projects", icon: Folder, path: "/dashboard/projects" },
+    { name: "Templates", icon: Sparkles, path: "/dashboard/templates" },
+    { name: "Settings", icon: Settings, path: "/dashboard/settings" },
+  ];
+
   return (
-    <div className="min-h-screen flex 
-                    bg-gradient-to-br 
-                    from-[#0f172a] via-[#111827] to-[#1f2937] 
-                    text-white">
+    <div className="min-h-screen flex text-white bg-[#0f172a] relative overflow-hidden">
 
-      {/* SIDEBAR */}
+      {/* Ambient Glow */}
+      <div className="absolute top-[-300px] left-1/2 -translate-x-1/2
+                      w-[900px] h-[900px]
+                      bg-indigo-500/10 blur-[140px]
+                      rounded-full pointer-events-none" />
+
+      {/* Sidebar */}
       <aside
-        className={`transition-all duration-300 
-                    bg-white/5 backdrop-blur-xl 
-                    border-r border-white/10 
-                    flex flex-col
-                    ${collapsed ? "w-20" : "w-64"}`}
+        className={`h-screen ${collapsed ? "w-20" : "w-64"}
+        bg-white/5 backdrop-blur-2xl border-r border-white/10
+        shadow-xl transition-all duration-300 flex flex-col`}
       >
-        {/* Top Section */}
         <div className="flex items-center justify-between p-6">
-
           {!collapsed && (
-            <h1 className="text-xl font-bold 
-                           bg-gradient-to-r from-purple-400 to-indigo-400 
-                           bg-clip-text text-transparent">
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
               EvolveWeb AI
             </h1>
           )}
@@ -34,76 +45,64 @@ const DashboardLayout = () => {
             onClick={() => setCollapsed(!collapsed)}
             className="p-2 rounded-lg hover:bg-white/10 transition"
           >
-            <Menu size={20} />
+            {collapsed ? (
+              <PanelLeftOpen size={20} />
+            ) : (
+              <PanelLeftClose size={20} />
+            )}
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex flex-col gap-3 px-3">
-
-          <SidebarItem collapsed={collapsed} label="Dashboard" />
-          <SidebarItem collapsed={collapsed} label="My Projects" />
-          <SidebarItem collapsed={collapsed} label="Templates" />
-          <SidebarItem collapsed={collapsed} label="Settings" />
-
+        <nav className="flex flex-col gap-2 px-3">
+          {navItems.map((item, i) => (
+            <NavLink
+              key={i}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl
+                transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-white/10 border border-white/10"
+                    : "hover:bg-white/10"
+                }`
+              }
+            >
+              <item.icon size={18} />
+              {!collapsed && (
+                <span className="text-sm">{item.name}</span>
+              )}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="mt-auto p-4 text-xs text-gray-400">
           {!collapsed && "© 2026 EvolveWeb AI"}
         </div>
-
       </aside>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col">
+      {/* Main Area */}
+      <div className="flex-1 flex flex-col relative z-10">
 
-        {/* TOPBAR */}
-        <header className="h-16 px-8 flex items-center justify-between 
-                           bg-white/5 backdrop-blur-xl 
-                           border-b border-white/10">
+        {/* Topbar */}
+        <header className="h-16 px-8 flex items-center justify-between
+                           bg-white/5 backdrop-blur-xl border-b border-white/10">
 
-          <h2 className="text-lg font-semibold text-gray-200">
+          <h2 className="text-lg font-medium text-gray-200">
             Dashboard
           </h2>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-400">
-              Welcome back 👋
-            </span>
-
-            <div className="w-9 h-9 rounded-full 
-                            bg-gradient-to-r 
-                            from-purple-500 to-indigo-500">
-            </div>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" />
           </div>
         </header>
 
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-10 overflow-y-auto">
           <Outlet />
         </main>
 
       </div>
     </div>
-  );
-};
-
-const SidebarItem = ({ collapsed, label }) => {
-  return (
-    <button
-      className="flex items-center gap-3 
-                 px-3 py-2 rounded-lg 
-                 hover:bg-white/10 transition"
-    >
-      <div className="w-6 h-6 rounded-md 
-                      bg-gradient-to-r 
-                      from-purple-500 to-indigo-500" />
-
-      {!collapsed && (
-        <span className="text-gray-300 text-sm">
-          {label}
-        </span>
-      )}
-    </button>
   );
 };
 
