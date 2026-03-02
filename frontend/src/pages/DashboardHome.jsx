@@ -1,41 +1,32 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+ import { useLocation } from "react-router-dom";
 
 const DashboardHome = () => {
   const [idea, setIdea] = useState("");
   const [projects, setProjects] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0);
+  const generationSteps = [
+  "🧠 Understanding your idea",
+  "🧩 Structuring layout architecture",
+  "🎨 Designing interface components",
+  "⚡ Optimizing responsiveness",
+  "🚀 Finalizing your website"
+];
 
-  useEffect(() => {
-  const savedProjects = localStorage.getItem("ew_projects");
-  if (savedProjects) {
-    setProjects(JSON.parse(savedProjects));
-  }
-}, []);
+
+const location = useLocation();
 
 useEffect(() => {
-  localStorage.setItem("ew_projects", JSON.stringify(projects));
-}, [projects]);
+  const savedProjects =
+    JSON.parse(localStorage.getItem("ew_projects")) || [];
 
-  const handleGenerate = () => {
-    if (!idea.trim()) return;
+  setProjects(savedProjects);
+}, [location]);
 
-    setIsGenerating(true);
-
-    setTimeout(() => {
-      const newProject = {
-        id: Date.now(),
-        title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
-        date: new Date().toLocaleString(),
-      };
-
-      setProjects([newProject, ...projects]);
-      setIdea("");
-      setIsGenerating(false);
-    }, 2500);
-  };
   const LoadingDots = () => {
   return (
     <div className="flex gap-1 ml-2">
@@ -53,6 +44,48 @@ useEffect(() => {
       ))}
     </div>
   );
+};
+
+const handleGenerate = () => {
+  if (!idea.trim()) return;
+
+  setIsGenerating(true);
+  setCurrentStep(0);
+
+  let stepIndex = 0;
+
+  const interval = setInterval(() => {
+    stepIndex++;
+
+    if (stepIndex < generationSteps.length) {
+      setCurrentStep(stepIndex);
+    } else {
+      clearInterval(interval);
+
+      const newProject = {
+        id: Date.now().toString(),
+        title:
+          idea.length > 30
+            ? idea.slice(0, 30) + "..."
+            : idea,
+        idea,
+        date: new Date().toLocaleString(),
+      };
+
+      setProjects((prev) => {
+        const updated = [newProject, ...prev];
+        localStorage.setItem(
+          "ew_projects",
+          JSON.stringify(updated)
+        );
+        return updated;
+      });
+
+      setIdea("");
+      setIsGenerating(false);
+      setCurrentStep(0);
+    }
+  }, 700);
 };
 
   return (
@@ -83,9 +116,9 @@ useEffect(() => {
                  rounded-3xl p-10
                  transition-all duration-500
                  ${
-                   isGenerating
-                     ? "shadow-[0_0_80px_rgba(99,102,241,0.35)]"
-                     : "shadow-[0_0_60px_rgba(99,102,241,0.15)]"
+                  isGenerating
+  ? "shadow-[0_0_100px_rgba(99,102,241,0.45)] animate-pulse"
+                     : "shadow-[0_0_60px_rgba(99,102,241,0.15)] animate-pulse"
                  }`}
 >
 
@@ -108,13 +141,40 @@ useEffect(() => {
 />
 
 {isGenerating && (
-  <motion.p
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="text-sm text-indigo-300 mt-4"
-  >
-    AI is analyzing your idea...
-  </motion.p>
+  <div className="mt-6 space-y-4">
+
+    {/* Steps */}
+    <div className="space-y-2">
+      {generationSteps.slice(0, currentStep + 1).map((step, index) => (
+        <motion.p
+          key={index}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className={`text-sm ${
+            index === currentStep
+              ? "text-indigo-300"
+              : "text-gray-500"
+          }`}
+        >
+          {step}
+        </motion.p>
+      ))}
+    </div>
+
+    {/* Progress Bar */}
+    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+        initial={{ width: 0 }}
+        animate={{
+          width: `${((currentStep + 1) / generationSteps.length) * 100}%`
+        }}
+        transition={{ ease: "easeInOut", duration: 0.5 }}
+      />
+    </div>
+
+  </div>
 )}
 
         <div className="flex justify-end mt-6">
@@ -178,7 +238,11 @@ useEffect(() => {
             {projects.map((project) => (
               <motion.div
   key={project.id}
-  onClick={() => navigate(`/dashboard/project/${project.id}`)}
+  onClick={() =>
+  navigate(`/dashboard/project/${project.id}`, {
+    state: { project },
+  })
+}
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0 }}
