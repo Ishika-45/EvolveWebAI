@@ -10,7 +10,9 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
-    const foundProject = savedProjects.find((p) => p.id === id);
+    const foundProject = savedProjects.find(
+  (p) => p.id.toString() === id
+);
     setProject(foundProject);
   }, [id]);
 
