@@ -25,6 +25,8 @@ const [copied, setCopied] = useState(false);
 const [editPulse, setEditPulse] = useState(false);
 const [isDeleting, setIsDeleting] = useState(false);
 const [showAIComplete, setShowAIComplete] = useState(true);
+const [regeneratingIndex, setRegeneratingIndex] = useState(null);
+const [showVersions, setShowVersions] = useState(false);
 
 useEffect(() => {
   const timer = setTimeout(() => {
@@ -46,7 +48,15 @@ useEffect(() => {
       (p) => p.id === id
     );
 
-    setProject(foundProject);
+    if (foundProject) {
+  const normalizedProject = {
+    ...foundProject,
+    versions: foundProject.versions || []
+  };
+
+  setProject(normalizedProject);
+  setEditedIdea(normalizedProject.idea || "");
+}
     if (foundProject) {
       setEditedIdea(foundProject.idea || "");
     }
@@ -82,6 +92,63 @@ const handleDelete = () => {
   }, 500); // animation duration
 };
 
+const handleRegenerateSection = async (index) => {
+  setRegeneratingIndex(index);
+
+  try {
+    const response = await fetch("http://localhost:5000/api/ai/generate-section", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        idea: project.idea,
+        sectionTitle: project.sections[index].title
+      })
+    });
+
+    const data = await response.json();
+
+    const previousVersion = {
+      idea: project.idea,
+      sections: project.sections,
+      timestamp: new Date().toLocaleString()
+    };
+
+    const updatedSections = [...project.sections];
+
+    updatedSections[index] = {
+      ...updatedSections[index],
+      description: data.content
+    };
+
+    const updatedProject = {
+      ...project,
+      sections: updatedSections,
+      versions: [...(project.versions || []), previousVersion]
+    };
+
+    setProject(updatedProject);
+
+    const savedProjects =
+      JSON.parse(localStorage.getItem("ew_projects")) || [];
+
+    const updatedProjects = savedProjects.map((p) =>
+      String(p.id) === String(id) ? updatedProject : p
+    );
+
+    localStorage.setItem(
+      "ew_projects",
+      JSON.stringify(updatedProjects)
+    );
+
+  } catch (error) {
+    console.error("AI Error:", error);
+  }
+
+  setRegeneratingIndex(null);
+};
+
   return (
     <motion.div
   initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -94,7 +161,6 @@ const handleDelete = () => {
   className="p-10 max-w-6xl mx-auto text-white"
 >
       {/* Back Button */}
-      
 
       <div className="flex justify-between items-center mb-8 ">
   <button
@@ -273,10 +339,44 @@ const handleDelete = () => {
 
   {isEditing ? (
   <textarea
-    value={editedIdea}
-    onChange={(e) => setEditedIdea(e.target.value)}
-    className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200"
-  />
+  value={editedIdea}
+  onChange={(e) => setEditedIdea(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+
+      // Trigger same save logic
+      const previousVersion = {
+        idea: project.idea,
+        sections: project.sections,
+        timestamp: new Date().toLocaleString()
+      };
+
+      const updatedProject = {
+        ...project,
+        idea: editedIdea,
+        versions: [...(project.versions || []), previousVersion]
+      };
+
+      setProject(updatedProject);
+
+      const savedProjects =
+        JSON.parse(localStorage.getItem("ew_projects")) || [];
+
+      const updatedProjects = savedProjects.map((p) =>
+        String(p.id) === String(id) ? updatedProject : p
+      );
+
+      localStorage.setItem(
+        "ew_projects",
+        JSON.stringify(updatedProjects)
+      );
+
+      setIsEditing(false);
+    }
+  }}
+  className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200"
+/>
 ) : viewMode === "preview" ? (
   <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
     {project.idea}
@@ -292,28 +392,100 @@ const handleDelete = () => {
 
   {isEditing && (
     <button
-      onClick={() => {
-        const savedProjects =
-          JSON.parse(localStorage.getItem("ew_projects")) || [];
+      oonClick={() => {
+  // 1️⃣ Save previous version before editing
+  const previousVersion = {
+    idea: project.idea,
+    sections: project.sections,
+    timestamp: new Date().toLocaleString()
+  };
 
-        const updatedProjects = savedProjects.map((p) =>
-          p.id === id ? { ...p, idea: editedIdea } : p
-        );
+  const updatedProject = {
+    ...project,
+    idea: editedIdea,
+    versions: [...(project.versions || []), previousVersion]
+  };
 
-        localStorage.setItem(
-          "ew_projects",
-          JSON.stringify(updatedProjects)
-        );
+  // 2️⃣ Update state
+  setProject(updatedProject);
 
-        setProject({ ...project, idea: editedIdea });
-        setIsEditing(false);
-      }}
+  // 3️⃣ Update localStorage
+  const savedProjects =
+    JSON.parse(localStorage.getItem("ew_projects")) || [];
+
+  const updatedProjects = savedProjects.map((p) =>
+    String(p.id) === String(id) ? updatedProject : p
+  );
+
+  localStorage.setItem(
+    "ew_projects",
+    JSON.stringify(updatedProjects)
+  );
+
+  setIsEditing(false);
+}}
       className="mt-4 px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
     >
       Save Changes
     </button>
   )}
 </div>
+
+<button
+  onClick={() => setShowVersions(!showVersions)}
+  className="mb-6 px-4 py-2 rounded-xl
+             bg-indigo-500/20 text-indigo-400
+             hover:bg-indigo-500/30 transition"
+>
+  View Version History
+</button>
+
+{showVersions && project.versions?.length > 0 && (
+  <div className="mb-8 bg-white/5 border border-white/10 rounded-2xl p-6">
+    <h3 className="text-lg font-semibold mb-4 text-indigo-400">
+      Version History
+    </h3>
+
+    {project.versions.map((version, index) => (
+      <div
+        key={index}
+        className="mb-4 p-4 bg-black/30 rounded-xl"
+      >
+        <p className="text-xs text-gray-400 mb-2">
+          Saved on {version.timestamp}
+        </p>
+
+        <button
+          onClick={() => {
+            const restoredProject = {
+  ...project,
+  idea: version.idea,
+  sections: version.sections,
+  versions: project.versions
+};
+
+            setProject(restoredProject);
+
+            const savedProjects =
+              JSON.parse(localStorage.getItem("ew_projects")) || [];
+
+            const updatedProjects = savedProjects.map((p) =>
+              String(p.id) === String(id) ? restoredProject : p
+            );
+
+            localStorage.setItem(
+              "ew_projects",
+              JSON.stringify(updatedProjects)
+            );
+          }}
+          className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
+        >
+          Restore This Version
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
       {/* Generated Sections */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -323,18 +495,41 @@ const handleDelete = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white/5 backdrop-blur-xl
-                       border border-white/10
-                       rounded-2xl p-6
-                       hover:bg-white/10
-                       transition"
+            className={`bg-white/5 backdrop-blur-xl
+           border border-white/10
+           rounded-2xl p-6
+           hover:bg-white/10
+           transition
+           ${regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""}`}
           >
-            <h3 className="text-lg font-semibold mb-3 text-purple-400">
-              {section.title}
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              {section.description}
-            </p>
+           <div className="flex justify-between items-start mb-3">
+  <h3 className="text-lg font-semibold text-purple-400">
+    {section.title}
+  </h3>
+
+  <button
+    onClick={() => handleRegenerateSection(index)}
+    className="text-xs px-3 py-1 rounded-lg
+               bg-indigo-500/20 text-indigo-400
+               hover:bg-indigo-500/30 transition"
+  >
+    Regenerate
+  </button>
+</div>
+            {regeneratingIndex === index ? (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="text-gray-400 text-sm flex items-center gap-2"
+  >
+    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
+    AI is improving this section...
+  </motion.div>
+) : (
+  <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+    {section.description}
+  </p>
+)}
           </motion.div>
         ))}
       </div>
