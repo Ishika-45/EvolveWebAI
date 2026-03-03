@@ -123,7 +123,7 @@ const handleDelete = () => {
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
   <div className="flex justify-between items-center mb-3">
     <h2 className="text-lg font-medium text-indigo-400">
-      Original Idea
+      {project.title ? project.title : "Title to be decided..."}
     </h2>
 
     <div className="flex items-center gap-3 ">
