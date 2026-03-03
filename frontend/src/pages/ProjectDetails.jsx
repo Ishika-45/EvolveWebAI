@@ -24,6 +24,15 @@ const [viewMode, setViewMode] = useState("preview");
 const [copied, setCopied] = useState(false);
 const [editPulse, setEditPulse] = useState(false);
 const [isDeleting, setIsDeleting] = useState(false);
+const [showAIComplete, setShowAIComplete] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setShowAIComplete(false);
+  }, 2200);
+
+  return () => clearTimeout(timer);
+}, []);
 
   useEffect(() => {
   if (passedProject) {
@@ -72,6 +81,7 @@ const handleDelete = () => {
     navigate("/dashboard");
   }, 500); // animation duration
 };
+
   return (
     <motion.div
   initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -111,16 +121,41 @@ const handleDelete = () => {
 </div>
 
       {/* Project Title */}
+      <div className=" mb-8">
       <h1 className="text-4xl font-semibold mb-4">
         {project.title}
       </h1>
 
-      <p className="text-gray-400 mb-10">
+      <p className="text-gray-400 mb-3">
         Created on {project.date}
       </p>
 
+        {/* AI Generation Status */}
+        <AnimatePresence>
+  {showAIComplete && (
+    <motion.div
+      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.4 }}
+      className="inline-flex items-center gap-2
+                 mt-2 px-4 py-2
+                 rounded-xl
+                 bg-green-500/10
+                 border border-green-500/30
+                 text-green-400
+                 backdrop-blur-xl
+                 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+    >
+      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+      AI Generation Complete
+    </motion.div>
+  )}
+</AnimatePresence>
+      </div>
+
       {/* Original Idea */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 ">
   <div className="flex justify-between items-center mb-3">
     <h2 className="text-lg font-medium text-indigo-400">
       {project.title ? project.title : "Title to be decided..."}
