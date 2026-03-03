@@ -63,14 +63,32 @@ const handleGenerate = () => {
       clearInterval(interval);
 
       const newProject = {
-        id: Date.now().toString(),
-        title:
-          idea.length > 30
-            ? idea.slice(0, 30) + "..."
-            : idea,
-        idea,
-        date: new Date().toLocaleString(),
-      };
+  id: Date.now().toString(),
+  title:
+    idea.length > 30
+      ? idea.slice(0, 30) + "..."
+      : idea,
+  idea,
+  date: new Date().toLocaleString(),
+};
+
+setProjects((prev) => {
+  const updated = [newProject, ...prev];
+  localStorage.setItem(
+    "ew_projects",
+    JSON.stringify(updated)
+  );
+  return updated;
+});
+
+setIdea("");
+setIsGenerating(false);
+setCurrentStep(0);
+
+// Small cinematic delay
+setTimeout(() => {
+  navigate(`/dashboard/project/${newProject.id}`);
+}, 400);
 
       setProjects((prev) => {
         const updated = [newProject, ...prev];

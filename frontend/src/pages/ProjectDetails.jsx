@@ -74,15 +74,15 @@ const handleDelete = () => {
 };
   return (
     <motion.div
-  initial={{ opacity: 0, y: 20 }}
+  initial={{ opacity: 0, y: 40, scale: 0.98 }}
   animate={
     isDeleting
       ? { opacity: 0, scale: 0.9, y: 50 }
       : { opacity: 1, scale: 1, y: 0 }
   }
-  transition={{ duration: 0.5 }}
-      className="p-10 max-w-6xl mx-auto text-white"
-    >
+  transition={{ duration: 0.4, ease: "easeOut" }}
+  className="p-10 max-w-6xl mx-auto text-white"
+>
       {/* Back Button */}
       
 
