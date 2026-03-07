@@ -8,11 +8,19 @@ const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   defaultHeaders: {
     "HTTP-Referer": "http://localhost:3000",
-    "X-Title": "EvolveWeb AI"
-  }
+    "X-Title": "EvolveWeb AI",
+  },
 });
 
-// 🧠 ANALYZE STARTUP IDEA
+const parseAIResponse = (response) => {
+  try {
+    return JSON.parse(response);
+  } catch {
+    return response;
+  }
+};
+
+// 🧠 IDEA ANALYSIS
 router.post("/analyze-idea", async (req, res) => {
   try {
     const { idea } = req.body;
@@ -20,40 +28,36 @@ router.post("/analyze-idea", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
       messages: [
-        {
-          role: "system",
-          content: "You are a startup advisor."
-        },
+        { role: "system", content: "You are a startup advisor." },
         {
           role: "user",
           content: `
-Analyze the following startup idea.
+Analyze the startup idea below.
 
 Idea: ${idea}
 
 Return JSON with:
 - ideaScore
-- strengths (3 points)
-- weaknesses (3 points)
-- opportunities (3 points)
+- strengths (3)
+- weaknesses (3)
+- opportunities (3)
 
 Return ONLY JSON.
-`
-        }
-      ]
+`,
+        },
+      ],
     });
 
-    res.json({
-      content: completion.choices[0].message.content
-    });
+    const content = completion.choices[0].message.content;
 
+    res.json({ data: parseAIResponse(content) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Idea analysis failed" });
   }
 });
 
-// 🚀 EVOLVE IDEA
+// 🚀 IDEA EVOLUTION
 router.post("/evolve-idea", async (req, res) => {
   try {
     const { idea } = req.body;
@@ -61,10 +65,7 @@ router.post("/evolve-idea", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
       messages: [
-        {
-          role: "system",
-          content: "You are a startup product strategist."
-        },
+        { role: "system", content: "You are a startup strategist." },
         {
           role: "user",
           content: `
@@ -74,26 +75,25 @@ Idea: ${idea}
 
 Return JSON with:
 - improvedIdea
-- keyImprovements (3 points)
+- keyImprovements (3)
 - uniqueAngle
 
 Return ONLY JSON.
-`
-        }
-      ]
+`,
+        },
+      ],
     });
 
-    res.json({
-      content: completion.choices[0].message.content
-    });
+    const content = completion.choices[0].message.content;
 
+    res.json({ data: parseAIResponse(content) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Idea evolution failed" });
   }
 });
 
-// 📊 GENERATE PRODUCT BLUEPRINT
+// 📊 PRODUCT BLUEPRINT
 router.post("/generate-blueprint", async (req, res) => {
   try {
     const { idea } = req.body;
@@ -101,41 +101,38 @@ router.post("/generate-blueprint", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
       messages: [
-        {
-          role: "system",
-          content: "You are a startup product manager."
-        },
+        { role: "system", content: "You are a startup product manager." },
         {
           role: "user",
           content: `
-Create a product blueprint for the following startup idea.
+Generate a startup product blueprint.
 
 Idea: ${idea}
 
 Return JSON with:
 - problem
 - targetAudience
-- coreFeatures (5 items)
+- coreFeatures (5)
 - uniqueSellingProposition
 - monetizationStrategy
 - futureScope
 
 Return ONLY JSON.
-`
-        }
-      ]
+`,
+        },
+      ],
     });
 
-    res.json({
-      content: completion.choices[0].message.content
-    });
+    const content = completion.choices[0].message.content;
 
+    res.json({ data: parseAIResponse(content) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Blueprint generation failed" });
   }
 });
 
+// ✨ GENERATE SECTION
 router.post("/generate-section", async (req, res) => {
   try {
     const { idea, sectionTitle } = req.body;
@@ -145,35 +142,29 @@ router.post("/generate-section", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a professional SaaS product strategist."
+          content: "You are a professional SaaS product strategist.",
         },
         {
           role: "user",
           content: `
-You are an expert SaaS product strategist.
-
 Project Idea:
 ${idea}
 
-Write an improved version of the section:
-"${sectionTitle}"
+Write an improved version of the section "${sectionTitle}"
 
 Rules:
 - Professional startup tone
 - Clear structure
 - Bullet points when helpful
 - Focus on real-world business value
-- Maximum clarity and impact
-`
-        }
+`,
+        },
       ],
-      temperature: 0.7
     });
 
     res.json({
-      content: completion.choices[0].message.content
+      content: completion.choices[0].message.content,
     });
-
   } catch (error) {
     console.error("AI ERROR:", error);
     res.status(500).json({ error: "AI generation failed" });

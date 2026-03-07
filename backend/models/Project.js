@@ -14,12 +14,10 @@ const projectSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // original idea
     idea: {
       type: String,
     },
 
-    // AI analysis
     analysis: {
       ideaScore: Number,
       strengths: [String],
@@ -27,12 +25,10 @@ const projectSchema = new mongoose.Schema(
       opportunities: [String],
     },
 
-    // improved idea
     evolvedIdea: {
       type: String,
     },
 
-    // product blueprint
     blueprint: {
       problem: String,
       targetAudience: String,
@@ -42,7 +38,6 @@ const projectSchema = new mongoose.Schema(
       futureScope: String,
     },
 
-    // website structure
     websiteStructure: {
       pages: [
         {
@@ -58,7 +53,6 @@ const projectSchema = new mongoose.Schema(
       ],
     },
 
-    // generated website code
     generatedCode: {
       type: String,
     },
