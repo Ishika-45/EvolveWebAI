@@ -7,14 +7,58 @@ const projectSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+
     title: {
       type: String,
       required: true,
       trim: true,
     },
-    description: {
+
+    // original idea
+    idea: {
       type: String,
     },
+
+    // AI analysis
+    analysis: {
+      ideaScore: Number,
+      strengths: [String],
+      weaknesses: [String],
+      opportunities: [String],
+    },
+
+    // improved idea
+    evolvedIdea: {
+      type: String,
+    },
+
+    // product blueprint
+    blueprint: {
+      problem: String,
+      targetAudience: String,
+      coreFeatures: [String],
+      uniqueSellingProposition: String,
+      monetizationStrategy: String,
+      futureScope: String,
+    },
+
+    // website structure
+    websiteStructure: {
+      pages: [
+        {
+          name: String,
+          sections: [
+            {
+              sectionName: String,
+              title: String,
+              description: String,
+            },
+          ],
+        },
+      ],
+    },
+
+    // generated website code
     generatedCode: {
       type: String,
     },
