@@ -64,12 +64,32 @@ const handleGenerate = () => {
 
       const newProject = {
   id: Date.now().toString(),
-  title:
-    idea.length > 30
-      ? idea.slice(0, 30) + "..."
-      : idea,
+  title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
   idea,
   date: new Date().toLocaleString(),
+  versions: [],
+  sections: [
+    {
+      title: "Problem",
+      description: "AI will generate this section."
+    },
+    {
+      title: "Target Audience",
+      description: "AI will generate this section."
+    },
+    {
+      title: "Solution",
+      description: "AI will generate this section."
+    },
+    {
+      title: "Business Model",
+      description: "AI will generate this section."
+    },
+    {
+      title: "Key Features",
+      description: "AI will generate this section."
+    }
+  ]
 };
 
 setProjects((prev) => {

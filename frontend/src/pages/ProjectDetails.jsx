@@ -392,7 +392,7 @@ const handleRegenerateSection = async (index) => {
 
   {isEditing && (
     <button
-      oonClick={() => {
+      onClick={() => {
   // 1️⃣ Save previous version before editing
   const previousVersion = {
     idea: project.idea,
