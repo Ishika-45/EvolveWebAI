@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
  import { useLocation } from "react-router-dom";
+ import api from "../services/api";
 
 const DashboardHome = () => {
   const [idea, setIdea] = useState("");
@@ -21,10 +22,16 @@ const DashboardHome = () => {
 const location = useLocation();
 
 useEffect(() => {
-  const savedProjects =
-    JSON.parse(localStorage.getItem("ew_projects")) || [];
+  const fetchProjects = async () => {
+    try {
+      const res = await api.get("/projects");
+      setProjects(res.data);
+    } catch (err) {
+      console.error("Failed to load projects", err);
+    }
+  };
 
-  setProjects(savedProjects);
+  fetchProjects();
 }, [location]);
 
   const LoadingDots = () => {
@@ -68,6 +75,7 @@ const handleGenerate = () => {
   idea,
   date: new Date().toLocaleString(),
   versions: [],
+  blueprint: null,
   sections: [
     {
       title: "Problem",
@@ -92,14 +100,50 @@ const handleGenerate = () => {
   ]
 };
 
-setProjects((prev) => {
-  const updated = [newProject, ...prev];
-  localStorage.setItem(
-    "ew_projects",
-    JSON.stringify(updated)
-  );
-  return updated;
-});
+try {
+  const res = await api.post("/projects", {
+    title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
+    idea,
+    sections: [
+      {
+        title: "Problem",
+        description: "AI will generate this section."
+      },
+      {
+        title: "Target Audience",
+        description: "AI will generate this section."
+      },
+      {
+        title: "Solution",
+        description: "AI will generate this section."
+      },
+      {
+        title: "Business Model",
+        description: "AI will generate this section."
+      },
+      {
+        title: "Key Features",
+        description: "AI will generate this section."
+      }
+    ]
+  });
+
+  const newProject = res.data;
+
+  setProjects((prev) => [newProject, ...prev]);
+
+  setIdea("");
+  setIsGenerating(false);
+  setCurrentStep(0);
+
+  setTimeout(() => {
+    navigate(`/dashboard/project/${newProject._id}`);
+  }, 400);
+
+} catch (err) {
+  console.error("Project creation failed", err);
+  setIsGenerating(false);
+}
 
 setIdea("");
 setIsGenerating(false);
@@ -275,11 +319,9 @@ setTimeout(() => {
           <AnimatePresence>
             {projects.map((project) => (
               <motion.div
-  key={project.id}
+  key={project._id}
   onClick={() =>
-  navigate(`/dashboard/project/${project.id}`, {
-    state: { project },
-  })
+  navigate(`/dashboard/project/${project._id}`)
 }
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
@@ -300,7 +342,7 @@ setTimeout(() => {
                   {project.title}
                 </h3>
                 <p className="text-gray-400 text-sm mt-2">
-                  Generated on {project.date}
+                  Generated on {new Date(project.createdAt).toLocaleDateString()}
                 </p>
                 <p className="text-indigo-400 text-sm mt-4 opacity-0 group-hover:opacity-100 transition duration-300">
   Open Project →
