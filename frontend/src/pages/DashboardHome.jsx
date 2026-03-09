@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
- import { useLocation } from "react-router-dom";
- import api from "../services/api";
+import { useLocation } from "react-router-dom";
+import api from "../services/api";
+import AIStreamingText from "../components/AIStreamingText";
+import FlowCard from "../components/FlowCard";
+import AIGenerationModal from "../components/AIGenerationModal";
 
 const DashboardHome = () => {
   const [idea, setIdea] = useState("");
@@ -10,97 +13,98 @@ const DashboardHome = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const [generationFinished, setGenerationFinished] = useState(false);
   const generationSteps = [
-  "🧠 Understanding your idea",
-  "🧩 Structuring layout architecture",
-  "🎨 Designing interface components",
-  "⚡ Optimizing responsiveness",
-  "🚀 Finalizing your website"
-];
+    "🧠 Understanding your idea",
+    "🧩 Structuring layout architecture",
+    "🎨 Designing interface components",
+    "⚡ Optimizing responsiveness",
+    "🚀 Finalizing your website"
+  ];
 
 
-const location = useLocation();
+  const location = useLocation();
 
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      const res = await api.get("/projects");
-      setProjects(res.data);
-    } catch (err) {
-      console.error("Failed to load projects", err);
-    }
-  };
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await api.get("/projects");
+        setProjects(res.data);
+      } catch (err) {
+        console.error("Failed to load projects", err);
+      }
+    };
 
-  fetchProjects();
-}, [location]);
+    fetchProjects();
+  }, [location]);
 
   const LoadingDots = () => {
-  return (
-    <div className="flex gap-1 ml-2">
-      {[0, 1, 2].map((i) => (
-        <motion.span
-          key={i}
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
-          className="w-2 h-2 bg-white rounded-full"
-        />
-      ))}
-    </div>
-  );
-};
+    return (
+      <div className="flex gap-1 ml-2">
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              delay: i * 0.2,
+            }}
+            className="w-2 h-2 bg-white rounded-full"
+          />
+        ))}
+      </div>
+    );
+  };
 
-const handleGenerate = async () => {
-  if (!idea.trim()) return;
+  const handleGenerate = async () => {
+    if (!idea.trim()) return;
 
-  setIsGenerating(true);
-  setCurrentStep(0);
-
-  let stepIndex = 0;
-
-  const interval = setInterval(() => {
-    stepIndex++;
-
-    if (stepIndex < generationSteps.length) {
-      setCurrentStep(stepIndex);
-    } else {
-      clearInterval(interval);
-    }
-  }, 700);
-
-  try {
-    const res = await api.post("/projects", {
-      title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
-      idea,
-      sections: [
-        { title: "Problem", description: "AI will generate this section." },
-        { title: "Target Audience", description: "AI will generate this section." },
-        { title: "Solution", description: "AI will generate this section." },
-        { title: "Business Model", description: "AI will generate this section." },
-        { title: "Key Features", description: "AI will generate this section." }
-      ]
-    });
-
-    const newProject = res.data;
-
-    setProjects((prev) => [newProject, ...prev]);
-
-    setIdea("");
-    setIsGenerating(false);
+    setIsGenerating(true);
     setCurrentStep(0);
 
-    setTimeout(() => {
-      navigate(`/dashboard/project/${newProject._id}`);
-    }, 400);
+    let stepIndex = 0;
 
-  } catch (err) {
-    console.error("Project creation failed", err);
-    setIsGenerating(false);
-  }
-};
+    const interval = setInterval(() => {
+      stepIndex++;
+
+      if (stepIndex < generationSteps.length) {
+        setCurrentStep(stepIndex);
+      } else {
+        clearInterval(interval);
+      }
+    }, 700);
+
+    try {
+      const res = await api.post("/projects", {
+        title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
+        idea,
+        sections: [
+          { title: "Problem", description: "AI will generate this section." },
+          { title: "Target Audience", description: "AI will generate this section." },
+          { title: "Solution", description: "AI will generate this section." },
+          { title: "Business Model", description: "AI will generate this section." },
+          { title: "Key Features", description: "AI will generate this section." }
+        ]
+      });
+
+      const newProject = res.data;
+
+      setProjects((prev) => [newProject, ...prev]);
+
+      setIdea("");
+      setIsGenerating(false);
+      setCurrentStep(0);
+
+      setTimeout(() => {
+        navigate(`/dashboard/project/${newProject._id}`);
+      }, 400);
+
+    } catch (err) {
+      console.error("Project creation failed", err);
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -129,92 +133,86 @@ const handleGenerate = async () => {
                  border border-white/10
                  rounded-3xl p-10
                  transition-all duration-500
-                 ${
-                  isGenerating
-  ? "shadow-[0_0_100px_rgba(99,102,241,0.45)] animate-pulse"
-                     : "shadow-[0_0_60px_rgba(99,102,241,0.15)] animate-pulse"
-                 }`}
->
+                 ${isGenerating
+          ? "shadow-[0_0_100px_rgba(99,102,241,0.45)] animate-pulse"
+          : "shadow-[0_0_60px_rgba(99,102,241,0.15)] animate-pulse"
+        }`}
+      >
 
         <textarea
-  value={idea}
-  onChange={(e) => setIdea(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (!isGenerating) handleGenerate();
-    }
-  }}
-  placeholder="Describe the website you want to build..."
-  className="w-full h-36 bg-transparent resize-none
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (!isGenerating) handleGenerate();
+            }
+          }}
+          placeholder="Describe the website you want to build..."
+          className="w-full h-36 bg-transparent resize-none
              outline-none text-gray-200
              placeholder-gray-500 text-lg leading-relaxed
              focus:ring-2 focus:ring-indigo-500/40
              rounded-xl p-4"
-  disabled={isGenerating}
-/>
+          disabled={isGenerating}
+        />
 
-{isGenerating && (
-  <div className="mt-6 space-y-4">
+        {isGenerating && (
+          <div className="mt-8 space-y-6">
 
-    {/* Steps */}
-    <div className="space-y-2">
-      {generationSteps.slice(0, currentStep + 1).map((step, index) => (
-        <motion.p
-          key={index}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`text-sm ${
-            index === currentStep
-              ? "text-indigo-300"
-              : "text-gray-500"
-          }`}
-        >
-          {step}
-        </motion.p>
-      ))}
-    </div>
+            <AIStreamingText text="Analyzing your idea and generating a beautiful website structure..." />
 
-    {/* Progress Bar */}
-    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-      <motion.div
-        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
-        initial={{ width: 0 }}
-        animate={{
-          width: `${((currentStep + 1) / generationSteps.length) * 100}%`
-        }}
-        transition={{ ease: "easeInOut", duration: 0.5 }}
-      />
-    </div>
+            <div className="grid gap-3">
 
-  </div>
-)}
+              {generationSteps.map((step, index) => (
+                <FlowCard
+                  key={index}
+                  step={step}
+                  index={index}
+                  active={index === currentStep}
+                />
+              ))}
+
+            </div>
+
+            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                initial={{ width: 0 }}
+                animate={{
+                  width: `${((currentStep + 1) / generationSteps.length) * 100}%`
+                }}
+                transition={{ ease: "easeInOut", duration: 0.5 }}
+              />
+            </div>
+
+          </div>
+        )}
 
         <div className="flex justify-end mt-6">
           <button
-  onClick={handleGenerate}
-  disabled={isGenerating}
-  className={`px-8 py-3 rounded-xl
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className={`px-8 py-3 rounded-xl
              bg-gradient-to-r from-purple-500 to-indigo-500
              font-medium text-white
              shadow-lg shadow-indigo-500/30
              flex items-center justify-center
              transition-all duration-300
-             ${isGenerating 
-               ? "opacity-80 cursor-not-allowed"
-               : "hover:scale-[1.03] active:scale-95"
-             }`}
->
-  {isGenerating ? (
-    <>
-      Generating
-      <LoadingDots />
-    </>
-  ) : (
-    "Generate Website"
-  )}
-</button>
+             ${isGenerating
+                ? "opacity-80 cursor-not-allowed"
+                : "hover:scale-[1.03] active:scale-95"
+              }`}
+          >
+            {isGenerating ? (
+              <>
+                Generating
+                <LoadingDots />
+              </>
+            ) : (
+              "Generate Website"
+            )}
+          </button>
         </div>
       </div>
 
@@ -251,15 +249,15 @@ const handleGenerate = async () => {
           <AnimatePresence>
             {projects.map((project) => (
               <motion.div
-  key={project._id}
-  onClick={() =>
-  navigate(`/dashboard/project/${project._id}`)
-}
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  exit={{ opacity: 0 }}
-  transition={{ duration: 0.4 }}
-  className="group bg-white/5 backdrop-blur-xl
+                key={project._id}
+                onClick={() =>
+                  navigate(`/dashboard/project/${project._id}`)
+                }
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="group bg-white/5 backdrop-blur-xl
              border border-white/10
              rounded-2xl p-6
              cursor-pointer
@@ -269,7 +267,7 @@ const handleGenerate = async () => {
              hover:bg-white/10
              hover:border-indigo-400/30
              hover:shadow-[0_20px_50px_rgba(99,102,241,0.35)]"
->
+              >
                 <h3 className="text-lg font-medium">
                   {project.title}
                 </h3>
@@ -277,8 +275,8 @@ const handleGenerate = async () => {
                   Generated on {new Date(project.createdAt).toLocaleDateString()}
                 </p>
                 <p className="text-indigo-400 text-sm mt-4 opacity-0 group-hover:opacity-100 transition duration-300">
-  Open Project →
-</p>
+                  Open Project →
+                </p>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -286,7 +284,14 @@ const handleGenerate = async () => {
         </div>
       </div>
 
+      <AIGenerationModal
+  isGenerating={isGenerating}
+  generationSteps={generationSteps}
+  currentStep={currentStep}
+/>
+
     </div>
+    
   );
 };
 
