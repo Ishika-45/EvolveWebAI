@@ -1,6 +1,9 @@
 const express = require("express");
 const OpenAI = require("openai");
 
+const Project = require("../models/Project");
+const authMiddleware = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 const openai = new OpenAI({
@@ -20,10 +23,12 @@ const parseAIResponse = (response) => {
   }
 };
 
-// 🧠 IDEA ANALYSIS
-router.post("/analyze-idea", async (req, res) => {
+////////////////////////////////////////////////////
+//// 🧠 IDEA ANALYSIS
+////////////////////////////////////////////////////
+router.post("/analyze-idea", authMiddleware, async (req, res) => {
   try {
-    const { idea } = req.body;
+    const { projectId, idea } = req.body;
 
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
@@ -49,18 +54,28 @@ Return ONLY JSON.
     });
 
     const content = completion.choices[0].message.content;
+    const parsed = parseAIResponse(content);
 
-    res.json({ data: parseAIResponse(content) });
+    const project = await Project.findById(projectId);
+
+    if (project) {
+      project.analysis = parsed;
+      await project.save();
+    }
+
+    res.json({ data: parsed });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Idea analysis failed" });
   }
 });
 
-// 🚀 IDEA EVOLUTION
-router.post("/evolve-idea", async (req, res) => {
+////////////////////////////////////////////////////
+//// 🚀 IDEA EVOLUTION
+////////////////////////////////////////////////////
+router.post("/evolve-idea", authMiddleware, async (req, res) => {
   try {
-    const { idea } = req.body;
+    const { projectId, idea } = req.body;
 
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
@@ -85,18 +100,28 @@ Return ONLY JSON.
     });
 
     const content = completion.choices[0].message.content;
+    const parsed = parseAIResponse(content);
 
-    res.json({ data: parseAIResponse(content) });
+    const project = await Project.findById(projectId);
+
+    if (project) {
+      project.evolvedIdea = parsed.improvedIdea;
+      await project.save();
+    }
+
+    res.json({ data: parsed });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Idea evolution failed" });
   }
 });
 
-// 📊 PRODUCT BLUEPRINT
-router.post("/generate-blueprint", async (req, res) => {
+////////////////////////////////////////////////////
+//// 📊 PRODUCT BLUEPRINT
+////////////////////////////////////////////////////
+router.post("/generate-blueprint", authMiddleware, async (req, res) => {
   try {
-    const { idea } = req.body;
+    const { projectId, idea } = req.body;
 
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
@@ -124,16 +149,26 @@ Return ONLY JSON.
     });
 
     const content = completion.choices[0].message.content;
+    const parsed = parseAIResponse(content);
 
-    res.json({ data: parseAIResponse(content) });
+    const project = await Project.findById(projectId);
+
+    if (project) {
+      project.blueprint = parsed;
+      await project.save();
+    }
+
+    res.json({ data: parsed });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Blueprint generation failed" });
   }
 });
 
-// ✨ GENERATE SECTION
-router.post("/generate-section", async (req, res) => {
+////////////////////////////////////////////////////
+//// ✨ GENERATE WEBSITE SECTION
+////////////////////////////////////////////////////
+router.post("/generate-section", authMiddleware, async (req, res) => {
   try {
     const { idea, sectionTitle } = req.body;
 

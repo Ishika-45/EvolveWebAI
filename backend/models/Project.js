@@ -16,26 +16,28 @@ const projectSchema = new mongoose.Schema(
 
     idea: {
       type: String,
+      default: "",
     },
 
     analysis: {
-      ideaScore: Number,
-      strengths: [String],
-      weaknesses: [String],
-      opportunities: [String],
+      ideaScore: { type: Number, default: 0 },
+      strengths: { type: [String], default: [] },
+      weaknesses: { type: [String], default: [] },
+      opportunities: { type: [String], default: [] },
     },
 
     evolvedIdea: {
       type: String,
+      default: "",
     },
 
     blueprint: {
-      problem: String,
-      targetAudience: String,
-      coreFeatures: [String],
-      uniqueSellingProposition: String,
-      monetizationStrategy: String,
-      futureScope: String,
+      problem: { type: String, default: "" },
+      targetAudience: { type: String, default: "" },
+      coreFeatures: { type: [String], default: [] },
+      uniqueSellingProposition: { type: String, default: "" },
+      monetizationStrategy: { type: String, default: "" },
+      futureScope: { type: String, default: "" },
     },
 
     websiteStructure: {
@@ -51,10 +53,12 @@ const projectSchema = new mongoose.Schema(
           ],
         },
       ],
+      default: [],
     },
 
     generatedCode: {
       type: String,
+      default: "",
     },
   },
   {
