@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import DashboardLayout from "./layouts/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
 import ProjectDetails from "./pages/ProjectDetails";
+import StartupBuilder from "./pages/StartupBuilder";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardHome />} />
         <Route path="project/:id" element={<ProjectDetails />} />
+        <Route path="builder/:projectId" element={<StartupBuilder />} />
       </Route>
     </Routes>
   </div>

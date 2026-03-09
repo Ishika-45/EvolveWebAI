@@ -50,31 +50,24 @@ const ProjectDetails = () => {
 }, [project]);
 
   useEffect(() => {
-    if (passedProject) {
-      setProject(passedProject);
-      setEditedIdea(passedProject.idea || "");
-    } else {
-      const savedProjects =
-        JSON.parse(localStorage.getItem("ew_projects")) || [];
+  const fetchProject = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
 
-      const foundProject = savedProjects.find(
-        (p) => p.id === id
-      );
-
-      if (foundProject) {
-        const normalizedProject = {
-          ...foundProject,
-          versions: foundProject.versions || []
-        };
-
-        setProject(normalizedProject);
-        setEditedIdea(normalizedProject.idea || "");
-      }
-      if (foundProject) {
-        setEditedIdea(foundProject.idea || "");
-      }
+      const data = await res.json();
+      setProject(data);
+      setEditedIdea(data.idea || "");
+    } catch (error) {
+      console.error("Failed to load project", error);
     }
-  }, [id, passedProject]);
+  };
+
+  fetchProject();
+}, [id]);
 
 
   if (!project) {

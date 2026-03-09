@@ -53,7 +53,7 @@ useEffect(() => {
   );
 };
 
-const handleGenerate = () => {
+const handleGenerate = async () => {
   if (!idea.trim()) return;
 
   setIsGenerating(true);
@@ -68,106 +68,38 @@ const handleGenerate = () => {
       setCurrentStep(stepIndex);
     } else {
       clearInterval(interval);
-
-      const newProject = {
-  id: Date.now().toString(),
-  title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
-  idea,
-  date: new Date().toLocaleString(),
-  versions: [],
-  blueprint: null,
-  sections: [
-    {
-      title: "Problem",
-      description: "AI will generate this section."
-    },
-    {
-      title: "Target Audience",
-      description: "AI will generate this section."
-    },
-    {
-      title: "Solution",
-      description: "AI will generate this section."
-    },
-    {
-      title: "Business Model",
-      description: "AI will generate this section."
-    },
-    {
-      title: "Key Features",
-      description: "AI will generate this section."
-    }
-  ]
-};
-
-try {
-  const res = await api.post("/projects", {
-    title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
-    idea,
-    sections: [
-      {
-        title: "Problem",
-        description: "AI will generate this section."
-      },
-      {
-        title: "Target Audience",
-        description: "AI will generate this section."
-      },
-      {
-        title: "Solution",
-        description: "AI will generate this section."
-      },
-      {
-        title: "Business Model",
-        description: "AI will generate this section."
-      },
-      {
-        title: "Key Features",
-        description: "AI will generate this section."
-      }
-    ]
-  });
-
-  const newProject = res.data;
-
-  setProjects((prev) => [newProject, ...prev]);
-
-  setIdea("");
-  setIsGenerating(false);
-  setCurrentStep(0);
-
-  setTimeout(() => {
-    navigate(`/dashboard/project/${newProject._id}`);
-  }, 400);
-
-} catch (err) {
-  console.error("Project creation failed", err);
-  setIsGenerating(false);
-}
-
-setIdea("");
-setIsGenerating(false);
-setCurrentStep(0);
-
-// Small cinematic delay
-setTimeout(() => {
-  navigate(`/dashboard/project/${newProject.id}`);
-}, 400);
-
-      setProjects((prev) => {
-        const updated = [newProject, ...prev];
-        localStorage.setItem(
-          "ew_projects",
-          JSON.stringify(updated)
-        );
-        return updated;
-      });
-
-      setIdea("");
-      setIsGenerating(false);
-      setCurrentStep(0);
     }
   }, 700);
+
+  try {
+    const res = await api.post("/projects", {
+      title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
+      idea,
+      sections: [
+        { title: "Problem", description: "AI will generate this section." },
+        { title: "Target Audience", description: "AI will generate this section." },
+        { title: "Solution", description: "AI will generate this section." },
+        { title: "Business Model", description: "AI will generate this section." },
+        { title: "Key Features", description: "AI will generate this section." }
+      ]
+    });
+
+    const newProject = res.data;
+
+    setProjects((prev) => [newProject, ...prev]);
+
+    setIdea("");
+    setIsGenerating(false);
+    setCurrentStep(0);
+
+    setTimeout(() => {
+      navigate(`/dashboard/project/${newProject._id}`);
+    }, 400);
+
+  } catch (err) {
+    console.error("Project creation failed", err);
+    setIsGenerating(false);
+  }
 };
 
   return (
