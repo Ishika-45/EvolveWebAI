@@ -39,35 +39,35 @@ const ProjectDetails = () => {
   }, []);
 
   useEffect(() => {
-  if (!project) return;
+    if (!project) return;
 
-  if (project.blueprint) {
-    setBlueprint(project.blueprint);
-    return;
-  }
+    if (project.blueprint) {
+      setBlueprint(project.blueprint);
+      return;
+    }
 
-  generateBlueprint();
-}, [project]);
+    generateBlueprint();
+  }, [project]);
 
   useEffect(() => {
-  const fetchProject = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
 
-      const data = await res.json();
-      setProject(data);
-      setEditedIdea(data.idea || "");
-    } catch (error) {
-      console.error("Failed to load project", error);
-    }
-  };
+        const data = await res.json();
+        setProject(data);
+        setEditedIdea(data.idea || "");
+      } catch (error) {
+        console.error("Failed to load project", error);
+      }
+    };
 
-  fetchProject();
-}, [id]);
+    fetchProject();
+  }, [id]);
 
 
   if (!project) {
@@ -156,100 +156,170 @@ const ProjectDetails = () => {
   };
 
   const generateBlueprint = async () => {
-  setGeneratingBlueprint(true);
+    setGeneratingBlueprint(true);
 
-  try {
-    const response = await fetch(
-      "http://localhost:5000/api/ai/generate-blueprint",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          idea: project.idea
-        })
-      }
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/ai/generate-blueprint",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            idea: project.idea
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      const updatedProject = {
+        ...project,
+        blueprint: data.blueprint
+      };
+
+      setBlueprint(data.blueprint);
+      setProject(updatedProject);
+
+      const savedProjects =
+        JSON.parse(localStorage.getItem("ew_projects")) || [];
+
+      const updatedProjects = savedProjects.map((p) =>
+        String(p.id) === String(id) ? updatedProject : p
+      );
+
+      localStorage.setItem(
+        "ew_projects",
+        JSON.stringify(updatedProjects)
+      );
+
+    } catch (error) {
+      console.error("Blueprint AI error:", error);
+    }
+
+    setGeneratingBlueprint(false);
+  };
+
+  const renderPreview = () => {
+    if (!blueprint) return null;
+
+    return (
+      <div className="space-y-12 mt-8">
+
+        {/* HERO */}
+        <div className="text-center py-16 bg-white/5 rounded-2xl">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            {project.title}
+          </h1>
+          <p className="text-gray-400 max-w-xl mx-auto">
+            {blueprint.uniqueSellingProposition}
+          </p>
+        </div>
+
+        {/* FEATURES */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {blueprint.coreFeatures?.map((feature, i) => (
+            <div
+              key={i}
+              className="bg-white/5 border border-white/10 rounded-xl p-6"
+            >
+              <h3 className="text-indigo-400 font-semibold mb-2">
+                Feature {i + 1}
+              </h3>
+              <p className="text-gray-400 text-sm">{feature}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold text-white mb-3">
+            Ready to get started?
+          </h2>
+          <button
+            onClick={() => {
+              const previewSection = document.getElementById("live-preview");
+              if (previewSection) {
+                previewSection.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
+          >
+            Get Started
+          </button>
+        </div>
+
+      </div>
     );
+  };
 
-    const data = await response.json();
-
-    const updatedProject = {
-      ...project,
-      blueprint: data.blueprint
-    };
-
-    setBlueprint(data.blueprint);
-    setProject(updatedProject);
-
-    const savedProjects =
-      JSON.parse(localStorage.getItem("ew_projects")) || [];
-
-    const updatedProjects = savedProjects.map((p) =>
-      String(p.id) === String(id) ? updatedProject : p
-    );
-
-    localStorage.setItem(
-      "ew_projects",
-      JSON.stringify(updatedProjects)
-    );
-
-  } catch (error) {
-    console.error("Blueprint AI error:", error);
-  }
-
-  setGeneratingBlueprint(false);
-};
-
-const renderPreview = () => {
+  const renderLivePreview = () => {
   if (!blueprint) return null;
 
   return (
-    <div className="space-y-12 mt-8">
+    <div
+      id="live-preview"
+      className="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8"
+    >
+      <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
+        Website Preview
+      </h2>
 
-      {/* HERO */}
-      <div className="text-center py-16 bg-white/5 rounded-2xl">
-        <h1 className="text-4xl font-bold text-white mb-4">
-          {project.title}
-        </h1>
-        <p className="text-gray-400 max-w-xl mx-auto">
-          {blueprint.uniqueSellingProposition}
-        </p>
-      </div>
+      <div className="bg-black rounded-xl overflow-hidden border border-white/10">
 
-      {/* FEATURES */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {blueprint.coreFeatures?.map((feature, i) => (
-          <div
-            key={i}
-            className="bg-white/5 border border-white/10 rounded-xl p-6"
-          >
-            <h3 className="text-indigo-400 font-semibold mb-2">
-              Feature {i + 1}
-            </h3>
-            <p className="text-gray-400 text-sm">{feature}</p>
+        {/* Fake browser header */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/60">
+          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+
+          <span className="text-xs text-gray-400 ml-4">
+            ai-generated-site.vercel.app
+          </span>
+        </div>
+
+        {/* AI Website */}
+        <div className="p-10 space-y-10">
+
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
+            <p className="text-gray-400 max-w-xl mx-auto">
+              {blueprint.uniqueSellingProposition}
+            </p>
           </div>
-        ))}
-      </div>
 
-      {/* CTA */}
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-white mb-3">
-          Ready to get started?
-        </h2>
-        <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
-          Get Started
-        </button>
-      </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {blueprint.coreFeatures?.map((feature, i) => (
+              <div
+                key={i}
+                className="p-6 border border-white/10 rounded-xl"
+              >
+                <h3 className="text-indigo-400 font-semibold mb-2">
+                  Feature {i + 1}
+                </h3>
+                <p className="text-gray-400 text-sm">{feature}</p>
+              </div>
+            ))}
+          </div>
 
+          <div className="text-center">
+            <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
+              Get Started
+            </button>
+          </div>
+
+        </div>
+
+      </div>
     </div>
   );
 };
 
-const generateCode = () => {
-  if (!blueprint) return "// No blueprint yet";
+  const generateCode = () => {
+    if (!blueprint) return "// No blueprint yet";
 
-  return `import React from "react";
+    return `import React from "react";
 
 export default function LandingPage() {
  return (
@@ -264,14 +334,14 @@ export default function LandingPage() {
 
    <section className="grid md:grid-cols-3 gap-6 mb-20">
      ${blueprint.coreFeatures
-       ?.map(
-         (f) => `
+        ?.map(
+          (f) => `
      <div className="p-6 border border-white/10 rounded-xl">
        <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
        <p>${f}</p>
      </div>`
-       )
-       .join("")}
+        )
+        .join("")}
    </section>
 
    <section className="text-center">
@@ -284,7 +354,7 @@ export default function LandingPage() {
  );
 }
 `;
-};
+  };
 
   return (
     <motion.div
@@ -622,74 +692,74 @@ export default function LandingPage() {
 
       {/* AI Startup Blueprint */}
 
-<div className="mt-10 mb-10">
+      <div className="mt-10 mb-10">
 
-<h2 className="text-2xl font-semibold mb-6 text-indigo-400">
-AI Startup Blueprint
-</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
+          AI Startup Blueprint
+        </h2>
 
-{generatingBlueprint ? (
+        {generatingBlueprint ? (
 
-<div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-gray-400">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-gray-400">
 
-<motion.div
-initial={{ opacity: 0 }}
-animate={{ opacity: 1 }}
-className="flex items-center gap-2"
->
-<span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
-AI is analyzing your idea...
-</motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-2"
+            >
+              <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
+              AI is analyzing your idea...
+            </motion.div>
 
-<p className="text-sm mt-3 text-gray-500">
-Identifying problem, audience, and solution...
-</p>
+            <p className="text-sm mt-3 text-gray-500">
+              Identifying problem, audience, and solution...
+            </p>
 
-</div>
+          </div>
 
-) : blueprint && (
+        ) : blueprint && (
 
-<div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
 
-{
-[
- { title: "Problem", content: blueprint.problem },
- { title: "Target Audience", content: blueprint.targetAudience },
- { title: "Solution", content: blueprint.uniqueSellingProposition },
- { title: "Business Model", content: blueprint.monetizationStrategy },
- { title: "Core Features", content: blueprint.coreFeatures?.join(", ") }
-]
-.map((item, index) => (
+            {
+              [
+                { title: "Problem", content: blueprint.problem },
+                { title: "Target Audience", content: blueprint.targetAudience },
+                { title: "Solution", content: blueprint.uniqueSellingProposition },
+                { title: "Business Model", content: blueprint.monetizationStrategy },
+                { title: "Core Features", content: blueprint.coreFeatures?.join(", ") }
+              ]
+                .map((item, index) => (
 
-<motion.div
-key={index}
-initial={{ opacity: 0, y: 15 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ delay: index * 0.1 }}
-className="bg-white/5 backdrop-blur-xl
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white/5 backdrop-blur-xl
 border border-white/10
 rounded-2xl p-6
 hover:bg-white/10
 transition"
->
+                  >
 
-<h3 className="text-lg font-semibold text-indigo-400 mb-2">
-{item.title}
-</h3>
+                    <h3 className="text-lg font-semibold text-indigo-400 mb-2">
+                      {item.title}
+                    </h3>
 
-<p className="text-gray-400 text-sm leading-relaxed">
-{item.content}
-</p>
+                    <p className="text-gray-400 text-sm leading-relaxed">
+                      {item.content}
+                    </p>
 
-</motion.div>
+                  </motion.div>
 
-))}
+                ))}
 
-</div>
+          </div>
 
-)}
+        )}
 
-</div>
+      </div>
 
       {/* Generated Sections */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -737,6 +807,7 @@ transition"
           </motion.div>
         ))}
       </div>
+      {renderLivePreview()}
     </motion.div>
   );
 };
