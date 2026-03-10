@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DragDropContext,
   Droppable,
@@ -6,27 +6,25 @@ import {
 } from "@hello-pangea/dnd";
 import SectionCard from "./SectionCard";
 
-const initialSections = [
-  "Hero Section",
-  "Features Section",
-  "Pricing Section",
-  "Testimonials",
-  "Call To Action",
-  "Footer",
-];
+const WebsiteBlueprint = ({ sections }) => {
+  const [items, setItems] = useState([]);
 
-const WebsiteBlueprint = () => {
-  const [sections, setSections] = useState(initialSections);
+  // When AI generates sections, update blueprint
+  useEffect(() => {
+    if (sections && sections.length > 0) {
+      setItems(sections);
+    }
+  }, [sections]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
-    const items = Array.from(sections);
-    const [reordered] = items.splice(result.source.index, 1);
+    const updated = Array.from(items);
+    const [reordered] = updated.splice(result.source.index, 1);
 
-    items.splice(result.destination.index, 0, reordered);
+    updated.splice(result.destination.index, 0, reordered);
 
-    setSections(items);
+    setItems(updated);
   };
 
   return (
@@ -46,10 +44,10 @@ const WebsiteBlueprint = () => {
               className="space-y-3"
             >
 
-              {sections.map((section, index) => (
+              {items.map((section, index) => (
                 <Draggable
-                  key={section}
-                  draggableId={section}
+                  key={section + index}
+                  draggableId={section + index}
                   index={index}
                 >
                   {(provided) => (

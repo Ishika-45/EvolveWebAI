@@ -14,6 +14,7 @@ const DashboardHome = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [generationFinished, setGenerationFinished] = useState(false);
+  const [blueprintSections, setBlueprintSections] = useState([]);
   const generationSteps = [
     "🧠 Understanding your idea",
     "🧩 Structuring layout architecture",
@@ -57,8 +58,63 @@ const DashboardHome = () => {
     );
   };
 
+  const generateBlueprint = (idea) => {
+  const ideaLower = idea.toLowerCase();
+
+  if (ideaLower.includes("saas")) {
+    return [
+      "Hero Section",
+      "Problem Section",
+      "Solution Section",
+      "Features Section",
+      "Pricing Section",
+      "Testimonials",
+      "Call To Action",
+      "Footer"
+    ];
+  }
+
+  if (ideaLower.includes("portfolio")) {
+    return [
+      "Hero Section",
+      "About Me",
+      "Projects Showcase",
+      "Skills",
+      "Testimonials",
+      "Contact Section",
+      "Footer"
+    ];
+  }
+
+  if (ideaLower.includes("startup")) {
+    return [
+      "Hero Section",
+      "Problem",
+      "Solution",
+      "Product Demo",
+      "Key Features",
+      "Pricing",
+      "FAQ",
+      "Footer"
+    ];
+  }
+
+  return [
+    "Hero Section",
+    "Features Section",
+    "How It Works",
+    "Benefits",
+    "Testimonials",
+    "Call To Action",
+    "Footer"
+  ];
+};
+
   const handleGenerate = async () => {
     if (!idea.trim()) return;
+
+    const sections = generateBlueprint(idea);
+setBlueprintSections(sections);
 
     setIsGenerating(true);
     setCurrentStep(0);
@@ -220,7 +276,7 @@ const DashboardHome = () => {
       {generationFinished && (
   <div className="w-full max-w-5xl mt-16">
     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-      <WebsiteBlueprint />
+      <WebsiteBlueprint sections={blueprintSections} />
     </div>
   </div>
 )}
