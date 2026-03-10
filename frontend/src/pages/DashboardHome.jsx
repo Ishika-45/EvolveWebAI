@@ -95,10 +95,11 @@ const DashboardHome = () => {
       setIdea("");
       setIsGenerating(false);
       setCurrentStep(0);
+      setGenerationFinished(true);
 
       setTimeout(() => {
         navigate(`/dashboard/project/${newProject._id}`);
-      }, 400);
+      }, 2500);
 
     } catch (err) {
       console.error("Project creation failed", err);
@@ -215,6 +216,14 @@ const DashboardHome = () => {
           </button>
         </div>
       </div>
+
+      {generationFinished && (
+  <div className="w-full max-w-5xl mt-16">
+    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+      <WebsiteBlueprint />
+    </div>
+  </div>
+)}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
