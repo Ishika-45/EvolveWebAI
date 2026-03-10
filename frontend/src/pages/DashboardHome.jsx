@@ -6,6 +6,7 @@ import api from "../services/api";
 import AIStreamingText from "../components/AIStreamingText";
 import FlowCard from "../components/FlowCard";
 import AIGenerationModal from "../components/AIGenerationModal";
+import WebsiteBlueprint from "../components/WebsiteBlueprint";
 
 const DashboardHome = () => {
   const [idea, setIdea] = useState("");

@@ -2,7 +2,7 @@ const express = require("express");
 const OpenAI = require("openai");
 
 const Project = require("../models/Project");
-const authMiddleware = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ const parseAIResponse = (response) => {
 ////////////////////////////////////////////////////
 //// 🧠 IDEA ANALYSIS
 ////////////////////////////////////////////////////
-router.post("/analyze-idea", authMiddleware, async (req, res) => {
+router.post("/analyze-idea", protect, async (req, res) => {
   try {
     const { projectId, idea } = req.body;
 
@@ -73,7 +73,7 @@ Return ONLY JSON.
 ////////////////////////////////////////////////////
 //// 🚀 IDEA EVOLUTION
 ////////////////////////////////////////////////////
-router.post("/evolve-idea", authMiddleware, async (req, res) => {
+router.post("/evolve-idea", protect, async (req, res) => {
   try {
     const { projectId, idea } = req.body;
 
@@ -119,7 +119,7 @@ Return ONLY JSON.
 ////////////////////////////////////////////////////
 //// 📊 PRODUCT BLUEPRINT
 ////////////////////////////////////////////////////
-router.post("/generate-blueprint", authMiddleware, async (req, res) => {
+router.post("/generate-blueprint", protect, async (req, res) => {
   try {
     const { projectId, idea } = req.body;
 
@@ -168,7 +168,7 @@ Return ONLY JSON.
 ////////////////////////////////////////////////////
 //// ✨ GENERATE WEBSITE SECTION
 ////////////////////////////////////////////////////
-router.post("/generate-section", authMiddleware, async (req, res) => {
+router.post("/generate-section", protect, async (req, res) => {
   try {
     const { idea, sectionTitle } = req.body;
 

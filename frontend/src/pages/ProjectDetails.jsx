@@ -201,6 +201,91 @@ const ProjectDetails = () => {
   setGeneratingBlueprint(false);
 };
 
+const renderPreview = () => {
+  if (!blueprint) return null;
+
+  return (
+    <div className="space-y-12 mt-8">
+
+      {/* HERO */}
+      <div className="text-center py-16 bg-white/5 rounded-2xl">
+        <h1 className="text-4xl font-bold text-white mb-4">
+          {project.title}
+        </h1>
+        <p className="text-gray-400 max-w-xl mx-auto">
+          {blueprint.uniqueSellingProposition}
+        </p>
+      </div>
+
+      {/* FEATURES */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {blueprint.coreFeatures?.map((feature, i) => (
+          <div
+            key={i}
+            className="bg-white/5 border border-white/10 rounded-xl p-6"
+          >
+            <h3 className="text-indigo-400 font-semibold mb-2">
+              Feature {i + 1}
+            </h3>
+            <p className="text-gray-400 text-sm">{feature}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold text-white mb-3">
+          Ready to get started?
+        </h2>
+        <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
+          Get Started
+        </button>
+      </div>
+
+    </div>
+  );
+};
+
+const generateCode = () => {
+  if (!blueprint) return "// No blueprint yet";
+
+  return `import React from "react";
+
+export default function LandingPage() {
+ return (
+  <div className="min-h-screen bg-black text-white p-10">
+
+   <section className="text-center mb-20">
+     <h1 className="text-4xl font-bold">${project.title}</h1>
+     <p className="text-gray-400 mt-4">
+       ${blueprint.uniqueSellingProposition}
+     </p>
+   </section>
+
+   <section className="grid md:grid-cols-3 gap-6 mb-20">
+     ${blueprint.coreFeatures
+       ?.map(
+         (f) => `
+     <div className="p-6 border border-white/10 rounded-xl">
+       <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
+       <p>${f}</p>
+     </div>`
+       )
+       .join("")}
+   </section>
+
+   <section className="text-center">
+     <button className="px-6 py-3 bg-indigo-500 rounded-xl">
+       Get Started
+     </button>
+   </section>
+
+  </div>
+ );
+}
+`;
+};
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -287,6 +372,7 @@ const ProjectDetails = () => {
                 setIsEditing(!isEditing);
                 setEditPulse(true);
                 setTimeout(() => setEditPulse(false), 400);
+
               }}
               whileTap={{ scale: 0.9 }}
               className={`relative p-2 rounded-lg transition hover:bg-white/10 
@@ -430,15 +516,10 @@ const ProjectDetails = () => {
             className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200"
           />
         ) : viewMode === "preview" ? (
-          <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {project.idea}
-          </p>
+          renderPreview()
         ) : (
           <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/30 p-4 rounded-xl overflow-x-auto">
-            {`{
-  "title": "${project.title}",
-  "idea": "${project.idea}"
-}`}
+            {generateCode()}
           </pre>
         )}
 
@@ -570,12 +651,15 @@ Identifying problem, audience, and solution...
 
 <div className="grid md:grid-cols-2 gap-6">
 
-{[
-{ title: "Problem", content: blueprint.problem },
-{ title: "Target Audience", content: blueprint.targetAudience },
-{ title: "Solution", content: blueprint.solution },
-{ title: "Business Model", content: blueprint.businessModel }
-].map((item, index) => (
+{
+[
+ { title: "Problem", content: blueprint.problem },
+ { title: "Target Audience", content: blueprint.targetAudience },
+ { title: "Solution", content: blueprint.uniqueSellingProposition },
+ { title: "Business Model", content: blueprint.monetizationStrategy },
+ { title: "Core Features", content: blueprint.coreFeatures?.join(", ") }
+]
+.map((item, index) => (
 
 <motion.div
 key={index}
