@@ -22,15 +22,14 @@ const DashboardHome = () => {
   // Dynamic user name
   const [userName, setUserName] = useState("User");
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      if (parsed?.name) {
-        setUserName(parsed.name);
-      }
-    }
-  }, []);
+useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    setUserName(user.name);
+  }
+}, []);
 
   const generationSteps = [
     "🧠 Understanding your idea",
@@ -167,7 +166,7 @@ const DashboardHome = () => {
 
       setTimeout(() => {
         navigate(`/dashboard/project/${newProject._id}`);
-      }, 2500);
+      }, 4000);
 
     } catch (err) {
       console.error("Project creation failed", err);
@@ -194,7 +193,7 @@ const DashboardHome = () => {
           transition={{ duration: 0.6 }}
           className="text-5xl font-semibold tracking-tight text-white"
         >
-          Welcome back, Gagan
+          Welcome back, {userName}
           <motion.span
             animate={{ rotate: [0, 20, -10, 20, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 2 }}
@@ -237,13 +236,18 @@ const DashboardHome = () => {
           : "shadow-[0_0_60px_rgba(99,102,241,0.15)]"
         }`}>
 
-        <textarea
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-          placeholder="Describe the website you want to build..."
-          className="w-full h-36 bg-transparent resize-none outline-none text-gray-200 placeholder-gray-500 text-lg leading-relaxed rounded-xl p-4"
-          disabled={isGenerating}
-        />
+       <textarea
+  value={idea}
+  onChange={(e) => setIdea(e.target.value)}
+  placeholder="Describe your startup idea..."
+  className="w-full h-40 p-5 rounded-xl 
+  bg-white/5 border border-white/10 
+  text-white placeholder-gray-400
+  focus:outline-none focus:border-indigo-400
+  focus:ring-2 focus:ring-indigo-500/40
+  shadow-[inset_0_0_15px_rgba(99,102,241,0.25)]
+  transition-all"
+/>
 
         {isGenerating && (
           <div className="mt-8 space-y-6">
@@ -277,13 +281,17 @@ const DashboardHome = () => {
         <div className="flex justify-end mt-6">
 
           <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 text-white flex items-center gap-2"
-          >
-            ⚡ {isGenerating ? "Generating" : "Generate Website"}
-            {isGenerating && <LoadingDots />}
-          </button>
+  disabled={generating}
+  onClick={handleGenerate}
+  className="mt-6 px-8 py-3 rounded-xl
+  bg-gradient-to-r from-indigo-500 to-purple-600
+  text-white font-semibold
+  hover:scale-105 hover:shadow-[0_0_20px_rgba(99,102,241,0.5)]
+  transition-all duration-300
+  disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {generating ? "Generating..." : "Generate Blueprint"}
+</button>
 
         </div>
       </div>
