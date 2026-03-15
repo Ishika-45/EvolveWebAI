@@ -23,6 +23,8 @@ const DashboardHome = () => {
 
   const [userName, setUserName] = useState("User");
 
+  const [streamingText, setStreamingText] = useState("");
+
   /* ---------------- USER NAME ---------------- */
 
   useEffect(() => {
@@ -128,86 +130,137 @@ const DashboardHome = () => {
 
   /* ---------------- TYPE BLUEPRINT ---------------- */
 
-  const startTypingBlueprint = (sections) => {
+ const startTypingBlueprint = (sections = []) => {
 
-    let i = 0;
+  if (!sections.length) return;
 
-    setTypedSections([]);
+  let i = 0;
 
-    const interval = setInterval(() => {
+  setTypedSections([]);
 
-      setTypedSections(prev => [...prev, sections[i]]);
+  const interval = setInterval(() => {
 
-      i++;
+    setTypedSections(prev => [...prev, sections[i]]);
 
-      if (i === sections.length) clearInterval(interval);
+    i++;
 
-    }, 400);
+    if (i === sections.length) clearInterval(interval);
 
-  };
+  }, 400);
+
+};
 
   /* ---------------- GENERATE ---------------- */
 
-  const handleGenerate = async () => {
+ const handleGenerate = async () => {
 
-    if (!idea.trim()) return;
+  const response = await fetch(
+    "http://localhost:5000/api/ai/generate-stream",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ idea })
+    }
+  );
 
-    const sections = generateBlueprint(idea);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
 
-    setBlueprintSections(sections);
+  let result = "";
 
-    setIsGenerating(true);
-    setCurrentStep(0);
+  while (true) {
 
-    let step = 0;
+    const { done, value } = await reader.read();
 
-    const interval = setInterval(() => {
+    if (done) break;
 
-      step++;
+    const chunk = decoder.decode(value);
 
-      if (step < generationSteps.length) {
-        setCurrentStep(step);
-      } else {
-        clearInterval(interval);
-      }
+    result += chunk;
 
-    }, 700);
+    setStreamingText(result);
+  }
 
-    startTypingBlueprint(sections);
+  if (!idea.trim()) return;
 
-    try {
+  setIsGenerating(true);
+  setCurrentStep(0);
 
-      const res = await api.post("/projects", {
+  let step = 0;
 
-        title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
-        idea,
+  const interval = setInterval(() => {
 
-        sections: [
-          { title: "Problem", description: "AI will generate this section." },
-          { title: "Target Audience", description: "AI will generate this section." },
-          { title: "Solution", description: "AI will generate this section." }
-        ]
+    step++;
 
-      });
-
-      const newProject = res.data;
-
-      setProjects(prev => [newProject, ...prev]);
-
-      setTimeout(() => {
-
-        navigate(`/dashboard/project/${newProject._id}`);
-
-      }, 4000);
-
-    } catch (err) {
-
-      console.error(err);
-      setIsGenerating(false);
-
+    if (step < generationSteps.length) {
+      setCurrentStep(step);
+    } else {
+      clearInterval(interval);
     }
 
-  };
+  }, 700);
+
+  try {
+
+    // 1️⃣ Ask AI for website structure
+    const aiRes = await api.post("/ai/generate-website", {
+      idea
+    });
+let sections = aiRes.data.sections;
+
+if (!sections || !Array.isArray(sections)) {
+
+  console.warn("AI returned invalid sections. Using fallback.");
+
+  sections = [
+    "Hero Section",
+    "Problem Section",
+    "Solution Section",
+    "Features",
+    "Pricing",
+    "Testimonials",
+    "CTA",
+    "Footer"
+  ];
+
+}
+
+    // 2️⃣ Start typing animation
+    setBlueprintSections(sections);
+    startTypingBlueprint(sections);
+
+    // 3️⃣ Save project to database
+    const res = await api.post("/projects", {
+
+      title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
+      idea,
+      sections
+
+    });
+
+    const newProject = res.data;
+
+    // 4️⃣ Update dashboard list
+    setProjects(prev => [newProject, ...prev]);
+
+    // 5️⃣ Navigate to project
+    setTimeout(() => {
+
+      navigate(`/dashboard/project/${newProject._id}`);
+
+    }, 4000);
+
+  } catch (err) {
+
+    console.error("Generation error:", err);
+    setIsGenerating(false);
+
+  }
+
+};
 
   /* ---------------- ENTER KEY ---------------- */
 

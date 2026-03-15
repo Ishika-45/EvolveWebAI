@@ -206,4 +206,107 @@ Rules:
   }
 });
 
+////////////////////////////////////////////////////
+//// 🌐 GENERATE WEBSITE STRUCTURE
+////////////////////////////////////////////////////
+router.post("/generate-website", protect, async (req, res) => {
+  try {
+
+    const { idea } = req.body;
+
+    const completion = await openai.chat.completions.create({
+      model: "deepseek/deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional startup website architect.",
+        },
+        {
+          role: "user",
+          content: `
+Generate a website structure for this startup idea.
+
+Idea:
+${idea}
+
+Return ONLY JSON like this:
+
+{
+  "sections":[
+    "Hero Section",
+    "Problem Section",
+    "Solution Section",
+    "Features Section",
+    "How It Works",
+    "Pricing Section",
+    "Testimonials",
+    "Call To Action",
+    "Footer"
+  ]
+}
+`,
+        },
+      ],
+    });
+
+    const content = completion.choices[0].message.content;
+
+    const parsed = parseAIResponse(content);
+
+    res.json(parsed);
+
+  } catch (error) {
+
+    console.error("AI WEBSITE ERROR:", error);
+
+    res.status(500).json({
+      error: "Website generation failed",
+    });
+
+  }
+});
+
+router.post("/generate-stream", protect, async (req, res) => {
+  try {
+
+    const { idea } = req.body;
+
+    const completion = await openrouter.chat.completions.create({
+      model: "deepseek/deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert startup website architect."
+        },
+        {
+          role: "user",
+          content: `Generate website sections for: ${idea}.
+Return each section on a new line.`
+        }
+      ],
+      stream: true
+    });
+
+    res.setHeader("Content-Type", "text/plain");
+
+    for await (const chunk of completion) {
+
+      const content = chunk.choices?.[0]?.delta?.content;
+
+      if (content) {
+        res.write(content);
+      }
+
+    }
+
+    res.end();
+
+  } catch (error) {
+
+    console.error("Streaming error:", error);
+    res.status(500).json({ message: "Streaming failed" });
+
+  }
+});
+
 module.exports = router;
