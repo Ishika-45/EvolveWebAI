@@ -23,22 +23,22 @@ const DashboardHome = () => {
   const [userName, setUserName] = useState("User");
 
 useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+
+  if (!storedUser || storedUser === "undefined") return;
+
   try {
-    const storedUser = localStorage.getItem("user");
+    const parsedUser = JSON.parse(storedUser);
 
-    if (!storedUser) return;
-
-    const user = JSON.parse(storedUser);
-
-    if (user?.name) {
-      setUserName(user.name);
+    if (parsedUser?.name) {
+      const firstName = parsedUser.name.split(" ")[0]; // get first name
+      setUserName(firstName);
     }
 
   } catch (err) {
     console.error("User parse error", err);
   }
 }, []);
-
   const generationSteps = [
     "🧠 Understanding your idea",
     "🧩 Structuring layout architecture",
@@ -201,7 +201,7 @@ useEffect(() => {
           transition={{ duration: 0.6 }}
           className="text-5xl font-semibold tracking-tight text-white"
         >
-          Welcome back, {userName}
+          Welcome back, <span className="text-indigo-400">{userName}</span>
           <motion.span
             animate={{ rotate: [0, 20, -10, 20, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 2 }}
