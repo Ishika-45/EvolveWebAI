@@ -2,43 +2,75 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
+
 import AIStreamingText from "../components/AIStreamingText";
 import FlowCard from "../components/FlowCard";
 import AIGenerationModal from "../components/AIGenerationModal";
-import WebsiteBlueprint from "../components/WebsiteBlueprint";
 
 const DashboardHome = () => {
-
-  const [idea, setIdea] = useState("");
-  const [projects, setProjects] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [generationFinished, setGenerationFinished] = useState(false);
-  const [blueprintSections, setBlueprintSections] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Dynamic user name
+  const [idea, setIdea] = useState("");
+  const [projects, setProjects] = useState([]);
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const [blueprintSections, setBlueprintSections] = useState([]);
+  const [typedSections, setTypedSections] = useState([]);
+
   const [userName, setUserName] = useState("User");
 
-useEffect(() => {
-  const storedUser = localStorage.getItem("user");
+  /* ---------------- USER NAME ---------------- */
 
-  if (!storedUser || storedUser === "undefined") return;
+  useEffect(() => {
 
-  try {
-    const parsedUser = JSON.parse(storedUser);
+    const storedUser = localStorage.getItem("user");
 
-    if (parsedUser?.name) {
-      const firstName = parsedUser.name.split(" ")[0]; // get first name
-      setUserName(firstName);
+    if (!storedUser) return;
+
+    try {
+
+      const parsedUser = JSON.parse(storedUser);
+
+      if (parsedUser?.name) {
+
+        const first = parsedUser.name.split(" ")[0];
+        setUserName(first);
+
+      }
+
+    } catch (err) {
+      console.error(err);
     }
 
-  } catch (err) {
-    console.error("User parse error", err);
-  }
-}, []);
+  }, []);
+
+  /* ---------------- FETCH PROJECTS ---------------- */
+
+  useEffect(() => {
+
+    const fetchProjects = async () => {
+
+      try {
+
+        const res = await api.get("/projects");
+        setProjects(res.data);
+
+      } catch (err) {
+        console.error(err);
+      }
+
+    };
+
+    fetchProjects();
+
+  }, [location]);
+
+  /* ---------------- AI GENERATION STEPS ---------------- */
+
   const generationSteps = [
     "🧠 Understanding your idea",
     "🧩 Structuring layout architecture",
@@ -47,340 +79,411 @@ useEffect(() => {
     "🚀 Finalizing your website"
   ];
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await api.get("/projects");
-        setProjects(res.data);
-      } catch (err) {
-        console.error("Failed to load projects", err);
-      }
-    };
-
-    fetchProjects();
-  }, [location]);
-
-  const LoadingDots = () => {
-    return (
-      <div className="flex gap-1 ml-2">
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-            className="w-2 h-2 bg-white rounded-full"
-          />
-        ))}
-      </div>
-    );
-  };
+  /* ---------------- BLUEPRINT ---------------- */
 
   const generateBlueprint = (idea) => {
-    const ideaLower = idea.toLowerCase();
 
-    if (ideaLower.includes("saas")) {
+    const text = idea.toLowerCase();
+
+    if (text.includes("saas")) {
+
       return [
         "Hero Section",
         "Problem Section",
         "Solution Section",
-        "Features Section",
-        "Pricing Section",
+        "Features",
+        "Pricing",
         "Testimonials",
-        "Call To Action",
+        "CTA",
         "Footer"
       ];
+
     }
 
-    if (ideaLower.includes("portfolio")) {
+    if (text.includes("portfolio")) {
+
       return [
-        "Hero Section",
-        "About Me",
-        "Projects Showcase",
+        "Hero",
+        "About",
+        "Projects",
         "Skills",
         "Testimonials",
-        "Contact Section",
+        "Contact",
         "Footer"
       ];
-    }
 
-    if (ideaLower.includes("startup")) {
-      return [
-        "Hero Section",
-        "Problem",
-        "Solution",
-        "Product Demo",
-        "Key Features",
-        "Pricing",
-        "FAQ",
-        "Footer"
-      ];
     }
 
     return [
       "Hero Section",
-      "Features Section",
+      "Features",
       "How It Works",
       "Benefits",
       "Testimonials",
-      "Call To Action",
+      "CTA",
       "Footer"
     ];
+
   };
+
+  /* ---------------- TYPE BLUEPRINT ---------------- */
+
+  const startTypingBlueprint = (sections) => {
+
+    let i = 0;
+
+    setTypedSections([]);
+
+    const interval = setInterval(() => {
+
+      setTypedSections(prev => [...prev, sections[i]]);
+
+      i++;
+
+      if (i === sections.length) clearInterval(interval);
+
+    }, 400);
+
+  };
+
+  /* ---------------- GENERATE ---------------- */
 
   const handleGenerate = async () => {
 
     if (!idea.trim()) return;
 
     const sections = generateBlueprint(idea);
+
     setBlueprintSections(sections);
 
     setIsGenerating(true);
     setCurrentStep(0);
 
-    let stepIndex = 0;
+    let step = 0;
 
     const interval = setInterval(() => {
-      stepIndex++;
 
-      if (stepIndex < generationSteps.length) {
-        setCurrentStep(stepIndex);
+      step++;
+
+      if (step < generationSteps.length) {
+        setCurrentStep(step);
       } else {
         clearInterval(interval);
       }
+
     }, 700);
+
+    startTypingBlueprint(sections);
 
     try {
 
       const res = await api.post("/projects", {
+
         title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
         idea,
+
         sections: [
           { title: "Problem", description: "AI will generate this section." },
           { title: "Target Audience", description: "AI will generate this section." },
-          { title: "Solution", description: "AI will generate this section." },
-          { title: "Business Model", description: "AI will generate this section." },
-          { title: "Key Features", description: "AI will generate this section." }
+          { title: "Solution", description: "AI will generate this section." }
         ]
+
       });
 
       const newProject = res.data;
 
-      setProjects((prev) => [newProject, ...prev]);
-
-      setIdea("");
-      setIsGenerating(false);
-      setCurrentStep(0);
-      setGenerationFinished(true);
+      setProjects(prev => [newProject, ...prev]);
 
       setTimeout(() => {
+
         navigate(`/dashboard/project/${newProject._id}`);
+
       }, 4000);
 
     } catch (err) {
-      console.error("Project creation failed", err);
+
+      console.error(err);
       setIsGenerating(false);
+
     }
+
   };
+
+  /* ---------------- ENTER KEY ---------------- */
+
+  const handleKeyDown = (e) => {
+
+    if (e.key === "Enter" && !e.shiftKey) {
+
+      e.preventDefault();
+      handleGenerate();
+
+    }
+
+  };
+
+  /* ---------------- PROMPT SUGGESTIONS ---------------- */
+
+  const prompts = [
+
+    "AI SaaS for doctors",
+    "Portfolio website for designer",
+    "Startup landing page for fintech app",
+    "AI productivity tool for students"
+
+  ];
+
+  /* ---------------- CURSOR GLOW ---------------- */
+
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+
+    const move = (e) => {
+
+      setMouse({
+        x: e.clientX,
+        y: e.clientY
+      });
+
+    };
+
+    window.addEventListener("mousemove", move);
+
+    return () => window.removeEventListener("mousemove", move);
+
+  }, []);
+
+  /* ---------------- UI ---------------- */
 
   return (
 
-    <div className="w-full flex flex-col items-center relative overflow-hidden">
+    <div className="relative w-full flex flex-col items-center overflow-hidden">
 
-      {/* Background Glow */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-20 right-1/4 w-[500px] h-[500px] bg-purple-600/20 blur-[120px] rounded-full"></div>
-      </div>
+      {/* Cursor Glow */}
+
+      <div
+        className="pointer-events-none fixed w-[500px] h-[500px] rounded-full blur-[120px] bg-indigo-600/20"
+        style={{
+          left: mouse.x - 250,
+          top: mouse.y - 250
+        }}
+      />
 
       {/* Greeting */}
-      <div className="text-center mt-14 mb-20">
+
+      <div className="text-center mt-16 mb-20">
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-5xl font-semibold tracking-tight text-white"
+          className="text-5xl font-semibold"
         >
-          Welcome back, <span className="text-indigo-400">{userName}</span>
+
+          Welcome back,
+
+          <span className="text-indigo-400 ml-3">
+
+            {userName}
+
+          </span>
+
           <motion.span
             animate={{ rotate: [0, 20, -10, 20, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 2 }}
             className="inline-block ml-3"
           >
+
             👋
+
           </motion.span>
+
         </motion.h1>
 
-        <p className="text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
-          Turn your idea into a full startup website in seconds using AI.
+        <p className="text-gray-400 mt-4">
+
+          Describe your idea and let AI craft a stunning website instantly.
+
         </p>
 
-        <div className="flex justify-center gap-6 mt-8 text-sm text-gray-400">
-
-          <span className="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-            ⚡ Instant website generation
-          </span>
-
-          <span className="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-            🧠 AI startup analysis
-          </span>
-
-          <span className="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-            🚀 Production ready UI
-          </span>
-
-        </div>
       </div>
 
-      {/* AI Generator Card */}
+      {/* GENERATOR */}
 
-      <div className={`w-full max-w-3xl relative
-      bg-white/5 backdrop-blur-2xl
-      border border-white/10
-      rounded-3xl p-10
-      transition-all duration-500
-      ${isGenerating
-          ? "shadow-[0_0_100px_rgba(99,102,241,0.45)] animate-pulse"
-          : "shadow-[0_0_60px_rgba(99,102,241,0.15)]"
-        }`}>
+      <div className="w-full max-w-3xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-[0_0_60px_rgba(99,102,241,0.25)]">
 
-       <textarea
-  value={idea}
-  onChange={(e) => setIdea(e.target.value)}
-  placeholder="Describe your startup idea..."
-  className="w-full h-40 p-5 rounded-xl 
-  bg-white/5 border border-white/10 
-  text-white placeholder-gray-400
-  focus:outline-none focus:border-indigo-400
-  focus:ring-2 focus:ring-indigo-500/40
-  shadow-[inset_0_0_15px_rgba(99,102,241,0.25)]
-  transition-all"
-/>
+        <textarea
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Describe your startup idea..."
+          className="w-full h-36 p-5 rounded-xl bg-white/5 border border-indigo-500/40 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-400"
+        />
+
+        {/* Prompt Suggestions */}
+
+        <div className="flex flex-wrap gap-3 mt-4">
+
+          {prompts.map((p, i) => (
+
+            <button
+              key={i}
+              onClick={() => setIdea(p)}
+              className="text-sm px-3 py-1 bg-white/5 border border-white/10 rounded-lg hover:border-indigo-400"
+            >
+
+              {p}
+
+            </button>
+
+          ))}
+
+        </div>
 
         {isGenerating && (
+
           <div className="mt-8 space-y-6">
 
-            <AIStreamingText text="Analyzing your idea and generating a beautiful website structure..." />
+            <AIStreamingText text="Analyzing your idea and generating website structure..." />
 
             <div className="grid gap-3">
-              {generationSteps.map((step, index) => (
-                <FlowCard
-                  key={index}
-                  step={step}
-                  index={index}
-                  active={index === currentStep}
-                />
-              ))}
-            </div>
 
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${((currentStep + 1) / generationSteps.length) * 100}%`
-                }}
-              />
+              {generationSteps.map((step, i) => (
+
+                <FlowCard
+                  key={i}
+                  step={step}
+                  index={i}
+                  active={i === currentStep}
+                />
+
+              ))}
+
             </div>
 
           </div>
+
         )}
 
         <div className="flex justify-end mt-6">
 
-         <button
-  disabled={isGenerating}
-  onClick={handleGenerate}
-  className="mt-6 px-8 py-3 rounded-xl
-  bg-gradient-to-r from-indigo-500 to-purple-600
-  text-white font-semibold
-  hover:scale-105 hover:shadow-[0_0_20px_rgba(99,102,241,0.5)]
-  transition-all duration-300
-  disabled:opacity-50 disabled:cursor-not-allowed"
->
-  {isGenerating ? "Generating..." : "Generate Blueprint"}
-</button>
-        </div>
-      </div>
-
-      {generationFinished && (
-        <div className="w-full max-w-5xl mt-16">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <WebsiteBlueprint sections={blueprintSections} />
-          </div>
-        </div>
-      )}
-
-      {/* Stats */}
-
-      <div className="grid grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
-
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">Projects</p>
-          <h3 className="text-2xl font-semibold mt-2">{projects.length}</h3>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">Templates Used</p>
-          <h3 className="text-2xl font-semibold mt-2">12</h3>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">AI Generations</p>
-          <h3 className="text-2xl font-semibold mt-2">{projects.length}</h3>
-        </div>
-
-      </div>
-
-      {/* Recent Projects */}
-
-      <div className="w-full max-w-5xl mt-20">
-
-        <div className="flex justify-between items-center mb-6">
-
-          <h2 className="text-xl font-semibold text-gray-200">
-            Recent Projects
-          </h2>
-
           <button
-            onClick={() => navigate("/dashboard/projects")}
-            className="text-sm text-indigo-400 hover:text-indigo-300"
+            onClick={handleGenerate}
+            className="flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:scale-105 transition"
           >
-            View All →
+
+            ⚡ Generate Website
+
           </button>
 
         </div>
 
+      </div>
+
+      {/* AI TYPING BLUEPRINT */}
+
+      {typedSections.length > 0 && (
+
+        <div className="w-full max-w-5xl mt-16">
+
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+
+            <h2 className="text-lg mb-4">
+
+              AI Generated Structure
+
+            </h2>
+
+            <div className="space-y-3">
+
+              {typedSections.map((s, i) => (
+
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-3 bg-white/5 rounded-lg border border-white/10"
+                >
+
+                  {s}
+
+                </motion.div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+      {/* STATS */}
+
+      <div className="grid grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+
+          <p className="text-gray-400 text-sm">Projects</p>
+
+          <h3 className="text-2xl mt-2">{projects.length}</h3>
+
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+
+          <p className="text-gray-400 text-sm">Templates Used</p>
+
+          <h3 className="text-2xl mt-2">12</h3>
+
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+
+          <p className="text-gray-400 text-sm">AI Generations</p>
+
+          <h3 className="text-2xl mt-2">{projects.length}</h3>
+
+        </div>
+
+      </div>
+
+      {/* RECENT PROJECTS */}
+
+      <div className="w-full max-w-5xl mt-20">
+
+        <h2 className="text-xl mb-6">Recent Projects</h2>
+
         <div className="grid grid-cols-3 gap-6">
 
-          <AnimatePresence>
-            {projects.map((project) => (
+          {projects.map((project) => (
 
-              <motion.div
-                key={project._id}
-                onClick={() => navigate(`/dashboard/project/${project._id}`)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 cursor-pointer hover:-translate-y-2 transition"
-              >
+            <motion.div
+              key={project._id}
+              whileHover={{
+                y: -8,
+                boxShadow: "0 0 40px rgba(99,102,241,0.35)"
+              }}
+              onClick={() => navigate(`/dashboard/project/${project._id}`)}
+              className="bg-white/5 border border-white/10 rounded-2xl p-6 cursor-pointer"
+            >
 
-                <h3 className="text-lg font-medium">{project.title}</h3>
+              <h3 className="text-lg">
 
-                <p className="text-gray-400 text-sm mt-2">
-                  Generated on {project.createdAt
-  ? new Date(project.createdAt).toLocaleDateString()
-  : "Today"}
-                </p>
+                {project.title}
 
-                <p className="text-indigo-400 text-sm mt-4 opacity-0 group-hover:opacity-100 transition">
-                  Open Project →
-                </p>
+              </h3>
 
-              </motion.div>
+              <p className="text-gray-400 text-sm mt-2">
 
-            ))}
-          </AnimatePresence>
+                {new Date(project.createdAt).toLocaleDateString()}
+
+              </p>
+
+            </motion.div>
+
+          ))}
 
         </div>
 
@@ -393,7 +496,9 @@ useEffect(() => {
       />
 
     </div>
+
   );
+
 };
 
 export default DashboardHome;
