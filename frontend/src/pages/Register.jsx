@@ -40,8 +40,13 @@ const checkStrength = (password) => {
         password,
       });
 
-     localStorage.setItem("token", res.data.token);
-localStorage.setItem("user", JSON.stringify(res.data.user));
+    if (res.data?.token) {
+  localStorage.setItem("token", res.data.token);
+}
+
+if (res.data?.user) {
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+}
       toast.success("Account created successfully 🚀");
 
       setTimeout(() => navigate("/dashboard"), 1000);

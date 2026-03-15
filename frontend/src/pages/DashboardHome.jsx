@@ -23,11 +23,19 @@ const DashboardHome = () => {
   const [userName, setUserName] = useState("User");
 
 useEffect(() => {
-  const storedUser = localStorage.getItem("user");
+  try {
+    const storedUser = localStorage.getItem("user");
 
-  if (storedUser) {
+    if (!storedUser) return;
+
     const user = JSON.parse(storedUser);
-    setUserName(user.name);
+
+    if (user?.name) {
+      setUserName(user.name);
+    }
+
+  } catch (err) {
+    console.error("User parse error", err);
   }
 }, []);
 
@@ -280,8 +288,8 @@ useEffect(() => {
 
         <div className="flex justify-end mt-6">
 
-          <button
-  disabled={generating}
+         <button
+  disabled={isGenerating}
   onClick={handleGenerate}
   className="mt-6 px-8 py-3 rounded-xl
   bg-gradient-to-r from-indigo-500 to-purple-600
@@ -290,9 +298,8 @@ useEffect(() => {
   transition-all duration-300
   disabled:opacity-50 disabled:cursor-not-allowed"
 >
-  {generating ? "Generating..." : "Generate Blueprint"}
+  {isGenerating ? "Generating..." : "Generate Blueprint"}
 </button>
-
         </div>
       </div>
 
@@ -361,7 +368,9 @@ useEffect(() => {
                 <h3 className="text-lg font-medium">{project.title}</h3>
 
                 <p className="text-gray-400 text-sm mt-2">
-                  Generated on {new Date(project.createdAt).toLocaleDateString()}
+                  Generated on {project.createdAt
+  ? new Date(project.createdAt).toLocaleDateString()
+  : "Today"}
                 </p>
 
                 <p className="text-indigo-400 text-sm mt-4 opacity-0 group-hover:opacity-100 transition">

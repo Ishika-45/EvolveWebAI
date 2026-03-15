@@ -59,8 +59,11 @@ const ProjectDetails = () => {
         });
 
         const data = await res.json();
-        setProject(data);
-        setEditedIdea(data.idea || "");
+
+if (data) {
+  setProject(data);
+  setEditedIdea(data.idea || "");
+}
       } catch (error) {
         console.error("Failed to load project", error);
       }
