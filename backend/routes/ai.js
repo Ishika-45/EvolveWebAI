@@ -6,6 +6,9 @@ const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+////////////////////////////////////////////////////
+// OPENROUTER CLIENT
+////////////////////////////////////////////////////
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
@@ -15,16 +18,25 @@ const openai = new OpenAI({
   },
 });
 
+////////////////////////////////////////////////////
+// SAFE JSON PARSER
+////////////////////////////////////////////////////
 const parseAIResponse = (response) => {
   try {
-    return JSON.parse(response);
-  } catch {
+    const cleaned = response
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.log("AI returned invalid JSON:", response);
     return response;
   }
 };
 
 ////////////////////////////////////////////////////
-//// 🧠 IDEA ANALYSIS
+// 🧠 IDEA ANALYSIS
 ////////////////////////////////////////////////////
 router.post("/analyze-idea", protect, async (req, res) => {
   try {
@@ -33,21 +45,22 @@ router.post("/analyze-idea", protect, async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
       messages: [
-        { role: "system", content: "You are a startup advisor." },
+        { role: "system", content: "You are an expert startup advisor." },
         {
           role: "user",
           content: `
-Analyze the startup idea below.
+Analyze this startup idea.
 
 Idea: ${idea}
 
-Return JSON with:
-- ideaScore
-- strengths (3)
-- weaknesses (3)
-- opportunities (3)
+Return JSON only:
 
-Return ONLY JSON.
+{
+ "ideaScore": number,
+ "strengths": [],
+ "weaknesses": [],
+ "opportunities": []
+}
 `,
         },
       ],
@@ -65,13 +78,13 @@ Return ONLY JSON.
 
     res.json({ data: parsed });
   } catch (error) {
-    console.error(error);
+    console.error("IDEA ANALYSIS ERROR:", error);
     res.status(500).json({ error: "Idea analysis failed" });
   }
 });
 
 ////////////////////////////////////////////////////
-//// 🚀 IDEA EVOLUTION
+// 🚀 IDEA EVOLUTION
 ////////////////////////////////////////////////////
 router.post("/evolve-idea", protect, async (req, res) => {
   try {
@@ -84,16 +97,17 @@ router.post("/evolve-idea", protect, async (req, res) => {
         {
           role: "user",
           content: `
-Improve this startup idea and make it more innovative.
+Improve this startup idea.
 
 Idea: ${idea}
 
-Return JSON with:
-- improvedIdea
-- keyImprovements (3)
-- uniqueAngle
+Return JSON:
 
-Return ONLY JSON.
+{
+ "improvedIdea": "",
+ "keyImprovements": [],
+ "uniqueAngle": ""
+}
 `,
         },
       ],
@@ -111,13 +125,13 @@ Return ONLY JSON.
 
     res.json({ data: parsed });
   } catch (error) {
-    console.error(error);
+    console.error("EVOLUTION ERROR:", error);
     res.status(500).json({ error: "Idea evolution failed" });
   }
 });
 
 ////////////////////////////////////////////////////
-//// 📊 PRODUCT BLUEPRINT
+// 📊 PRODUCT BLUEPRINT
 ////////////////////////////////////////////////////
 router.post("/generate-blueprint", protect, async (req, res) => {
   try {
@@ -130,19 +144,20 @@ router.post("/generate-blueprint", protect, async (req, res) => {
         {
           role: "user",
           content: `
-Generate a startup product blueprint.
+Generate a product blueprint.
 
 Idea: ${idea}
 
-Return JSON with:
-- problem
-- targetAudience
-- coreFeatures (5)
-- uniqueSellingProposition
-- monetizationStrategy
-- futureScope
+Return JSON:
 
-Return ONLY JSON.
+{
+ "problem": "",
+ "targetAudience": "",
+ "coreFeatures": [],
+ "uniqueSellingProposition": "",
+ "monetizationStrategy": "",
+ "futureScope": ""
+}
 `,
         },
       ],
@@ -160,13 +175,13 @@ Return ONLY JSON.
 
     res.json({ data: parsed });
   } catch (error) {
-    console.error(error);
+    console.error("BLUEPRINT ERROR:", error);
     res.status(500).json({ error: "Blueprint generation failed" });
   }
 });
 
 ////////////////////////////////////////////////////
-//// ✨ GENERATE WEBSITE SECTION
+// ✨ GENERATE WEBSITE SECTION
 ////////////////////////////////////////////////////
 router.post("/generate-section", protect, async (req, res) => {
   try {
@@ -182,16 +197,15 @@ router.post("/generate-section", protect, async (req, res) => {
         {
           role: "user",
           content: `
-Project Idea:
+Startup Idea:
 ${idea}
 
-Write an improved version of the section "${sectionTitle}"
+Write a professional "${sectionTitle}" section for a startup website.
 
 Rules:
-- Professional startup tone
-- Clear structure
-- Bullet points when helpful
-- Focus on real-world business value
+- Clear
+- Professional
+- Bullet points when useful
 `,
         },
       ],
@@ -201,17 +215,16 @@ Rules:
       content: completion.choices[0].message.content,
     });
   } catch (error) {
-    console.error("AI ERROR:", error);
-    res.status(500).json({ error: "AI generation failed" });
+    console.error("SECTION ERROR:", error);
+    res.status(500).json({ error: "Section generation failed" });
   }
 });
 
 ////////////////////////////////////////////////////
-//// 🌐 GENERATE WEBSITE STRUCTURE
+// 🌐 GENERATE WEBSITE STRUCTURE
 ////////////////////////////////////////////////////
 router.post("/generate-website", protect, async (req, res) => {
   try {
-
     const { idea } = req.body;
 
     const completion = await openai.chat.completions.create({
@@ -219,30 +232,30 @@ router.post("/generate-website", protect, async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a professional startup website architect.",
+          content: "You are a startup website architect.",
         },
         {
           role: "user",
           content: `
-Generate a website structure for this startup idea.
+Generate a landing page structure.
 
 Idea:
 ${idea}
 
-Return ONLY JSON like this:
+Return JSON:
 
 {
-  "sections":[
-    "Hero Section",
-    "Problem Section",
-    "Solution Section",
-    "Features Section",
-    "How It Works",
-    "Pricing Section",
-    "Testimonials",
-    "Call To Action",
-    "Footer"
-  ]
+ "sections":[
+  "Hero",
+  "Problem",
+  "Solution",
+  "Features",
+  "How It Works",
+  "Pricing",
+  "Testimonials",
+  "Call To Action",
+  "Footer"
+ ]
 }
 `,
         },
@@ -250,61 +263,83 @@ Return ONLY JSON like this:
     });
 
     const content = completion.choices[0].message.content;
-
     const parsed = parseAIResponse(content);
 
     res.json(parsed);
-
   } catch (error) {
-
-    console.error("AI WEBSITE ERROR:", error);
-
-    res.status(500).json({
-      error: "Website generation failed",
-    });
-
+    console.error("WEBSITE STRUCTURE ERROR:", error);
+    res.status(500).json({ error: "Website generation failed" });
   }
 });
 
+////////////////////////////////////////////////////
+// ⚡ STREAM AI RESPONSE
+////////////////////////////////////////////////////
 router.post("/generate-stream", protect, async (req, res) => {
   try {
-
     const { idea } = req.body;
 
-    const completion = await openrouter.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "deepseek/deepseek-chat",
+      stream: true,
       messages: [
         {
           role: "system",
-          content: "You are an expert startup website architect."
+          content: "You are an expert startup website architect.",
         },
         {
           role: "user",
           content: `Generate website sections for: ${idea}.
-Return each section on a new line.`
-        }
+Return each section on a new line.`,
+        },
       ],
-      stream: true
     });
 
     res.setHeader("Content-Type", "text/plain");
 
     for await (const chunk of completion) {
-
       const content = chunk.choices?.[0]?.delta?.content;
 
       if (content) {
         res.write(content);
       }
-
     }
 
     res.end();
+  } catch (error) {
+    console.error("STREAM ERROR:", error);
+    res.status(500).json({ message: "Streaming failed" });
+  }
+});
+
+const generateReactWebsite = require("../services/aiWebsiteGenerator");
+
+router.post("/build-website", protect, async (req, res) => {
+  try {
+    const { projectId } = req.body;
+
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const websiteCode = await generateReactWebsite(project);
+
+    project.generatedWebsite = websiteCode;
+    await project.save();
+
+    res.json({
+      code: websiteCode
+    });
 
   } catch (error) {
 
-    console.error("Streaming error:", error);
-    res.status(500).json({ message: "Streaming failed" });
+    console.error("BUILD WEBSITE ERROR:", error);
+
+    res.status(500).json({
+      error: "Website build failed"
+    });
 
   }
 });

@@ -1,16 +1,21 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-
 import {
   ArrowLeft,
   Trash2,
   Pencil,
   Copy,
-  Code,
-  Check
+  Check,
+  History,
+  Sparkles,
+  Loader2,
+  Eye,
+  FileCode,
+  AlertTriangle
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import LiveWebsitePreview from "../components/LiveWebsitePreview";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -24,56 +29,44 @@ const ProjectDetails = () => {
   const [copied, setCopied] = useState(false);
   const [editPulse, setEditPulse] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showAIComplete, setShowAIComplete] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAIComplete, setShowAIComplete] = useState(true);
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [showVersions, setShowVersions] = useState(false);
-  const [blueprint, setBlueprint] = useState(null);
+  const [blueprint, setBlueprint] = useState(project?.blueprint || null);
   const [generatingBlueprint, setGeneratingBlueprint] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteError, setDeleteError] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
 
-  if (!project) {
-  return (
-    <div className="flex items-center justify-center h-screen text-gray-400">
-      Loading project...
-    </div>
-  );
-}
+ const buildWebsite = async () => {
 
-  useEffect(() => {
+  try {
 
-  if (passedProject) {
-    setProject(passedProject);
-    setEditedIdea(passedProject.idea || "");
-    setBlueprint(passedProject.blueprint || null);
-    return;
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:5000/api/ai/build-website", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        projectId: id
+      })
+    });
+
+    const data = await res.json();
+
+    setGeneratedCode(data.code);
+
+  } catch (error) {
+
+    console.error("Website build failed", error);
+
   }
 
-  const fetchProject = async () => {
-
-    try {
-
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const data = await res.json();
-
-      setProject(data);
-      setEditedIdea(data.idea || "");
-      setBlueprint(data.blueprint || null);
-
-    } catch (err) {
-      console.error("Failed to load project", err);
-    }
-
-  };
-
-  fetchProject();
-
-}, [id, passedProject]);
+};
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,54 +89,79 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     const fetchProject = async () => {
+      setIsLoading(true);
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
         const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${token}`
           }
         });
 
-        const data = await res.json();
+        if (!res.ok) {
+          if (res.status === 404) {
+            throw new Error("Project not found");
+          }
+          throw new Error("Failed to fetch project");
+        }
 
-if (data) {
-  setProject(data);
-  setEditedIdea(data.idea || "");
-}
+        const data = await res.json();
+        
+        if (data) {
+          setProject(data);
+          setEditedIdea(data.idea || "");
+        }
       } catch (error) {
         console.error("Failed to load project", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchProject();
-  }, [id]);
+  }, [id, navigate]);
 
-
-  if (!project) {
-    return (
-      <div className="p-10 text-gray-400">
-        Project not found.
-      </div>
-    );
-  }
-
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setIsDeleting(true);
+    setDeleteError("");
 
-    setTimeout(() => {
-      const savedProjects =
-        JSON.parse(localStorage.getItem("ew_projects")) || [];
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await fetch(`http://localhost:5000/api/projects/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+
+      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
       const updatedProjects = savedProjects.filter(
         (p) => String(p.id) !== String(id)
       );
+      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
 
-      localStorage.setItem(
-        "ew_projects",
-        JSON.stringify(updatedProjects)
-      );
-
-      navigate("/dashboard");
-    }, 500); // animation duration
+      setTimeout(() => {
+        navigate("/dashboard", { 
+          state: { message: "Project deleted successfully" } 
+        });
+      }, 500);
+      
+    } catch (error) {
+      console.error("Delete error:", error);
+      setDeleteError(error.message);
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const handleRegenerateSection = async (index) => {
@@ -153,7 +171,8 @@ if (data) {
       const response = await fetch("http://localhost:5000/api/ai/generate-section", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
           idea: project.idea,
@@ -170,7 +189,6 @@ if (data) {
       };
 
       const updatedSections = [...project.sections];
-
       updatedSections[index] = {
         ...updatedSections[index],
         description: data.content
@@ -184,17 +202,20 @@ if (data) {
 
       setProject(updatedProject);
 
-      const savedProjects =
-        JSON.parse(localStorage.getItem("ew_projects")) || [];
+      await fetch(`http://localhost:5000/api/projects/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(updatedProject)
+      });
 
+      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
       const updatedProjects = savedProjects.map((p) =>
         String(p.id) === String(id) ? updatedProject : p
       );
-
-      localStorage.setItem(
-        "ew_projects",
-        JSON.stringify(updatedProjects)
-      );
+      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
 
     } catch (error) {
       console.error("AI Error:", error);
@@ -212,7 +233,8 @@ if (data) {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
           },
           body: JSON.stringify({
             idea: project.idea
@@ -230,17 +252,20 @@ if (data) {
       setBlueprint(data.blueprint);
       setProject(updatedProject);
 
-      const savedProjects =
-        JSON.parse(localStorage.getItem("ew_projects")) || [];
+      await fetch(`http://localhost:5000/api/projects/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(updatedProject)
+      });
 
+      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
       const updatedProjects = savedProjects.map((p) =>
         String(p.id) === String(id) ? updatedProject : p
       );
-
-      localStorage.setItem(
-        "ew_projects",
-        JSON.stringify(updatedProjects)
-      );
+      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
 
     } catch (error) {
       console.error("Blueprint AI error:", error);
@@ -249,13 +274,69 @@ if (data) {
     setGeneratingBlueprint(false);
   };
 
+  const saveProjectChanges = async (updatedProject) => {
+    try {
+      await fetch(`http://localhost:5000/api/projects/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(updatedProject)
+      });
+
+      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
+      const updatedProjects = savedProjects.map((p) =>
+        String(p.id) === String(id) ? updatedProject : p
+      );
+      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
+    } catch (error) {
+      console.error("Failed to save project:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="p-10 max-w-6xl mx-auto text-white min-h-screen flex items-center justify-center"
+      >
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading your project...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="p-10 max-w-6xl mx-auto text-white min-h-screen flex items-center justify-center"
+      >
+        <div className="text-center">
+          <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold text-white mb-2">Project Not Found</h2>
+          <p className="text-gray-400 mb-6">The project you're looking for doesn't exist or has been deleted.</p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
   const renderPreview = () => {
     if (!blueprint) return null;
 
     return (
       <div className="space-y-12 mt-8">
-
-        {/* HERO */}
         <div className="text-center py-16 bg-white/5 rounded-2xl">
           <h1 className="text-4xl font-bold text-white mb-4">
             {project.title}
@@ -265,7 +346,6 @@ if (data) {
           </p>
         </div>
 
-        {/* FEATURES */}
         <div className="grid md:grid-cols-3 gap-6">
           {blueprint.coreFeatures?.map((feature, i) => (
             <div
@@ -280,7 +360,6 @@ if (data) {
           ))}
         </div>
 
-        {/* CTA */}
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold text-white mb-3">
             Ready to get started?
@@ -297,72 +376,64 @@ if (data) {
             Get Started
           </button>
         </div>
-
       </div>
     );
   };
 
   const renderLivePreview = () => {
-  if (!blueprint) return null;
+    if (!blueprint) return null;
 
-  return (
-    <div
-      id="live-preview"
-      className="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8"
-    >
-      <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
-        Website Preview
-      </h2>
+    return (
+      <div
+        id="live-preview"
+        className="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8"
+      >
+        <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
+          Website Preview
+        </h2>
 
-      <div className="bg-black rounded-xl overflow-hidden border border-white/10">
+        <div className="bg-black rounded-xl overflow-hidden border border-white/10">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/60">
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span className="text-xs text-gray-400 ml-4">
+              ai-generated-site.vercel.app
+            </span>
+          </div>
 
-        {/* Fake browser header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/60">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <div className="p-10 space-y-10">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                {blueprint.uniqueSellingProposition}
+              </p>
+            </div>
 
-          <span className="text-xs text-gray-400 ml-4">
-            ai-generated-site.vercel.app
-          </span>
+            <div className="grid md:grid-cols-3 gap-6">
+              {blueprint.coreFeatures?.map((feature, i) => (
+                <div
+                  key={i}
+                  className="p-6 border border-white/10 rounded-xl"
+                >
+                  <h3 className="text-indigo-400 font-semibold mb-2">
+                    Feature {i + 1}
+                  </h3>
+                  <p className="text-gray-400 text-sm">{feature}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center">
+              <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
+                Get Started
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* AI Website */}
-        <div className="p-10 space-y-10">
-
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
-            <p className="text-gray-400 max-w-xl mx-auto">
-              {blueprint.uniqueSellingProposition}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {blueprint.coreFeatures?.map((feature, i) => (
-              <div
-                key={i}
-                className="p-6 border border-white/10 rounded-xl"
-              >
-                <h3 className="text-indigo-400 font-semibold mb-2">
-                  Feature {i + 1}
-                </h3>
-                <p className="text-gray-400 text-sm">{feature}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
-              Get Started
-            </button>
-          </div>
-
-        </div>
-
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   const generateCode = () => {
     if (!blueprint) return "// No blueprint yet";
@@ -415,9 +486,8 @@ export default function LandingPage() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="p-10 max-w-6xl mx-auto text-white"
     >
-      {/* Back Button */}
-
-      <div className="flex justify-between items-center mb-8 ">
+      {/* Header with Back and Delete */}
+      <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition"
@@ -426,23 +496,68 @@ export default function LandingPage() {
           Back
         </button>
 
-        <motion.button
-          onClick={handleDelete}
-          whileTap={{ scale: 0.9 }}
-          animate={isDeleting ? { rotate: 20, scale: 1.1 } : {}}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl
-             bg-red-500/20 text-red-400
-             border border-red-500/30
-             hover:bg-red-500/30
-             transition-all duration-300"
-        >
-          <Trash2 size={16} />
-          Delete
-        </motion.button>
+        <div className="flex items-center gap-3">
+          {!showDeleteConfirm ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl
+                bg-red-500/20 text-red-400
+                border border-red-500/30
+                hover:bg-red-500/30
+                transition-all duration-300"
+            >
+              <Trash2 size={16} />
+              Delete
+            </motion.button>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1"
+            >
+              <span className="text-sm text-gray-400 px-2">Are you sure?</span>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm
+                  hover:bg-red-600 transition disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Yes"
+                )}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 text-sm
+                  hover:bg-white/20 transition"
+              >
+                No
+              </motion.button>
+            </motion.div>
+          )}
+        </div>
       </div>
 
+      {deleteError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm"
+        >
+          {deleteError}
+        </motion.div>
+      )}
+
       {/* Project Title */}
-      <div className=" mb-8">
+      <div className="mb-8">
         <h1 className="text-4xl font-semibold mb-4">
           {project.title}
         </h1>
@@ -476,35 +591,32 @@ export default function LandingPage() {
       </div>
 
       {/* Original Idea */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 ">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-medium text-indigo-400">
             {project.title ? project.title : "Title to be decided..."}
           </h2>
 
-          <div className="flex items-center gap-3 ">
-
+          <div className="flex items-center gap-3">
             {/* EDIT */}
             <motion.button
               onClick={() => {
                 setIsEditing(!isEditing);
                 setEditPulse(true);
                 setTimeout(() => setEditPulse(false), 400);
-
               }}
               whileTap={{ scale: 0.9 }}
               className={`relative p-2 rounded-lg transition hover:bg-white/10 
-      ${isEditing ? "text-indigo-400" : "text-gray-400 hover:text-white"}
-    `}
+                ${isEditing ? "text-indigo-400" : "text-gray-400 hover:text-white"}
+              `}
             >
               <Pencil size={18} />
-
               {editPulse && (
                 <motion.span
                   initial={{ scale: 0, opacity: 0.6 }}
                   animate={{ scale: 2, opacity: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="absolute inset-0 rounded-lg bg-indigo-500/30 hover:bg-white/10 transition"
+                  className="absolute inset-0 rounded-lg bg-indigo-500/30"
                 />
               )}
             </motion.button>
@@ -517,7 +629,7 @@ export default function LandingPage() {
                 setTimeout(() => setCopied(false), 1200);
               }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-lg text-gray-400 hover:text-white transition hover:bg-white/10 "
+              className="p-2 rounded-lg text-gray-400 hover:text-white transition hover:bg-white/10"
             >
               <AnimatePresence mode="wait">
                 {copied ? (
@@ -548,91 +660,110 @@ export default function LandingPage() {
             <motion.div
               layout
               className="relative flex items-center 
-             bg-white/5 border border-white/10
-             rounded-xl p-1 text-sm cursor-pointer
-             backdrop-blur-xl "
+                bg-white/5 border border-white/10
+                rounded-xl p-1 text-sm cursor-pointer
+                backdrop-blur-xl"
             >
-
-              {/* Animated Active Background */}
               <motion.div
                 layout
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 className={`absolute top-1 bottom-1 w-1/2 rounded-lg
-      ${viewMode === "preview"
+                  ${viewMode === "preview"
                     ? "left-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                     : "right-1 bg-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                   }`}
               />
 
-              {/* Preview */}
               <div
                 onClick={() => setViewMode("preview")}
-                className={`relative z-10 px-4 py-1.5 transition
-      ${viewMode === "preview"
+                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1
+                  ${viewMode === "preview"
                     ? "text-white"
                     : "text-gray-400 hover:text-gray-200"
                   }`}
               >
+                <Eye size={14} />
                 Preview
               </div>
 
-              {/* Code */}
               <div
                 onClick={() => setViewMode("code")}
-                className={`relative z-10 px-4 py-1.5 transition
-      ${viewMode === "code"
+                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1
+                  ${viewMode === "code"
                     ? "text-indigo-400"
                     : "text-gray-400 hover:text-gray-200"
                   }`}
               >
+                <FileCode size={14} />
                 Code
               </div>
-
             </motion.div>
-
           </div>
         </div>
 
         {isEditing ? (
-          <textarea
-            value={editedIdea}
-            onChange={(e) => setEditedIdea(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
+          <div className="space-y-4">
+            <textarea
+              value={editedIdea}
+              onChange={(e) => setEditedIdea(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  const previousVersion = {
+                    idea: project.idea,
+                    sections: project.sections,
+                    timestamp: new Date().toLocaleString()
+                  };
 
-                // Trigger same save logic
-                const previousVersion = {
-                  idea: project.idea,
-                  sections: project.sections,
-                  timestamp: new Date().toLocaleString()
-                };
+                  const updatedProject = {
+                    ...project,
+                    idea: editedIdea,
+                    versions: [...(project.versions || []), previousVersion]
+                  };
 
-                const updatedProject = {
-                  ...project,
-                  idea: editedIdea,
-                  versions: [...(project.versions || []), previousVersion]
-                };
+                  setProject(updatedProject);
+                  saveProjectChanges(updatedProject);
+                  setIsEditing(false);
+                }
+              }}
+              className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
+              placeholder="Edit your idea..."
+              autoFocus
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedIdea(project.idea);
+                }}
+                className="px-4 py-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const previousVersion = {
+                    idea: project.idea,
+                    sections: project.sections,
+                    timestamp: new Date().toLocaleString()
+                  };
 
-                setProject(updatedProject);
+                  const updatedProject = {
+                    ...project,
+                    idea: editedIdea,
+                    versions: [...(project.versions || []), previousVersion]
+                  };
 
-                const savedProjects =
-                  JSON.parse(localStorage.getItem("ew_projects")) || [];
-
-                const updatedProjects = savedProjects.map((p) =>
-                  String(p.id) === String(id) ? updatedProject : p
-                );
-
-                localStorage.setItem(
-                  "ew_projects",
-                  JSON.stringify(updatedProjects)
-                );
-
-                setIsEditing(false);
-              }
-            }}
-            className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200"
-          />
+                  setProject(updatedProject);
+                  saveProjectChanges(updatedProject);
+                  setIsEditing(false);
+                }}
+                className="px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
         ) : viewMode === "preview" ? (
           renderPreview()
         ) : (
@@ -640,223 +771,227 @@ export default function LandingPage() {
             {generateCode()}
           </pre>
         )}
-
-        {isEditing && (
-          <button
-            onClick={() => {
-              // 1️⃣ Save previous version before editing
-              const previousVersion = {
-                idea: project.idea,
-                sections: project.sections,
-                timestamp: new Date().toLocaleString()
-              };
-
-              const updatedProject = {
-                ...project,
-                idea: editedIdea,
-                versions: [...(project.versions || []), previousVersion]
-              };
-
-              // 2️⃣ Update state
-              setProject(updatedProject);
-
-              // 3️⃣ Update localStorage
-              const savedProjects =
-                JSON.parse(localStorage.getItem("ew_projects")) || [];
-
-              const updatedProjects = savedProjects.map((p) =>
-                String(p.id) === String(id) ? updatedProject : p
-              );
-
-              localStorage.setItem(
-                "ew_projects",
-                JSON.stringify(updatedProjects)
-              );
-
-              setIsEditing(false);
-            }}
-            className="mt-4 px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
-          >
-            Save Changes
-          </button>
-        )}
       </div>
 
-      <button
+      {/* Version History Toggle */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setShowVersions(!showVersions)}
-        className="mb-6 px-4 py-2 rounded-xl
-             bg-indigo-500/20 text-indigo-400
-             hover:bg-indigo-500/30 transition"
+        className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2
+          bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
+          hover:bg-indigo-500/30 transition"
       >
-        View Version History
-      </button>
+        <History size={16} />
+        {showVersions ? "Hide" : "View"} Version History
+        {project.versions?.length > 0 && (
+          <span className="ml-1 px-2 py-0.5 bg-indigo-500/20 rounded-full text-xs">
+            {project.versions.length}
+          </span>
+        )}
+      </motion.button>
 
-      {showVersions && project.versions?.length > 0 && (
-        <div className="mb-8 bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h3 className="text-lg font-semibold mb-4 text-indigo-400">
-            Version History
-          </h3>
+      {/* Version History */}
+      <AnimatePresence>
+        {showVersions && project.versions?.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+          >
+            <h3 className="text-lg font-semibold mb-4 text-indigo-400 flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Version History
+            </h3>
 
-          {project.versions.map((version, index) => (
-            <div
-              key={index}
-              className="mb-4 p-4 bg-black/30 rounded-xl"
-            >
-              <p className="text-xs text-gray-400 mb-2">
-                Saved on {version.timestamp}
-              </p>
+            <div className="space-y-3">
+              {project.versions.map((version, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-4 bg-black/30 rounded-xl border border-white/5"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs text-gray-400 font-mono">
+                      Version {project.versions.length - index}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {version.timestamp}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-300 mb-3 line-clamp-2">
+                    {version.idea}
+                  </p>
+                  <button
+                    onClick={() => {
+                      const restoredProject = {
+                        ...project,
+                        idea: version.idea,
+                        sections: version.sections,
+                        versions: project.versions
+                      };
 
-              <button
-                onClick={() => {
-                  const restoredProject = {
-                    ...project,
-                    idea: version.idea,
-                    sections: version.sections,
-                    versions: project.versions
-                  };
-
-                  setProject(restoredProject);
-
-                  const savedProjects =
-                    JSON.parse(localStorage.getItem("ew_projects")) || [];
-
-                  const updatedProjects = savedProjects.map((p) =>
-                    String(p.id) === String(id) ? restoredProject : p
-                  );
-
-                  localStorage.setItem(
-                    "ew_projects",
-                    JSON.stringify(updatedProjects)
-                  );
-                }}
-                className="text-xs px-3 py-1 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
-              >
-                Restore This Version
-              </button>
+                      setProject(restoredProject);
+                      saveProjectChanges(restoredProject);
+                    }}
+                    className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 
+                      rounded-lg hover:bg-green-500/30 transition"
+                  >
+                    Restore This Version
+                  </button>
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* AI Startup Blueprint */}
-
       <div className="mt-10 mb-10">
-
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
+        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+          <Sparkles className="w-6 h-6" />
           AI Startup Blueprint
         </h2>
 
         {generatingBlueprint ? (
-
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-gray-400">
-
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-gray-400">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="flex items-center gap-2"
             >
-              <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
-              AI is analyzing your idea...
+              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+              <span>AI is analyzing your idea...</span>
             </motion.div>
-
             <p className="text-sm mt-3 text-gray-500">
               Identifying problem, audience, and solution...
             </p>
-
           </div>
-
         ) : blueprint && (
-
           <div className="grid md:grid-cols-2 gap-6">
-
-            {
-              [
-                { title: "Problem", content: blueprint.problem },
-                { title: "Target Audience", content: blueprint.targetAudience },
-                { title: "Solution", content: blueprint.uniqueSellingProposition },
-                { title: "Business Model", content: blueprint.monetizationStrategy },
-                { title: "Core Features", content: blueprint.coreFeatures?.join(", ") }
-              ]
-                .map((item, index) => (
-
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-white/5 backdrop-blur-xl
-border border-white/10
-rounded-2xl p-6
-hover:bg-white/10
-transition"
-                  >
-
+            {[
+              { title: "Problem", content: blueprint.problem, icon: "⚠️" },
+              { title: "Target Audience", content: blueprint.targetAudience, icon: "👥" },
+              { title: "Solution", content: blueprint.uniqueSellingProposition, icon: "💡" },
+              { title: "Business Model", content: blueprint.monetizationStrategy, icon: "💰" },
+              { title: "Core Features", content: blueprint.coreFeatures?.join(", "), icon: "⚡" }
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="bg-white/5 backdrop-blur-xl
+                  border border-white/10
+                  rounded-2xl p-6
+                  hover:bg-white/10
+                  transition cursor-pointer"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
                     <h3 className="text-lg font-semibold text-indigo-400 mb-2">
                       {item.title}
                     </h3>
-
                     <p className="text-gray-400 text-sm leading-relaxed">
                       {item.content}
                     </p>
-
-                  </motion.div>
-
-                ))}
-
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
-
         )}
-
       </div>
 
       {/* Generated Sections */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {project.sections?.map((section, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`bg-white/5 backdrop-blur-xl
-           border border-white/10
-           rounded-2xl p-6
-           hover:bg-white/10
-           transition
-           ${regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""}`}
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-lg font-semibold text-purple-400">
-                {section.title}
-              </h3>
-
-              <button
-                onClick={() => handleRegenerateSection(index)}
-                className="text-xs px-3 py-1 rounded-lg
-               bg-indigo-500/20 text-indigo-400
-               hover:bg-indigo-500/30 transition"
-              >
-                Regenerate
-              </button>
-            </div>
-            {regeneratingIndex === index ? (
+      {project.sections && project.sections.length > 0 && (
+        <>
+          <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+            <Sparkles className="w-6 h-6" />
+            Generated Sections
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {project.sections.map((section, index) => (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-gray-400 text-sm flex items-center gap-2"
+                key={index}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5 }}
+                className={`bg-white/5 backdrop-blur-xl
+                  border border-white/10
+                  rounded-2xl p-6
+                  hover:bg-white/10
+                  transition
+                  ${regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""}`}
               >
-                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
-                AI is improving this section...
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-semibold text-purple-400">
+                    {section.title}
+                  </h3>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRegenerateSection(index)}
+                    disabled={regeneratingIndex !== null}
+                    className="text-xs px-3 py-1.5 rounded-lg
+                      bg-indigo-500/20 text-indigo-400
+                      hover:bg-indigo-500/30 transition
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {regeneratingIndex === index ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      "Regenerate"
+                    )}
+                  </motion.button>
+                </div>
+
+                {regeneratingIndex === index ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-gray-400 text-sm flex items-center gap-2"
+                  >
+                    <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+                    AI is improving this section...
+                  </motion.div>
+                ) : (
+                  <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+                    {section.description}
+                  </p>
+                )}
               </motion.div>
-            ) : (
-              <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-                {section.description}
-              </p>
-            )}
-          </motion.div>
-        ))}
-      </div>
+            ))}
+          </div>
+        </>
+      )}
+<div className="mt-12 text-center">
+
+  <button
+    onClick={buildWebsite}
+    className="px-8 py-3 bg-indigo-600 rounded-xl
+    hover:bg-indigo-700 transition
+    flex items-center gap-2 mx-auto"
+  >
+    <Sparkles size={18}/>
+    Build AI Website
+  </button>
+
+</div>
+{generatedCode && (
+  <LiveWebsitePreview code={generatedCode} />
+)}
       {renderLivePreview()}
     </motion.div>
+
+    
   );
 };
 

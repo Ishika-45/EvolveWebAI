@@ -1,48 +1,37 @@
 const axios = require("axios");
 
 const analyzeStartupIdea = async (idea) => {
-  try {
-    const prompt = `
-You are a startup mentor and product strategist.
 
-Analyze this startup idea and return JSON.
+  try {
+
+    const prompt = `
+You are a startup mentor.
+
+Analyze this startup idea.
 
 Idea:
 ${idea}
 
-Return this structure:
+Return JSON:
 
 {
  "analysis":{
-   "ideaScore": number (1-10),
-   "strengths":[string],
-   "weaknesses":[string],
-   "opportunities":[string]
+   "ideaScore": number,
+   "strengths":[],
+   "weaknesses":[],
+   "opportunities":[]
  },
- "evolvedIdea": "Improved startup idea",
-
+ "evolvedIdea":"",
  "blueprint":{
-   "problem":"problem statement",
-   "targetAudience":"who will use this",
-   "coreFeatures":["feature1","feature2","feature3"],
-   "uniqueSellingProposition":"USP",
-   "monetizationStrategy":"how it earns money",
-   "futureScope":"future potential"
+   "problem":"",
+   "targetAudience":"",
+   "coreFeatures":[],
+   "uniqueSellingProposition":"",
+   "monetizationStrategy":"",
+   "futureScope":""
  },
-
  "websiteStructure":{
-   "pages":[
-      {
-        "name":"Home",
-        "sections":[
-          {
-            "sectionName":"Hero",
-            "title":"Hero title",
-            "description":"Hero description"
-          }
-        ]
-      }
-   ]
+   "sections":[]
  }
 }
 `;
@@ -50,16 +39,10 @@ Return this structure:
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "openai/gpt-4o-mini",
+        model: "deepseek/deepseek-chat",
         messages: [
-          {
-            role: "system",
-            content: "You are a startup expert and product builder.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
+          { role: "system", content: "You are a startup expert." },
+          { role: "user", content: prompt },
         ],
       },
       {
@@ -72,22 +55,18 @@ Return this structure:
 
     const content = response.data.choices[0].message.content;
 
-    // Clean markdown code blocks
     const cleaned = content
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
 
-    try {
-      return JSON.parse(cleaned);
-    } catch (parseError) {
-      console.error("AI returned invalid JSON:", content);
-      throw new Error("Failed to parse AI response");
-    }
+    return JSON.parse(cleaned);
 
   } catch (error) {
+
     console.error("AI ERROR:", error.response?.data || error.message);
     throw new Error("AI analysis failed");
+
   }
 };
 
