@@ -8,6 +8,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import CursorGlow from "../components/CursorGlow";
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,6 +32,8 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen flex text-white relative overflow-hidden
                 bg-[#0f172a]">
+
+                  <CursorGlow/>
   
   {/* Grid Overlay */}
  <div className="absolute inset-0 animated-grid

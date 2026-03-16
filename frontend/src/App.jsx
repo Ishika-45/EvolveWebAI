@@ -7,6 +7,8 @@ import DashboardHome from "./pages/DashboardHome";
 import ProjectDetails from "./pages/ProjectDetails";
 import StartupBuilder from "./pages/StartupBuilder";
 import Projects from "./pages/Projects";
+import Templates from "./pages/Templates";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -45,6 +47,8 @@ function App() {
         <Route path="project/:id" element={<ProjectDetails />} />
         <Route path="builder/:projectId" element={<StartupBuilder />} />
          <Route path="projects" element={<Projects />} />
+         <Route path="templates" element={<Templates />} />
+         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   </div>
