@@ -154,40 +154,16 @@ const DashboardHome = () => {
 
  const handleGenerate = async () => {
 
-  const response = await fetch(
-    "http://localhost:5000/api/ai/generate-stream",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ idea })
-    }
-  );
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-
-  let result = "";
-
-  while (true) {
-
-    const { done, value } = await reader.read();
-
-    if (done) break;
-
-    const chunk = decoder.decode(value);
-
-    result += chunk;
-
-    setStreamingText(result);
-  }
-
   if (!idea.trim()) return;
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const token = storedUser?.token;
 
   setIsGenerating(true);
   setCurrentStep(0);
+  setStreamingText("");
+
+  /* ---------------- STEP ANIMATION ---------------- */
 
   let step = 0;
 
@@ -203,36 +179,79 @@ const DashboardHome = () => {
 
   }, 700);
 
+  /* ---------------- AI STREAMING ---------------- */
+
   try {
 
-    // 1️⃣ Ask AI for website structure
+    const response = await fetch(
+      "http://localhost:5000/api/ai/generate-stream",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ idea })
+      }
+    );
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let result = "";
+
+    while (true) {
+
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+
+      result += chunk;
+
+      setStreamingText(result);
+
+    }
+
+  } catch (err) {
+
+    console.error("Streaming error:", err);
+
+  }
+
+  /* ---------------- STRUCTURE GENERATION ---------------- */
+
+  try {
+
     const aiRes = await api.post("/ai/generate-website", {
       idea
     });
-let sections = aiRes.data.sections;
 
-if (!sections || !Array.isArray(sections)) {
+    let sections = aiRes.data.sections;
 
-  console.warn("AI returned invalid sections. Using fallback.");
+    if (!sections || !Array.isArray(sections)) {
 
-  sections = [
-    "Hero Section",
-    "Problem Section",
-    "Solution Section",
-    "Features",
-    "Pricing",
-    "Testimonials",
-    "CTA",
-    "Footer"
-  ];
+      console.warn("AI returned invalid sections. Using fallback.");
 
-}
+      sections = [
+        "Hero Section",
+        "Problem Section",
+        "Solution Section",
+        "Features",
+        "Pricing",
+        "Testimonials",
+        "CTA",
+        "Footer"
+      ];
 
-    // 2️⃣ Start typing animation
+    }
+
     setBlueprintSections(sections);
     startTypingBlueprint(sections);
 
-    // 3️⃣ Save project to database
+    /* ---------------- SAVE PROJECT ---------------- */
+
     const res = await api.post("/projects", {
 
       title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
@@ -243,10 +262,8 @@ if (!sections || !Array.isArray(sections)) {
 
     const newProject = res.data;
 
-    // 4️⃣ Update dashboard list
     setProjects(prev => [newProject, ...prev]);
 
-    // 5️⃣ Navigate to project
     setTimeout(() => {
 
       navigate(`/dashboard/project/${newProject._id}`);
@@ -372,6 +389,22 @@ if (!sections || !Array.isArray(sections)) {
           placeholder="Describe your startup idea..."
           className="w-full h-36 p-5 rounded-xl bg-white/5 border border-indigo-500/40 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-400"
         />
+
+        {streamingText && (
+
+  <div className="mt-6 bg-black/40 p-5 rounded-xl border border-indigo-500/30">
+
+    <p className="text-indigo-300 mb-3">
+      ⚡ AI Generating Website Blueprint
+    </p>
+
+    <pre className="text-gray-300 whitespace-pre-wrap">
+      {streamingText}
+    </pre>
+
+  </div>
+
+)}
 
         {/* Prompt Suggestions */}
 

@@ -24,11 +24,56 @@ const ProjectDetails = () => {
   const [copied, setCopied] = useState(false);
   const [editPulse, setEditPulse] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showAIComplete, setShowAIComplete] = useState(true);
+  const [showAIComplete, setShowAIComplete] = useState(false);
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [showVersions, setShowVersions] = useState(false);
-  const [blueprint, setBlueprint] = useState(project?.blueprint || null);
+  const [blueprint, setBlueprint] = useState(null);
   const [generatingBlueprint, setGeneratingBlueprint] = useState(false);
+
+  if (!project) {
+  return (
+    <div className="flex items-center justify-center h-screen text-gray-400">
+      Loading project...
+    </div>
+  );
+}
+
+  useEffect(() => {
+
+  if (passedProject) {
+    setProject(passedProject);
+    setEditedIdea(passedProject.idea || "");
+    setBlueprint(passedProject.blueprint || null);
+    return;
+  }
+
+  const fetchProject = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+
+      setProject(data);
+      setEditedIdea(data.idea || "");
+      setBlueprint(data.blueprint || null);
+
+    } catch (err) {
+      console.error("Failed to load project", err);
+    }
+
+  };
+
+  fetchProject();
+
+}, [id, passedProject]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
