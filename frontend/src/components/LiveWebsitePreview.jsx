@@ -1,77 +1,120 @@
-import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Maximize2 } from "lucide-react";
+import { useState } from "react";
 
-const LiveWebsitePreview = ({ code }) => {
-  if (!code) return null;
+const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
 
-  // Wrap AI code inside a minimal React runtime page
-  const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- React Runtime -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-<title>AI Website Preview</title>
-
-<style>
-body{
-margin:0;
-font-family:sans-serif;
-background:#f9fafb;
-}
-</style>
-
-</head>
-
-<body>
-
-<div id="root"></div>
-
-<script>
-
-${code}
-
-try {
-  const root = ReactDOM.createRoot(document.getElementById("root"));
-  root.render(React.createElement(App));
-} catch(err){
-  document.body.innerHTML =
-  "<div style='padding:40px;font-family:sans-serif'>" +
-  "<h2>⚠️ AI Code Error</h2>" +
-  "<pre>" + err + "</pre>" +
-  "</div>";
-}
-
-</script>
-
-</body>
-</html>
-`;
+  const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="mt-12 border border-gray-700 rounded-xl overflow-hidden">
+    <AnimatePresence>
 
-      <div className="bg-gray-900 text-white px-4 py-2 text-sm">
-        🌐 Live AI Website Preview
-      </div>
+      {code && (
 
-      <iframe
-        title="AI Website"
-        sandbox="allow-scripts allow-same-origin"
-        style={{
-          width: "100%",
-          height: "650px",
-          border: "none"
-        }}
-        srcDoc={html}
-      />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
 
-    </div>
+          onClick={() => focusPreview && setFocusPreview(false)}
+
+          className={`fixed inset-0 z-50 flex items-center justify-center
+          transition-all duration-500
+          ${focusPreview ? "backdrop-blur-xl bg-black/70" : ""}`}
+        >
+
+          {/* Preview Window */}
+          <motion.div
+
+            layout
+
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{
+              scale: focusPreview ? 1 : 0.95,
+              opacity: 1
+            }}
+
+            transition={{
+              duration: 0.45,
+              ease: "easeOut"
+            }}
+
+            onClick={(e) => e.stopPropagation()}
+
+            className={`relative bg-black border border-white/10
+            rounded-2xl overflow-hidden shadow-2xl
+
+            ${focusPreview
+              ? "w-[92vw] h-[92vh]"
+              : "w-[900px] h-[520px]"
+            }`}
+          >
+
+            {/* Browser Bar */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-black/80">
+
+              <div className="flex items-center gap-2">
+
+                <div className="w-3 h-3 bg-red-500 rounded-full"/>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"/>
+                <div className="w-3 h-3 bg-green-500 rounded-full"/>
+
+                <span className="text-xs text-gray-400 ml-4">
+                  evolveweb-ai-preview.vercel.app
+                </span>
+
+              </div>
+
+              <div className="flex items-center gap-3">
+
+                {!focusPreview && (
+                  <button
+                    onClick={() => setFocusPreview(true)}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition"
+                  >
+                    <Maximize2 size={16}/>
+                  </button>
+                )}
+
+                {focusPreview && (
+                  <button
+                    onClick={() => setFocusPreview(false)}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition"
+                  >
+                    <X size={16}/>
+                  </button>
+                )}
+
+              </div>
+
+            </div>
+
+            {/* Loading shimmer */}
+            {!loaded && (
+              <div className="absolute inset-0 animate-pulse bg-gray-900 flex items-center justify-center text-gray-400 text-sm">
+                Loading preview...
+              </div>
+            )}
+
+            {/* Website Frame */}
+            <div className="w-full h-full bg-white">
+
+              <iframe
+                title="ai-preview"
+                srcDoc={code}
+                className="w-full h-full border-none"
+                onLoad={() => setLoaded(true)}
+              />
+
+            </div>
+
+          </motion.div>
+
+        </motion.div>
+
+      )}
+
+    </AnimatePresence>
   );
 };
 

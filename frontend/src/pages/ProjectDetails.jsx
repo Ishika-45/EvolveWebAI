@@ -33,15 +33,19 @@ const ProjectDetails = () => {
   const [showAIComplete, setShowAIComplete] = useState(true);
   const [regeneratingIndex, setRegeneratingIndex] = useState(null);
   const [showVersions, setShowVersions] = useState(false);
-  const [blueprint, setBlueprint] = useState(project?.blueprint || null);
+  const [blueprint, setBlueprint] = useState(null);
   const [generatingBlueprint, setGeneratingBlueprint] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteError, setDeleteError] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
+  const [buildingWebsite, setBuildingWebsite] = useState(false);
+  const [focusPreview, setFocusPreview] = useState(false);
 
- const buildWebsite = async () => {
+const buildWebsite = async () => {
 
   try {
+
+    setBuildingWebsite(true);
 
     const token = localStorage.getItem("token");
 
@@ -63,6 +67,10 @@ const ProjectDetails = () => {
   } catch (error) {
 
     console.error("Website build failed", error);
+
+  } finally {
+
+    setBuildingWebsite(false);
 
   }
 
@@ -338,7 +346,8 @@ const ProjectDetails = () => {
     return (
       <div className="space-y-12 mt-8">
         <div className="text-center py-16 bg-white/5 rounded-2xl">
-          <h1 className="text-4xl font-bold text-white mb-4">
+         <h1 className="text-5xl font-bold bg-gradient-to-r 
+from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
             {project.title}
           </h1>
           <p className="text-gray-400 max-w-xl mx-auto">
@@ -724,6 +733,8 @@ export default function LandingPage() {
                   setProject(updatedProject);
                   saveProjectChanges(updatedProject);
                   setIsEditing(false);
+                  
+generateBlueprint();
                 }
               }}
               className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
@@ -975,18 +986,35 @@ export default function LandingPage() {
 <div className="mt-12 text-center">
 
   <button
-    onClick={buildWebsite}
-    className="px-8 py-3 bg-indigo-600 rounded-xl
-    hover:bg-indigo-700 transition
-    flex items-center gap-2 mx-auto"
-  >
-    <Sparkles size={18}/>
-    Build AI Website
-  </button>
+  onClick={buildWebsite}
+  disabled={buildingWebsite}
+  className="px-8 py-3 bg-indigo-600 rounded-xl
+  hover:bg-indigo-700 transition
+  flex items-center gap-2 mx-auto
+  disabled:opacity-50"
+>
+
+{buildingWebsite ? (
+<>
+<Loader2 className="animate-spin" size={18}/>
+Building Website...
+</>
+) : (
+<>
+<Sparkles size={18}/>
+Build AI Website
+</>
+)}
+
+</button>
 
 </div>
 {generatedCode && (
-  <LiveWebsitePreview code={generatedCode} />
+  <LiveWebsitePreview
+    code={generatedCode}
+    focusPreview={focusPreview}
+    setFocusPreview={setFocusPreview}
+  />
 )}
       {renderLivePreview()}
     </motion.div>

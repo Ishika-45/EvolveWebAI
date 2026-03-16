@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Folder,
@@ -11,6 +11,15 @@ import {
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+}, []);
 
   const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -110,16 +119,68 @@ const DashboardLayout = () => {
 
         {/* Topbar */}
         <header className="h-16 px-8 flex items-center justify-between
-                           bg-white/5 backdrop-blur-xl border-b border-white/10">
+                   bg-white/5 backdrop-blur-xl border-b border-white/10">
 
-          <h2 className="text-lg font-medium text-gray-200">
-            Dashboard
-          </h2>
+  {/* Page Title */}
+  <h2 className="text-lg font-medium text-gray-200">
+    Dashboard
+  </h2>
 
-          <div className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" />
-          </div>
-        </header>
+  {/* Right Side */}
+  <div className="flex items-center gap-6">
+
+    {/* Notification */}
+    <button className="p-2 rounded-lg hover:bg-white/10 transition">
+      🔔
+    </button>
+
+    {/* Profile Dropdown */}
+    <div className="relative group">
+
+      <div className="w-9 h-9 rounded-full flex items-center justify-center
+                      bg-gradient-to-r from-purple-500 to-indigo-500
+                      text-sm font-semibold cursor-pointer">
+        {user?.name?.charAt(0).toUpperCase() || "U"}
+      </div>
+
+      {/* Dropdown */}
+      <div className="absolute right-0 mt-3 w-48
+                      bg-[#0f172a] border border-white/10
+                      rounded-xl shadow-xl
+                      opacity-0 invisible
+                      group-hover:visible group-hover:opacity-100
+                      transition">
+
+        <div className="px-4 py-3 border-b border-white/10">
+         <p className="text-sm font-medium">{user?.name || "User"}</p>
+<p className="text-xs text-gray-400">{user?.email || "email@example.com"}</p>
+        </div>
+
+        <button className="w-full text-left px-4 py-3 hover:bg-white/10 text-sm">
+          Profile
+        </button>
+
+        <button className="w-full text-left px-4 py-3 hover:bg-white/10 text-sm">
+          Settings
+        </button>
+
+       <button
+  onClick={() => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  }}
+  className="w-full text-left px-4 py-3 hover:bg-white/10 text-sm text-red-400"
+>
+  Logout
+</button>
+
+      </div>
+    </div>
+
+  </div>
+
+</header>
 
        <main className="flex-1 p-10 overflow-y-auto relative z-10">
 

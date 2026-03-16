@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
+import LandingNavbar from "../components/LandingNavbar";
 
 const Landing = () => {
   return (
     <>
-      <Navbar />
+      <LandingNavbar />
 
       <section className="min-h-screen flex items-center justify-center px-6 pt-32">
         <div className="max-w-7xl w-full grid md:grid-cols-2 gap-12 items-center">

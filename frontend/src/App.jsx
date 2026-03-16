@@ -6,6 +6,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
 import ProjectDetails from "./pages/ProjectDetails";
 import StartupBuilder from "./pages/StartupBuilder";
+import Projects from "./pages/Projects";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route index element={<DashboardHome />} />
         <Route path="project/:id" element={<ProjectDetails />} />
         <Route path="builder/:projectId" element={<StartupBuilder />} />
+         <Route path="projects" element={<Projects />} />
       </Route>
     </Routes>
   </div>
