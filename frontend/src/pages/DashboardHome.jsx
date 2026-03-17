@@ -152,12 +152,11 @@ const DashboardHome = () => {
 
   /* ---------------- GENERATE ---------------- */
 
- const handleGenerate = async () => {
+const handleGenerate = async () => {
 
   if (!idea.trim()) return;
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const token = storedUser?.token;
+  const token = localStorage.getItem("token");
 
   setIsGenerating(true);
   setCurrentStep(0);
@@ -168,15 +167,12 @@ const DashboardHome = () => {
   let step = 0;
 
   const interval = setInterval(() => {
-
     step++;
-
     if (step < generationSteps.length) {
       setCurrentStep(step);
     } else {
       clearInterval(interval);
     }
-
   }, 700);
 
   /* ---------------- AI STREAMING ---------------- */
@@ -195,43 +191,37 @@ const DashboardHome = () => {
       }
     );
 
+    if (!response.ok) {
+      throw new Error(`Streaming failed: ${response.status}`);
+    }
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
 
     let result = "";
 
     while (true) {
-
       const { done, value } = await reader.read();
-
       if (done) break;
 
       const chunk = decoder.decode(value);
-
       result += chunk;
-
       setStreamingText(result);
-
     }
 
   } catch (err) {
-
     console.error("Streaming error:", err);
-
   }
 
   /* ---------------- STRUCTURE GENERATION ---------------- */
 
   try {
 
-    const aiRes = await api.post("/ai/generate-website", {
-      idea
-    });
+    const aiRes = await api.post("/ai/generate-website", { idea });
 
     let sections = aiRes.data.sections;
 
     if (!sections || !Array.isArray(sections)) {
-
       console.warn("AI returned invalid sections. Using fallback.");
 
       sections = [
@@ -244,20 +234,23 @@ const DashboardHome = () => {
         "CTA",
         "Footer"
       ];
-
     }
 
     setBlueprintSections(sections);
     startTypingBlueprint(sections);
 
-    /* ---------------- SAVE PROJECT ---------------- */
+    /* ---------------- SAFE SAVE ---------------- */
+
+    if (!sections || !Array.isArray(sections)) {
+      console.warn("Skipping save due to invalid sections");
+      setIsGenerating(false);
+      return;
+    }
 
     const res = await api.post("/projects", {
-
       title: idea.length > 30 ? idea.slice(0, 30) + "..." : idea,
       idea,
       sections
-
     });
 
     const newProject = res.data;
@@ -265,9 +258,7 @@ const DashboardHome = () => {
     setProjects(prev => [newProject, ...prev]);
 
     setTimeout(() => {
-
       navigate(`/dashboard/project/${newProject._id}`);
-
     }, 4000);
 
   } catch (err) {
