@@ -1,5 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -12,19 +12,67 @@ import {
   Loader2,
   Eye,
   FileCode,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import api from "../services/api";
 import LiveWebsitePreview from "../components/LiveWebsitePreview";
+
+const normalizeSection = (section, index = 0) => {
+  if (typeof section === "string") {
+    return {
+      title: section.trim() || `Section ${index + 1}`,
+      description: "",
+    };
+  }
+
+  if (section && typeof section === "object") {
+    return {
+      title:
+        section.title?.trim() ||
+        section.name?.trim() ||
+        section.heading?.trim() ||
+        `Section ${index + 1}`,
+      description:
+        section.description?.trim() ||
+        section.content?.trim() ||
+        section.summary?.trim() ||
+        "",
+    };
+  }
+
+  return {
+    title: `Section ${index + 1}`,
+    description: "",
+  };
+};
+
+const normalizeSections = (sections) => {
+  if (!Array.isArray(sections)) return [];
+  return sections.map((section, index) => normalizeSection(section, index));
+};
+
+const normalizeBlueprint = (blueprint) => {
+  if (!blueprint || typeof blueprint !== "object") return null;
+
+  return {
+    problem: blueprint.problem || "",
+    targetAudience: blueprint.targetAudience || "",
+    uniqueSellingProposition: blueprint.uniqueSellingProposition || "",
+    monetizationStrategy: blueprint.monetizationStrategy || "",
+    coreFeatures: Array.isArray(blueprint.coreFeatures) ? blueprint.coreFeatures : [],
+  };
+};
 
 const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const passedProject = location.state?.project;
+
   const [project, setProject] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedIdea, setEditedIdea] = useState("");
-  const location = useLocation();
-  const passedProject = location.state?.project;
   const [viewMode, setViewMode] = useState("preview");
   const [copied, setCopied] = useState(false);
   const [editPulse, setEditPulse] = useState(false);
@@ -40,41 +88,12 @@ const ProjectDetails = () => {
   const [generatedCode, setGeneratedCode] = useState("");
   const [buildingWebsite, setBuildingWebsite] = useState(false);
   const [focusPreview, setFocusPreview] = useState(false);
+  const [pageError, setPageError] = useState("");
 
-const buildWebsite = async () => {
-
-  try {
-
-    setBuildingWebsite(true);
-
-    const token = localStorage.getItem("token");
-
-    const res = await fetch("http://localhost:5000/api/ai/build-website", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        projectId: id
-      })
-    });
-
-    const data = await res.json();
-
-    setGeneratedCode(data.code);
-
-  } catch (error) {
-
-    console.error("Website build failed", error);
-
-  } finally {
-
-    setBuildingWebsite(false);
-
-  }
-
-};
+  const normalizedSections = useMemo(
+    () => normalizeSections(project?.sections),
+    [project?.sections]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -85,222 +104,224 @@ const buildWebsite = async () => {
   }, []);
 
   useEffect(() => {
-    if (!project) return;
-
-    if (project.blueprint) {
-      setBlueprint(project.blueprint);
-      return;
+    if (passedProject && !project) {
+      setProject({
+        ...passedProject,
+        sections: normalizeSections(passedProject.sections),
+      });
+      setEditedIdea(passedProject.idea || "");
     }
-
-    generateBlueprint();
-  }, [project]);
+  }, [passedProject, project]);
 
   useEffect(() => {
     const fetchProject = async () => {
       setIsLoading(true);
+      setPageError("");
+
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/login");
-          return;
+        const res = await api.get(`/projects/${id}`);
+        const data = res.data?.project || res.data;
+
+        if (!data) {
+          throw new Error("Project not found");
         }
 
-        const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const normalizedProject = {
+          ...data,
+          sections: normalizeSections(data.sections),
+        };
 
-        if (!res.ok) {
-          if (res.status === 404) {
-            throw new Error("Project not found");
-          }
-          throw new Error("Failed to fetch project");
-        }
-
-        const data = await res.json();
-        
-        if (data) {
-          setProject(data);
-          setEditedIdea(data.idea || "");
-        }
+        setProject(normalizedProject);
+        setEditedIdea(normalizedProject.idea || "");
+        setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
       } catch (error) {
-        console.error("Failed to load project", error);
+        console.error("Failed to load project:", error);
+
+        const message =
+          error?.response?.status === 404
+            ? "Project not found"
+            : error?.response?.data?.message || "Failed to load project";
+
+        setPageError(message);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProject();
-  }, [id, navigate]);
+  }, [id]);
+
+  useEffect(() => {
+    if (!project) return;
+
+    if (project.blueprint) {
+      setBlueprint(normalizeBlueprint(project.blueprint));
+      return;
+    }
+
+    generateBlueprint(project.idea);
+  }, [project?.idea]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const persistProjectUpdate = async (updatedProject) => {
+    const payload = {
+      ...updatedProject,
+      sections: normalizeSections(updatedProject.sections),
+    };
+
+    const res = await api.put(`/projects/${id}`, payload);
+    const savedProject = res.data?.project || res.data;
+
+    const normalizedSavedProject = {
+      ...savedProject,
+      sections: normalizeSections(savedProject.sections),
+    };
+
+    setProject(normalizedSavedProject);
+    setEditedIdea(normalizedSavedProject.idea || "");
+    setBlueprint(normalizeBlueprint(normalizedSavedProject.blueprint));
+
+    return normalizedSavedProject;
+  };
+
+  const buildWebsite = async () => {
+    try {
+      setBuildingWebsite(true);
+
+      const res = await api.post("/ai/build-website", {
+        projectId: id,
+      });
+
+      setGeneratedCode(res.data?.code || "");
+    } catch (error) {
+      console.error("Website build failed:", error);
+    } finally {
+      setBuildingWebsite(false);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
     setDeleteError("");
 
     try {
-      const token = localStorage.getItem("token");
-      
-      const response = await fetch(`http://localhost:5000/api/projects/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete project");
-      }
-
-      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
-      const updatedProjects = savedProjects.filter(
-        (p) => String(p.id) !== String(id)
-      );
-      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
+      await api.delete(`/projects/${id}`);
 
       setTimeout(() => {
-        navigate("/dashboard", { 
-          state: { message: "Project deleted successfully" } 
+        navigate("/dashboard", {
+          state: { message: "Project deleted successfully" },
         });
-      }, 500);
-      
+      }, 400);
     } catch (error) {
       console.error("Delete error:", error);
-      setDeleteError(error.message);
+      setDeleteError(
+        error?.response?.data?.message || error?.message || "Failed to delete project"
+      );
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
   };
 
   const handleRegenerateSection = async (index) => {
+    if (!project) return;
+
     setRegeneratingIndex(index);
 
     try {
-      const response = await fetch("http://localhost:5000/api/ai/generate-section", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({
-          idea: project.idea,
-          sectionTitle: project.sections[index].title
-        })
-      });
+      const currentSections = normalizeSections(project.sections);
+      const sectionToRegenerate = currentSections[index];
 
-      const data = await response.json();
+      const response = await api.post("/ai/generate-section", {
+        idea: project.idea,
+        sectionTitle: sectionToRegenerate.title,
+      });
 
       const previousVersion = {
         idea: project.idea,
-        sections: project.sections,
-        timestamp: new Date().toLocaleString()
+        sections: currentSections,
+        timestamp: new Date().toLocaleString(),
       };
 
-      const updatedSections = [...project.sections];
+      const updatedSections = [...currentSections];
       updatedSections[index] = {
         ...updatedSections[index],
-        description: data.content
+        description:
+          response.data?.content ||
+          response.data?.description ||
+          updatedSections[index].description,
       };
 
       const updatedProject = {
         ...project,
         sections: updatedSections,
-        versions: [...(project.versions || []), previousVersion]
+        versions: [...(project.versions || []), previousVersion],
       };
 
-      setProject(updatedProject);
-
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(updatedProject)
-      });
-
-      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
-      const updatedProjects = savedProjects.map((p) =>
-        String(p.id) === String(id) ? updatedProject : p
-      );
-      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
-
+      await persistProjectUpdate(updatedProject);
     } catch (error) {
-      console.error("AI Error:", error);
+      console.error("AI section regeneration error:", error);
+    } finally {
+      setRegeneratingIndex(null);
     }
-
-    setRegeneratingIndex(null);
   };
 
-  const generateBlueprint = async () => {
+  const generateBlueprint = async (ideaOverride) => {
+    const sourceIdea = ideaOverride || project?.idea;
+    if (!sourceIdea) return;
+
     setGeneratingBlueprint(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/ai/generate-blueprint",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          },
-          body: JSON.stringify({
-            idea: project.idea
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      const updatedProject = {
-        ...project,
-        blueprint: data.blueprint
-      };
-
-      setBlueprint(data.blueprint);
-      setProject(updatedProject);
-
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(updatedProject)
+      const response = await api.post("/ai/generate-blueprint", {
+        idea: sourceIdea,
       });
 
-      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
-      const updatedProjects = savedProjects.map((p) =>
-        String(p.id) === String(id) ? updatedProject : p
-      );
-      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
+      const nextBlueprint = normalizeBlueprint(response.data?.blueprint);
 
+      if (!nextBlueprint) return;
+
+      setBlueprint(nextBlueprint);
+
+      if (project) {
+        const updatedProject = {
+          ...project,
+          blueprint: nextBlueprint,
+        };
+
+        await persistProjectUpdate(updatedProject);
+      }
     } catch (error) {
       console.error("Blueprint AI error:", error);
+    } finally {
+      setGeneratingBlueprint(false);
     }
-
-    setGeneratingBlueprint(false);
   };
 
   const saveProjectChanges = async (updatedProject) => {
     try {
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(updatedProject)
-      });
-
-      const savedProjects = JSON.parse(localStorage.getItem("ew_projects")) || [];
-      const updatedProjects = savedProjects.map((p) =>
-        String(p.id) === String(id) ? updatedProject : p
-      );
-      localStorage.setItem("ew_projects", JSON.stringify(updatedProjects));
+      await persistProjectUpdate(updatedProject);
     } catch (error) {
       console.error("Failed to save project:", error);
     }
+  };
+
+  const handleSaveIdea = async () => {
+    if (!project) return;
+
+    const previousVersion = {
+      idea: project.idea,
+      sections: normalizedSections,
+      timestamp: new Date().toLocaleString(),
+    };
+
+    const updatedProject = {
+      ...project,
+      idea: editedIdea.trim(),
+      versions: [...(project.versions || []), previousVersion],
+    };
+
+    setIsEditing(false);
+    await saveProjectChanges(updatedProject);
+    await generateBlueprint(editedIdea.trim());
   };
 
   if (isLoading) {
@@ -318,7 +339,7 @@ const buildWebsite = async () => {
     );
   }
 
-  if (!project) {
+  if (!project || pageError) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -328,7 +349,9 @@ const buildWebsite = async () => {
         <div className="text-center">
           <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-white mb-2">Project Not Found</h2>
-          <p className="text-gray-400 mb-6">The project you're looking for doesn't exist or has been deleted.</p>
+          <p className="text-gray-400 mb-6">
+            {pageError || "The project you're looking for doesn't exist or has been deleted."}
+          </p>
           <button
             onClick={() => navigate("/dashboard")}
             className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
@@ -346,8 +369,7 @@ const buildWebsite = async () => {
     return (
       <div className="space-y-12 mt-8">
         <div className="text-center py-16 bg-white/5 rounded-2xl">
-         <h1 className="text-5xl font-bold bg-gradient-to-r 
-from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
             {project.title}
           </h1>
           <p className="text-gray-400 max-w-xl mx-auto">
@@ -361,9 +383,7 @@ from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
               key={i}
               className="bg-white/5 border border-white/10 rounded-xl p-6"
             >
-              <h3 className="text-indigo-400 font-semibold mb-2">
-                Feature {i + 1}
-              </h3>
+              <h3 className="text-indigo-400 font-semibold mb-2">Feature {i + 1}</h3>
               <p className="text-gray-400 text-sm">{feature}</p>
             </div>
           ))}
@@ -403,9 +423,9 @@ from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
 
         <div className="bg-black rounded-xl overflow-hidden border border-white/10">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/60">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-red-500 rounded-full" />
+            <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+            <div className="w-3 h-3 bg-green-500 rounded-full" />
             <span className="text-xs text-gray-400 ml-4">
               ai-generated-site.vercel.app
             </span>
@@ -421,10 +441,7 @@ from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
 
             <div className="grid md:grid-cols-3 gap-6">
               {blueprint.coreFeatures?.map((feature, i) => (
-                <div
-                  key={i}
-                  className="p-6 border border-white/10 rounded-xl"
-                >
+                <div key={i} className="p-6 border border-white/10 rounded-xl">
                   <h3 className="text-indigo-400 font-semibold mb-2">
                     Feature {i + 1}
                   </h3>
@@ -450,36 +467,34 @@ from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
     return `import React from "react";
 
 export default function LandingPage() {
- return (
-  <div className="min-h-screen bg-black text-white p-10">
+  return (
+    <div className="min-h-screen bg-black text-white p-10">
+      <section className="text-center mb-20">
+        <h1 className="text-4xl font-bold">${project.title}</h1>
+        <p className="text-gray-400 mt-4">
+          ${blueprint.uniqueSellingProposition}
+        </p>
+      </section>
 
-   <section className="text-center mb-20">
-     <h1 className="text-4xl font-bold">${project.title}</h1>
-     <p className="text-gray-400 mt-4">
-       ${blueprint.uniqueSellingProposition}
-     </p>
-   </section>
+      <section className="grid md:grid-cols-3 gap-6 mb-20">
+        ${blueprint.coreFeatures
+          ?.map(
+            (f) => `
+        <div className="p-6 border border-white/10 rounded-xl">
+          <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
+          <p>${f}</p>
+        </div>`
+          )
+          .join("")}
+      </section>
 
-   <section className="grid md:grid-cols-3 gap-6 mb-20">
-     ${blueprint.coreFeatures
-        ?.map(
-          (f) => `
-     <div className="p-6 border border-white/10 rounded-xl">
-       <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
-       <p>${f}</p>
-     </div>`
-        )
-        .join("")}
-   </section>
-
-   <section className="text-center">
-     <button className="px-6 py-3 bg-indigo-500 rounded-xl">
-       Get Started
-     </button>
-   </section>
-
-  </div>
- );
+      <section className="text-center">
+        <button className="px-6 py-3 bg-indigo-500 rounded-xl">
+          Get Started
+        </button>
+      </section>
+    </div>
+  );
 }
 `;
   };
@@ -495,7 +510,6 @@ export default function LandingPage() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="p-10 max-w-6xl mx-auto text-white"
     >
-      {/* Header with Back and Delete */}
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
@@ -511,11 +525,7 @@ export default function LandingPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl
-                bg-red-500/20 text-red-400
-                border border-red-500/30
-                hover:bg-red-500/30
-                transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
             >
               <Trash2 size={16} />
               Delete
@@ -532,21 +542,15 @@ export default function LandingPage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm
-                  hover:bg-red-600 transition disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition disabled:opacity-50"
               >
-                {isDeleting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Yes"
-                )}
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Yes"}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 text-sm
-                  hover:bg-white/20 transition"
+                className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 text-sm hover:bg-white/20 transition"
               >
                 No
               </motion.button>
@@ -565,17 +569,16 @@ export default function LandingPage() {
         </motion.div>
       )}
 
-      {/* Project Title */}
       <div className="mb-8">
-        <h1 className="text-4xl font-semibold mb-4">
-          {project.title}
-        </h1>
+        <h1 className="text-4xl font-semibold mb-4">{project.title}</h1>
 
         <p className="text-gray-400 mb-3">
-          Created on {project.date}
+          Created on{" "}
+          {project.createdAt
+            ? new Date(project.createdAt).toLocaleDateString()
+            : project.date || "Recently"}
         </p>
 
-        {/* AI Generation Status */}
         <AnimatePresence>
           {showAIComplete && (
             <motion.div
@@ -583,31 +586,22 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2
-                 mt-2 px-4 py-2
-                 rounded-xl
-                 bg-green-500/10
-                 border border-green-500/30
-                 text-green-400
-                 backdrop-blur-xl
-                 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+              className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 backdrop-blur-xl shadow-[0_0_20px_rgba(34,197,94,0.2)]"
             >
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               AI Generation Complete
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Original Idea */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-medium text-indigo-400">
-            {project.title ? project.title : "Title to be decided..."}
+            {project.title || "Title to be decided..."}
           </h2>
 
           <div className="flex items-center gap-3">
-            {/* EDIT */}
             <motion.button
               onClick={() => {
                 setIsEditing(!isEditing);
@@ -615,9 +609,9 @@ export default function LandingPage() {
                 setTimeout(() => setEditPulse(false), 400);
               }}
               whileTap={{ scale: 0.9 }}
-              className={`relative p-2 rounded-lg transition hover:bg-white/10 
-                ${isEditing ? "text-indigo-400" : "text-gray-400 hover:text-white"}
-              `}
+              className={`relative p-2 rounded-lg transition hover:bg-white/10 ${
+                isEditing ? "text-indigo-400" : "text-gray-400 hover:text-white"
+              }`}
             >
               <Pencil size={18} />
               {editPulse && (
@@ -630,10 +624,9 @@ export default function LandingPage() {
               )}
             </motion.button>
 
-            {/* COPY */}
             <motion.button
               onClick={() => {
-                navigator.clipboard.writeText(project.idea);
+                navigator.clipboard.writeText(project.idea || "");
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1200);
               }}
@@ -665,31 +658,27 @@ export default function LandingPage() {
               </AnimatePresence>
             </motion.button>
 
-            {/* TOGGLE */}
             <motion.div
               layout
-              className="relative flex items-center 
-                bg-white/5 border border-white/10
-                rounded-xl p-1 text-sm cursor-pointer
-                backdrop-blur-xl"
+              className="relative flex items-center bg-white/5 border border-white/10 rounded-xl p-1 text-sm cursor-pointer backdrop-blur-xl"
             >
               <motion.div
                 layout
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                className={`absolute top-1 bottom-1 w-1/2 rounded-lg
-                  ${viewMode === "preview"
+                className={`absolute top-1 bottom-1 w-1/2 rounded-lg ${
+                  viewMode === "preview"
                     ? "left-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                     : "right-1 bg-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-                  }`}
+                }`}
               />
 
               <div
                 onClick={() => setViewMode("preview")}
-                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1
-                  ${viewMode === "preview"
+                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1 ${
+                  viewMode === "preview"
                     ? "text-white"
                     : "text-gray-400 hover:text-gray-200"
-                  }`}
+                }`}
               >
                 <Eye size={14} />
                 Preview
@@ -697,11 +686,11 @@ export default function LandingPage() {
 
               <div
                 onClick={() => setViewMode("code")}
-                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1
-                  ${viewMode === "code"
+                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1 ${
+                  viewMode === "code"
                     ? "text-indigo-400"
                     : "text-gray-400 hover:text-gray-200"
-                  }`}
+                }`}
               >
                 <FileCode size={14} />
                 Code
@@ -718,23 +707,7 @@ export default function LandingPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  const previousVersion = {
-                    idea: project.idea,
-                    sections: project.sections,
-                    timestamp: new Date().toLocaleString()
-                  };
-
-                  const updatedProject = {
-                    ...project,
-                    idea: editedIdea,
-                    versions: [...(project.versions || []), previousVersion]
-                  };
-
-                  setProject(updatedProject);
-                  saveProjectChanges(updatedProject);
-                  setIsEditing(false);
-                  
-generateBlueprint();
+                  handleSaveIdea();
                 }
               }}
               className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
@@ -745,30 +718,14 @@ generateBlueprint();
               <button
                 onClick={() => {
                   setIsEditing(false);
-                  setEditedIdea(project.idea);
+                  setEditedIdea(project.idea || "");
                 }}
                 className="px-4 py-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20 transition"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  const previousVersion = {
-                    idea: project.idea,
-                    sections: project.sections,
-                    timestamp: new Date().toLocaleString()
-                  };
-
-                  const updatedProject = {
-                    ...project,
-                    idea: editedIdea,
-                    versions: [...(project.versions || []), previousVersion]
-                  };
-
-                  setProject(updatedProject);
-                  saveProjectChanges(updatedProject);
-                  setIsEditing(false);
-                }}
+                onClick={handleSaveIdea}
                 className="px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
               >
                 Save Changes
@@ -784,14 +741,11 @@ generateBlueprint();
         )}
       </div>
 
-      {/* Version History Toggle */}
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setShowVersions(!showVersions)}
-        className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2
-          bg-indigo-500/20 text-indigo-400 border border-indigo-500/30
-          hover:bg-indigo-500/30 transition"
+        className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
       >
         <History size={16} />
         {showVersions ? "Hide" : "View"} Version History
@@ -802,7 +756,6 @@ generateBlueprint();
         )}
       </motion.button>
 
-      {/* Version History */}
       <AnimatePresence>
         {showVersions && project.versions?.length > 0 && (
           <motion.div
@@ -829,9 +782,7 @@ generateBlueprint();
                     <p className="text-xs text-gray-400 font-mono">
                       Version {project.versions.length - index}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {version.timestamp}
-                    </p>
+                    <p className="text-xs text-gray-500">{version.timestamp}</p>
                   </div>
                   <p className="text-sm text-gray-300 mb-3 line-clamp-2">
                     {version.idea}
@@ -841,15 +792,13 @@ generateBlueprint();
                       const restoredProject = {
                         ...project,
                         idea: version.idea,
-                        sections: version.sections,
-                        versions: project.versions
+                        sections: normalizeSections(version.sections),
+                        versions: project.versions,
                       };
 
-                      setProject(restoredProject);
                       saveProjectChanges(restoredProject);
                     }}
-                    className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 
-                      rounded-lg hover:bg-green-500/30 transition"
+                    className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
                   >
                     Restore This Version
                   </button>
@@ -860,7 +809,6 @@ generateBlueprint();
         )}
       </AnimatePresence>
 
-      {/* AI Startup Blueprint */}
       <div className="mt-10 mb-10">
         <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
           <Sparkles className="w-6 h-6" />
@@ -881,14 +829,26 @@ generateBlueprint();
               Identifying problem, audience, and solution...
             </p>
           </div>
-        ) : blueprint && (
+        ) : blueprint ? (
           <div className="grid md:grid-cols-2 gap-6">
             {[
               { title: "Problem", content: blueprint.problem, icon: "⚠️" },
               { title: "Target Audience", content: blueprint.targetAudience, icon: "👥" },
-              { title: "Solution", content: blueprint.uniqueSellingProposition, icon: "💡" },
-              { title: "Business Model", content: blueprint.monetizationStrategy, icon: "💰" },
-              { title: "Core Features", content: blueprint.coreFeatures?.join(", "), icon: "⚡" }
+              {
+                title: "Solution",
+                content: blueprint.uniqueSellingProposition,
+                icon: "💡",
+              },
+              {
+                title: "Business Model",
+                content: blueprint.monetizationStrategy,
+                icon: "💰",
+              },
+              {
+                title: "Core Features",
+                content: blueprint.coreFeatures?.join(", "),
+                icon: "⚡",
+              },
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -896,11 +856,7 @@ generateBlueprint();
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
-                className="bg-white/5 backdrop-blur-xl
-                  border border-white/10
-                  rounded-2xl p-6
-                  hover:bg-white/10
-                  transition cursor-pointer"
+                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition cursor-pointer"
               >
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">{item.icon}</span>
@@ -909,37 +865,33 @@ generateBlueprint();
                       {item.title}
                     </h3>
                     <p className="text-gray-400 text-sm leading-relaxed">
-                      {item.content}
+                      {item.content || "Not available yet"}
                     </p>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Generated Sections */}
-      {project.sections && project.sections.length > 0 && (
+      {normalizedSections.length > 0 && (
         <>
           <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
             <Sparkles className="w-6 h-6" />
             Generated Sections
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
-            {project.sections.map((section, index) => (
+            {normalizedSections.map((section, index) => (
               <motion.div
-                key={index}
+                key={`${section.title}-${index}`}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
-                className={`bg-white/5 backdrop-blur-xl
-                  border border-white/10
-                  rounded-2xl p-6
-                  hover:bg-white/10
-                  transition
-                  ${regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""}`}
+                className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition ${
+                  regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""
+                }`}
               >
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-semibold text-purple-400">
@@ -951,10 +903,7 @@ generateBlueprint();
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleRegenerateSection(index)}
                     disabled={regeneratingIndex !== null}
-                    className="text-xs px-3 py-1.5 rounded-lg
-                      bg-indigo-500/20 text-indigo-400
-                      hover:bg-indigo-500/30 transition
-                      disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {regeneratingIndex === index ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -975,7 +924,7 @@ generateBlueprint();
                   </motion.div>
                 ) : (
                   <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-                    {section.description}
+                    {section.description || "No description generated yet."}
                   </p>
                 )}
               </motion.div>
@@ -983,43 +932,37 @@ generateBlueprint();
           </div>
         </>
       )}
-<div className="mt-12 text-center">
 
-  <button
-  onClick={buildWebsite}
-  disabled={buildingWebsite}
-  className="px-8 py-3 bg-indigo-600 rounded-xl
-  hover:bg-indigo-700 transition
-  flex items-center gap-2 mx-auto
-  disabled:opacity-50"
->
+      <div className="mt-12 text-center">
+        <button
+          onClick={buildWebsite}
+          disabled={buildingWebsite}
+          className="px-8 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 mx-auto disabled:opacity-50"
+        >
+          {buildingWebsite ? (
+            <>
+              <Loader2 className="animate-spin" size={18} />
+              Building Website...
+            </>
+          ) : (
+            <>
+              <Sparkles size={18} />
+              Build AI Website
+            </>
+          )}
+        </button>
+      </div>
 
-{buildingWebsite ? (
-<>
-<Loader2 className="animate-spin" size={18}/>
-Building Website...
-</>
-) : (
-<>
-<Sparkles size={18}/>
-Build AI Website
-</>
-)}
+      {generatedCode && (
+        <LiveWebsitePreview
+          code={generatedCode}
+          focusPreview={focusPreview}
+          setFocusPreview={setFocusPreview}
+        />
+      )}
 
-</button>
-
-</div>
-{generatedCode && (
-  <LiveWebsitePreview
-    code={generatedCode}
-    focusPreview={focusPreview}
-    setFocusPreview={setFocusPreview}
-  />
-)}
       {renderLivePreview()}
     </motion.div>
-
-    
   );
 };
 
