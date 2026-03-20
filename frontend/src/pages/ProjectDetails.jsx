@@ -15,6 +15,12 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  Download,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Wand2,
+  RefreshCw,
 } from "lucide-react";
 import api from "../services/api";
 import LiveWebsitePreview from "../components/LiveWebsitePreview";
@@ -22,6 +28,7 @@ import LiveWebsitePreview from "../components/LiveWebsitePreview";
 const normalizeSection = (section, index = 0) => {
   if (typeof section === "string") {
     return {
+      id: `section-${index}`,
       title: section.trim() || `Section ${index + 1}`,
       description: "",
     };
@@ -29,6 +36,7 @@ const normalizeSection = (section, index = 0) => {
 
   if (section && typeof section === "object") {
     return {
+      id: section.id || `section-${index}`,
       title:
         section.title?.trim() ||
         section.name?.trim() ||
@@ -43,6 +51,7 @@ const normalizeSection = (section, index = 0) => {
   }
 
   return {
+    id: `section-${index}`,
     title: `Section ${index + 1}`,
     description: "",
   };
@@ -72,30 +81,35 @@ const ProjectDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
   const passedProject = location.state?.project;
 
   const [project, setProject] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [blueprint, setBlueprint] = useState(null);
   const [editedIdea, setEditedIdea] = useState("");
-  const [viewMode, setViewMode] = useState("preview");
-  const [copied, setCopied] = useState(false);
-  const [editPulse, setEditPulse] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState("");
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageError, setPageError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [buildError, setBuildError] = useState("");
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showAIComplete, setShowAIComplete] = useState(true);
-  const [regeneratingIndex, setRegeneratingIndex] = useState(null);
-  const [showVersions, setShowVersions] = useState(false);
-  const [blueprint, setBlueprint] = useState(null);
   const [generatingBlueprint, setGeneratingBlueprint] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [deleteError, setDeleteError] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
   const [buildingWebsite, setBuildingWebsite] = useState(false);
+  const [regeneratingIndex, setRegeneratingIndex] = useState(null);
+
+  const [isEditingIdea, setIsEditingIdea] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showAIComplete, setShowAIComplete] = useState(true);
+  const [showVersions, setShowVersions] = useState(false);
+
+  const [viewMode, setViewMode] = useState("preview");
   const [focusPreview, setFocusPreview] = useState(false);
-  const [pageError, setPageError] = useState("");
+  const [deviceMode, setDeviceMode] = useState("desktop");
+
   const [expandedBlueprintCard, setExpandedBlueprintCard] = useState(null);
-  const [buildError, setBuildError] = useState("");
 
   const normalizedSections = useMemo(
     () => normalizeSections(project?.sections),
@@ -103,22 +117,21 @@ const ProjectDetails = () => {
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAIComplete(false);
-    }, 2200);
-
+    const timer = setTimeout(() => setShowAIComplete(false), 2200);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (passedProject && !project) {
-      setProject({
+      const normalizedProject = {
         ...passedProject,
         sections: normalizeSections(passedProject.sections),
-      });
-      setEditedIdea(passedProject.idea || "");
-      setBlueprint(normalizeBlueprint(passedProject.blueprint));
-      setGeneratedCode(passedProject.generatedWebsite ?? "");
+      };
+
+      setProject(normalizedProject);
+      setEditedIdea(normalizedProject.idea || "");
+      setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
+      setGeneratedCode(normalizedProject.generatedWebsite ?? "");
     }
   }, [passedProject, project]);
 
@@ -131,9 +144,7 @@ const ProjectDetails = () => {
         const res = await api.get(`/projects/${id}`);
         const data = res.data?.project || res.data;
 
-        if (!data) {
-          throw new Error("Project not found");
-        }
+        if (!data) throw new Error("Project not found");
 
         const normalizedProject = {
           ...data,
@@ -146,13 +157,11 @@ const ProjectDetails = () => {
         setGeneratedCode(normalizedProject.generatedWebsite ?? "");
       } catch (error) {
         console.error("Failed to load project:", error);
-
-        const message =
+        setPageError(
           error?.response?.status === 404
             ? "Project not found"
-            : error?.response?.data?.message || "Failed to load project";
-
-        setPageError(message);
+            : error?.response?.data?.message || "Failed to load project"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -193,6 +202,84 @@ const ProjectDetails = () => {
     return normalizedSavedProject;
   };
 
+  const saveProjectChanges = async (updatedProject) => {
+    try {
+      await persistProjectUpdate(updatedProject);
+    } catch (error) {
+      console.error("Failed to save project:", error);
+    }
+  };
+
+  const generateBlueprint = async (ideaOverride) => {
+    const sourceIdea = ideaOverride || project?.idea;
+    if (!sourceIdea) return;
+
+    setGeneratingBlueprint(true);
+
+    try {
+      const response = await api.post("/ai/generate-blueprint", {
+        projectId: id,
+        idea: sourceIdea,
+      });
+
+      const responseData =
+        response.data?.data || response.data?.blueprint || response.data;
+
+      const nextBlueprint = normalizeBlueprint(responseData);
+      if (!nextBlueprint) return;
+
+      setBlueprint(nextBlueprint);
+
+      setProject((prev) =>
+        prev
+          ? {
+              ...prev,
+              blueprint: nextBlueprint,
+            }
+          : prev
+      );
+
+      if (project) {
+        await persistProjectUpdate({
+          ...project,
+          blueprint: nextBlueprint,
+        });
+      }
+    } catch (error) {
+      console.error("Blueprint AI error:", error);
+    } finally {
+      setGeneratingBlueprint(false);
+    }
+  };
+
+  const handleSaveIdea = async () => {
+    if (!project) return;
+
+    const trimmedIdea = editedIdea.trim();
+    if (!trimmedIdea) return;
+
+    const previousVersion = {
+      idea: project.idea,
+      sections: normalizedSections,
+      timestamp: new Date().toLocaleString(),
+    };
+
+    const updatedProject = {
+      ...project,
+      idea: trimmedIdea,
+      blueprint: null,
+      generatedWebsite: "",
+      versions: [...(project.versions || []), previousVersion],
+    };
+
+    setIsEditingIdea(false);
+    setGeneratedCode("");
+    setBlueprint(null);
+
+    await saveProjectChanges(updatedProject);
+    await generateBlueprint(trimmedIdea);
+  };
+
   const buildWebsite = async () => {
     try {
       setBuildingWebsite(true);
@@ -213,7 +300,6 @@ const ProjectDetails = () => {
       }
 
       setGeneratedCode(code);
-
       setProject((prev) =>
         prev
           ? {
@@ -223,7 +309,7 @@ const ProjectDetails = () => {
           : prev
       );
 
-      setViewMode("code");
+      setViewMode("preview");
       setFocusPreview(true);
     } catch (error) {
       console.error("Website build failed:", error);
@@ -245,12 +331,9 @@ const ProjectDetails = () => {
 
     try {
       await api.delete(`/projects/${id}`);
-
-      setTimeout(() => {
-        navigate("/dashboard", {
-          state: { message: "Project deleted successfully" },
-        });
-      }, 400);
+      navigate("/dashboard", {
+        state: { message: "Project deleted successfully" },
+      });
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(
@@ -306,145 +389,116 @@ const ProjectDetails = () => {
     }
   };
 
-  const generateBlueprint = async (ideaOverride) => {
-    const sourceIdea = ideaOverride || project?.idea;
-    if (!sourceIdea) return;
-
-    setGeneratingBlueprint(true);
-
+  const copyIdea = async () => {
     try {
-      const response = await api.post("/ai/generate-blueprint", {
-        projectId: id,
-        idea: sourceIdea,
+      await navigator.clipboard.writeText(project?.idea || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (error) {
+      console.error("Copy failed:", error);
+    }
+  };
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedCode || generateFallbackCode());
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 1200);
+    } catch (error) {
+      console.error("Code copy failed:", error);
+    }
+  };
+
+  const downloadCodeFile = () => {
+    const codeToDownload = generatedCode || generateFallbackCode();
+    const blob = new Blob([codeToDownload], {
+      type: "text/html;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(project?.title || "ai-website")
+      .toLowerCase()
+      .replace(/\s+/g, "-")}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadZip = async () => {
+    try {
+      const response = await api.get(`/projects/${id}/export-zip`, {
+        responseType: "blob",
       });
 
-      const responseData =
-        response.data?.data || response.data?.blueprint || response.data;
-
-      const nextBlueprint = normalizeBlueprint(responseData);
-
-      if (!nextBlueprint) return;
-
-      setBlueprint(nextBlueprint);
-
-      setProject((prev) =>
-        prev
-          ? {
-              ...prev,
-              blueprint: nextBlueprint,
-            }
-          : prev
-      );
-
-      if (project) {
-        const updatedProject = {
-          ...project,
-          blueprint: nextBlueprint,
-        };
-
-        await persistProjectUpdate(updatedProject);
-      }
+      const blob = new Blob([response.data], { type: "application/zip" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(project?.title || "website")
+        .toLowerCase()
+        .replace(/\s+/g, "-")}.zip`;
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Blueprint AI error:", error);
-    } finally {
-      setGeneratingBlueprint(false);
+      console.error("ZIP download failed:", error);
+      alert("ZIP export endpoint not connected yet. Create /projects/:id/export-zip on backend.");
     }
   };
 
-  const saveProjectChanges = async (updatedProject) => {
-    try {
-      await persistProjectUpdate(updatedProject);
-    } catch (error) {
-      console.error("Failed to save project:", error);
-    }
-  };
-
-  const handleSaveIdea = async () => {
-    if (!project) return;
-
-    const trimmedIdea = editedIdea.trim();
-    if (!trimmedIdea) return;
-
-    const previousVersion = {
-      idea: project.idea,
-      sections: normalizedSections,
-      timestamp: new Date().toLocaleString(),
-    };
-
-    const updatedProject = {
-      ...project,
-      idea: trimmedIdea,
-      blueprint: null,
-      sections: project.sections,
-      versions: [...(project.versions || []), previousVersion],
-    };
-
-    setIsEditing(false);
-    await saveProjectChanges(updatedProject);
-    await generateBlueprint(trimmedIdea);
-  };
-
-  const generateCode = () => {
+  const generateFallbackCode = () => {
     if (!blueprint) return "// No blueprint yet";
 
-    return `import React from "react";
-
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-[#050816] text-white">
-      <section className="px-8 py-24 text-center">
-        <h1 className="text-5xl font-bold mb-6">${project?.title || "Project Title"}</h1>
-        <p className="text-gray-400 max-w-2xl mx-auto">
-          ${blueprint.uniqueSellingProposition}
-        </p>
-      </section>
-
-      <section className="px-8 pb-20 grid md:grid-cols-3 gap-6">
-        ${blueprint.coreFeatures
-          ?.map(
-            (f) => `
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
-          <p className="text-gray-300">${f}</p>
-        </div>`
-          )
-          .join("")}
-      </section>
-
-      <section className="px-8 pb-24 text-center">
-        <button className="px-6 py-3 bg-indigo-500 rounded-xl">
-          Get Started
-        </button>
-      </section>
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>${project?.title || "AI Website"}</title>
+</head>
+<body class="min-h-screen bg-[#050816] text-white">
+  <section class="px-8 py-24 text-center">
+    <h1 class="text-5xl font-bold mb-6">${project?.title || "Project Title"}</h1>
+    <p class="text-gray-400 max-w-2xl mx-auto">
+      ${blueprint.uniqueSellingProposition || ""}
+    </p>
+    <div class="mt-8 flex justify-center gap-4">
+      <button class="px-6 py-3 bg-indigo-500 rounded-xl">Get Started</button>
+      <button class="px-6 py-3 border border-white/20 rounded-xl">Learn More</button>
     </div>
-  );
-}
-`;
+  </section>
+</body>
+</html>`;
   };
 
   const blueprintCards = blueprint
     ? [
         {
+          id: "problem",
           title: "Problem",
           icon: "⚠️",
           content: blueprint.problem,
         },
         {
+          id: "audience",
           title: "Target Audience",
           icon: "👥",
           content: blueprint.targetAudience,
         },
         {
+          id: "solution",
           title: "Solution",
           icon: "💡",
           content: blueprint.uniqueSellingProposition,
         },
         {
+          id: "business",
           title: "Business Model",
           icon: "💰",
           content: blueprint.monetizationStrategy,
         },
         {
+          id: "features",
           title: "Core Features",
           icon: "⚡",
           content:
@@ -453,6 +507,7 @@ export default function LandingPage() {
               : "",
         },
         {
+          id: "future",
           title: "Future Scope",
           icon: "🚀",
           content: blueprint.futureScope,
@@ -460,77 +515,12 @@ export default function LandingPage() {
       ]
     : [];
 
-  const renderWebsitePreviewSection = () => {
-    if (!blueprint) return null;
-
-    return (
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
-          <Eye className="w-6 h-6" />
-          Website Preview
-        </h2>
-
-        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/40">
-            <div className="w-3 h-3 bg-red-500 rounded-full" />
-            <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-            <div className="w-3 h-3 bg-green-500 rounded-full" />
-            <span className="text-xs text-gray-400 ml-4">
-              ai-generated-site.vercel.app
-            </span>
-          </div>
-
-          <div className="p-8 md:p-12 bg-gradient-to-br from-[#0b1020] via-[#11162a] to-[#1a1f3a]">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-sm mb-5">
-                <Sparkles size={14} />
-                AI-Powered Startup
-              </div>
-
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent mb-4">
-                {project.title}
-              </h1>
-
-              <p className="text-gray-300 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
-                {blueprint.uniqueSellingProposition ||
-                  "A modern AI startup experience."}
-              </p>
-
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <button className="px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 transition text-white shadow-lg shadow-indigo-500/20">
-                  Get Started
-                </button>
-                <button className="px-6 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition text-white">
-                  Watch Demo
-                </button>
-              </div>
-            </div>
-
-            {blueprint.coreFeatures?.length > 0 && (
-              <div className="grid md:grid-cols-3 gap-6">
-                {blueprint.coreFeatures.map((feature, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl hover:bg-white/10 transition"
-                  >
-                    <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-300 flex items-center justify-center mb-4 font-semibold">
-                      {i + 1}
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      Feature {i + 1}
-                    </h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      {feature}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const previewWidthClass =
+    deviceMode === "mobile"
+      ? "max-w-[380px]"
+      : deviceMode === "tablet"
+      ? "max-w-[820px]"
+      : "max-w-full";
 
   if (isLoading) {
     return (
@@ -576,14 +566,14 @@ export default function LandingPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.98 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={
         isDeleting
-          ? { opacity: 0, scale: 0.9, y: 50 }
+          ? { opacity: 0, scale: 0.98, y: 30 }
           : { opacity: 1, scale: 1, y: 0 }
       }
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="p-6 md:p-10 max-w-6xl mx-auto text-white"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="p-6 md:p-10 max-w-7xl mx-auto text-white"
     >
       <div className="flex justify-between items-center mb-8">
         <button
@@ -597,24 +587,22 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           {!showDeleteConfirm ? (
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 transition"
             >
               <Trash2 size={16} />
               Delete
             </motion.button>
           ) : (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1"
+              className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1"
             >
               <span className="text-sm text-gray-400 px-2">Are you sure?</span>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition disabled:opacity-50"
@@ -624,34 +612,35 @@ export default function LandingPage() {
                 ) : (
                   "Yes"
                 )}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              </button>
+              <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 text-sm hover:bg-white/20 transition"
               >
                 No
-              </motion.button>
+              </button>
             </motion.div>
           )}
         </div>
       </div>
 
       {deleteError && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm"
-        >
+        <div className="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
           {deleteError}
-        </motion.div>
+        </div>
       )}
 
-      <div className="mb-8">
-        <h1 className="text-4xl font-semibold mb-4">{project.title}</h1>
+      <div className="mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs mb-4">
+          <Sparkles size={12} />
+          Premium AI Project Workspace
+        </div>
 
-        <p className="text-gray-400 mb-3">
+        <h1 className="text-4xl md:text-5xl font-semibold mb-3">
+          {project.title}
+        </h1>
+
+        <p className="text-gray-400">
           Created on{" "}
           {project.createdAt
             ? new Date(project.createdAt).toLocaleDateString()
@@ -661,11 +650,10 @@ export default function LandingPage() {
         <AnimatePresence>
           {showAIComplete && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 backdrop-blur-xl shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+              exit={{ opacity: 0, y: -8 }}
+              className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400"
             >
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               AI Generation Complete
@@ -674,220 +662,73 @@ export default function LandingPage() {
         </AnimatePresence>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 mb-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <h2 className="text-lg font-medium text-indigo-400">
-            {project.title || "Title to be decided..."}
-          </h2>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <motion.button
-              onClick={() => {
-                setIsEditing(!isEditing);
-                setEditPulse(true);
-                setTimeout(() => setEditPulse(false), 400);
-              }}
-              whileTap={{ scale: 0.9 }}
-              className={`relative p-2 rounded-lg transition hover:bg-white/10 ${
-                isEditing ? "text-indigo-400" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              <Pencil size={18} />
-              {editPulse && (
-                <motion.span
-                  initial={{ scale: 0, opacity: 0.6 }}
-                  animate={{ scale: 2, opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="absolute inset-0 rounded-lg bg-indigo-500/30"
-                />
-              )}
-            </motion.button>
-
-            <motion.button
-              onClick={() => {
-                navigator.clipboard.writeText(project.idea || "");
-                setCopied(true);
-                setTimeout(() => setCopied(false), 1200);
-              }}
-              whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-lg text-gray-400 hover:text-white transition hover:bg-white/10"
-            >
-              <AnimatePresence mode="wait">
-                {copied ? (
-                  <motion.div
-                    key="check"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Check size={18} className="text-green-400" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="copy"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Copy size={18} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
-
-            <motion.div
-              layout
-              className="relative flex items-center bg-white/5 border border-white/10 rounded-xl p-1 text-sm cursor-pointer backdrop-blur-xl"
-            >
-              <motion.div
-                layout
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                className={`absolute top-1 bottom-1 w-1/2 rounded-lg ${
-                  viewMode === "preview"
-                    ? "left-1 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                    : "right-1 bg-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-                }`}
-              />
-
-              <div
-                onClick={() => setViewMode("preview")}
-                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1 ${
-                  viewMode === "preview"
-                    ? "text-white"
-                    : "text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                <Eye size={14} />
-                Preview
-              </div>
-
-              <div
-                onClick={() => setViewMode("code")}
-                className={`relative z-10 px-4 py-1.5 transition flex items-center gap-1 ${
-                  viewMode === "code"
-                    ? "text-indigo-400"
-                    : "text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                <FileCode size={14} />
-                Code
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {isEditing ? (
-          <div className="space-y-4">
-            <textarea
-              value={editedIdea}
-              onChange={(e) => setEditedIdea(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSaveIdea();
-                }
-              }}
-              className="w-full min-h-[140px] bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
-              placeholder="Edit your idea..."
-              autoFocus
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditedIdea(project.idea || "");
-                }}
-                className="px-4 py-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveIdea}
-                className="px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        ) : viewMode === "preview" ? (
-          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {project.idea}
-          </div>
-        ) : (
-          <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/30 p-4 rounded-xl overflow-x-auto">
-            {generatedCode || generateCode()}
-          </pre>
-        )}
-      </div>
-
-      <div className="mt-10 mb-10">
+      <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
           <Sparkles className="w-6 h-6" />
           AI Startup Blueprint
         </h2>
 
         {generatingBlueprint ? (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-gray-400">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-2"
-            >
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-gray-400">
+            <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
               <span>AI is analyzing your idea...</span>
-            </motion.div>
+            </div>
             <p className="text-sm mt-3 text-gray-500">
-              Identifying problem, audience, and solution...
+              Identifying problem, audience, solution, and growth scope...
             </p>
           </div>
         ) : blueprint ? (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {blueprintCards.map((item, index) => {
-              const isExpanded = expandedBlueprintCard === index;
+              const isExpanded = expandedBlueprintCard === item.id;
 
               return (
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 15 }}
+                  key={item.id}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.08 }}
+                  transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -4 }}
-                  onClick={() =>
-                    setExpandedBlueprintCard(isExpanded ? null : index)
-                  }
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition cursor-pointer"
+                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{item.icon}</span>
-                      <div>
-                        <h3 className="text-lg font-semibold text-indigo-400 mb-2">
-                          {item.title}
-                        </h3>
-                        <p
-                          className={`text-gray-400 text-sm leading-relaxed ${
-                            isExpanded ? "" : "line-clamp-2"
-                          }`}
-                        >
-                          {item.content || "Not available yet"}
-                        </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedBlueprintCard(isExpanded ? null : item.id)
+                    }
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl shrink-0">{item.icon}</span>
+                        <div>
+                          <h3 className="text-lg font-semibold text-indigo-400 mb-2">
+                            {item.title}
+                          </h3>
+                          <p
+                            className={`text-gray-400 text-sm leading-relaxed ${
+                              isExpanded ? "" : "line-clamp-2"
+                            }`}
+                          >
+                            {item.content || "Not available yet"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-gray-400 mt-1 shrink-0">
+                        {isExpanded ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
                       </div>
                     </div>
-
-                    <div className="text-gray-400 mt-1">
-                      {isExpanded ? (
-                        <ChevronUp size={18} />
-                      ) : (
-                        <ChevronDown size={18} />
-                      )}
-                    </div>
-                  </div>
+                  </button>
 
                   <AnimatePresence>
                     {isExpanded &&
-                      item.title === "Core Features" &&
+                      item.id === "features" &&
                       blueprint.coreFeatures?.length > 0 && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
@@ -912,143 +753,224 @@ export default function LandingPage() {
               );
             })}
           </div>
-        ) : null}
-      </div>
-
-      {renderWebsitePreviewSection()}
-
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => setShowVersions(!showVersions)}
-        className="mt-10 mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
-      >
-        <History size={16} />
-        {showVersions ? "Hide" : "View"} Version History
-        {project.versions?.length > 0 && (
-          <span className="ml-1 px-2 py-0.5 bg-indigo-500/20 rounded-full text-xs">
-            {project.versions.length}
-          </span>
+        ) : (
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-gray-400">
+            No blueprint available yet.
+          </div>
         )}
-      </motion.button>
+      </section>
 
-      <AnimatePresence>
-        {showVersions && project.versions?.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mb-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
-          >
-            <h3 className="text-lg font-semibold mb-4 text-indigo-400 flex items-center gap-2">
-              <History className="w-5 h-5" />
-              Version History
-            </h3>
-
-            <div className="space-y-3">
-              {project.versions.map((version, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.08 }}
-                  className="p-4 bg-black/30 rounded-xl border border-white/5"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-xs text-gray-400 font-mono">
-                      Version {project.versions.length - index}
-                    </p>
-                    <p className="text-xs text-gray-500">{version.timestamp}</p>
-                  </div>
-                  <p className="text-sm text-gray-300 mb-3 line-clamp-2">
-                    {version.idea}
-                  </p>
-                  <button
-                    onClick={async () => {
-                      const restoredProject = {
-                        ...project,
-                        idea: version.idea,
-                        sections: normalizeSections(version.sections),
-                        blueprint: null,
-                        generatedWebsite: "",
-                        versions: project.versions,
-                      };
-
-                      await saveProjectChanges(restoredProject);
-                      setGeneratedCode("");
-                      await generateBlueprint(version.idea);
-                    }}
-                    className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
-                  >
-                    Restore This Version
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {normalizedSections.length > 0 && (
-        <>
-          <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
-            <Sparkles className="w-6 h-6" />
-            Generated Sections
+      <section className="mb-12">
+        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-semibold text-indigo-400 flex items-center gap-2">
+            <Eye className="w-6 h-6" />
+            Website Preview
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {normalizedSections.map((section, index) => (
-              <motion.div
-                key={`${section.title}-${index}`}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.08 }}
-                whileHover={{ y: -5 }}
-                className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition ${
-                  regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
+              <button
+                onClick={() => setDeviceMode("desktop")}
+                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+                  deviceMode === "desktop"
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
-                <div className="flex justify-between items-start mb-3 gap-4">
-                  <h3 className="text-lg font-semibold text-purple-400">
-                    {section.title}
-                  </h3>
+                <Monitor size={15} />
+                Desktop
+              </button>
+              <button
+                onClick={() => setDeviceMode("tablet")}
+                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+                  deviceMode === "tablet"
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Tablet size={15} />
+                Tablet
+              </button>
+              <button
+                onClick={() => setDeviceMode("mobile")}
+                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+                  deviceMode === "mobile"
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Smartphone size={15} />
+                Mobile
+              </button>
+            </div>
 
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleRegenerateSection(index)}
-                    disabled={regeneratingIndex !== null}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {regeneratingIndex === index ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      "Regenerate"
-                    )}
-                  </motion.button>
-                </div>
-
-                {regeneratingIndex === index ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-gray-400 text-sm flex items-center gap-2"
-                  >
-                    <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
-                    AI is improving this section...
-                  </motion.div>
-                ) : (
-                  <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
-                    {section.description || "No description generated yet."}
-                  </p>
-                )}
-              </motion.div>
-            ))}
+            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode("preview")}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+                  viewMode === "preview"
+                    ? "bg-white/10 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Eye size={15} />
+                Preview
+              </button>
+              <button
+                onClick={() => setViewMode("code")}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+                  viewMode === "code"
+                    ? "bg-indigo-500/20 text-indigo-400"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <FileCode size={15} />
+                Code
+              </button>
+            </div>
           </div>
-        </>
-      )}
+        </div>
 
-      <div className="mt-14 text-center">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+            <div>
+              <p className="text-sm text-gray-300 font-medium">
+                {generatedCode
+                  ? "Generated website is ready"
+                  : "No website generated yet"}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Preview, inspect code, and export files
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={copyCode}
+                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+              >
+                {copiedCode ? <Check size={15} /> : <Copy size={15} />}
+                {copiedCode ? "Copied" : "Copy Code"}
+              </button>
+
+              <button
+                onClick={downloadCodeFile}
+                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+              >
+                <Download size={15} />
+                Download Code
+              </button>
+
+              <button
+                onClick={downloadZip}
+                className="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition text-sm flex items-center gap-2"
+              >
+                <Download size={15} />
+                Download ZIP
+              </button>
+            </div>
+          </div>
+
+          <div className={`mx-auto transition-all duration-300 ${previewWidthClass}`}>
+            {viewMode === "preview" ? (
+              generatedCode ? (
+                <LiveWebsitePreview
+                  code={generatedCode}
+                  focusPreview={focusPreview}
+                  setFocusPreview={setFocusPreview}
+                />
+              ) : (
+                <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-14 text-center">
+                  <Wand2 className="w-10 h-10 text-indigo-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-white mb-2">
+                    Build your first live website
+                  </h3>
+                  <p className="text-sm text-gray-400 max-w-xl mx-auto">
+                    Refine the idea below, save your updates, and generate a premium AI website preview.
+                  </p>
+                </div>
+              )
+            ) : (
+              <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/40 p-5 rounded-2xl overflow-x-auto border border-white/10 min-h-[300px]">
+                {generatedCode || generateFallbackCode()}
+              </pre>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-5">
+            <div>
+              <h2 className="text-2xl font-semibold text-indigo-400 flex items-center gap-2">
+                <Pencil className="w-5 h-5" />
+                Refine Idea
+              </h2>
+              <p className="text-sm text-gray-400 mt-2">
+                Update the product direction before generating the final website.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={copyIdea}
+                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+              >
+                {copied ? <Check size={15} /> : <Copy size={15} />}
+                {copied ? "Copied" : "Copy Idea"}
+              </button>
+
+              <button
+                onClick={() => setIsEditingIdea((prev) => !prev)}
+                className="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition text-sm flex items-center gap-2"
+              >
+                <Pencil size={15} />
+                {isEditingIdea ? "Close Editor" : "Edit Idea"}
+              </button>
+            </div>
+          </div>
+
+          {isEditingIdea ? (
+            <div className="space-y-4">
+              <textarea
+                value={editedIdea}
+                onChange={(e) => setEditedIdea(e.target.value)}
+                className="w-full min-h-[200px] bg-black/20 border border-white/10 rounded-2xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
+                placeholder="Refine your idea here..."
+              />
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setIsEditingIdea(false);
+                    setEditedIdea(project.idea || "");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-white/10 text-gray-300 hover:bg-white/20 transition"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSaveIdea}
+                  className="px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition flex items-center gap-2"
+                >
+                  <RefreshCw size={15} />
+                  Save & Regenerate Blueprint
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {project.idea}
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="mb-12 text-center">
         <button
           onClick={buildWebsite}
           disabled={buildingWebsite}
@@ -1072,15 +994,136 @@ export default function LandingPage() {
             {buildError}
           </div>
         )}
-      </div>
+      </section>
 
-      {generatedCode && (
-        <LiveWebsitePreview
-          code={generatedCode}
-          focusPreview={focusPreview}
-          setFocusPreview={setFocusPreview}
-        />
+      {normalizedSections.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+            <Sparkles className="w-6 h-6" />
+            Generated Sections
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {normalizedSections.map((section, index) => (
+              <motion.div
+                key={section.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+                whileHover={{ y: -4 }}
+                className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition ${
+                  regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""
+                }`}
+              >
+                <div className="flex justify-between items-start mb-3 gap-4">
+                  <h3 className="text-lg font-semibold text-purple-400">
+                    {section.title}
+                  </h3>
+
+                  <button
+                    onClick={() => handleRegenerateSection(index)}
+                    disabled={regeneratingIndex !== null}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {regeneratingIndex === index ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      "Regenerate"
+                    )}
+                  </button>
+                </div>
+
+                {regeneratingIndex === index ? (
+                  <div className="text-gray-400 text-sm flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+                    AI is improving this section...
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+                    {section.description || "No description generated yet."}
+                  </p>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </section>
       )}
+
+      <section>
+        <button
+          onClick={() => setShowVersions(!showVersions)}
+          className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
+        >
+          <History size={16} />
+          {showVersions ? "Hide" : "View"} Version History
+          {project.versions?.length > 0 && (
+            <span className="ml-1 px-2 py-0.5 bg-indigo-500/20 rounded-full text-xs">
+              {project.versions.length}
+            </span>
+          )}
+        </button>
+
+        <AnimatePresence>
+          {showVersions && project.versions?.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+            >
+              <h3 className="text-lg font-semibold mb-4 text-indigo-400 flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Version History
+              </h3>
+
+              <div className="space-y-3">
+                {project.versions.map((version, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-4 bg-black/30 rounded-xl border border-white/5"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="text-xs text-gray-400 font-mono">
+                        Version {project.versions.length - index}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {version.timestamp}
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-gray-300 mb-3 line-clamp-2">
+                      {version.idea}
+                    </p>
+
+                    <button
+                      onClick={async () => {
+                        const restoredProject = {
+                          ...project,
+                          idea: version.idea,
+                          sections: normalizeSections(version.sections),
+                          blueprint: null,
+                          generatedWebsite: "",
+                          versions: project.versions,
+                        };
+
+                        await saveProjectChanges(restoredProject);
+                        setGeneratedCode("");
+                        await generateBlueprint(version.idea);
+                      }}
+                      className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
+                    >
+                      Restore This Version
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
     </motion.div>
   );
 };
