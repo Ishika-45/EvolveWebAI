@@ -13,6 +13,8 @@ import {
   Eye,
   FileCode,
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import api from "../services/api";
 import LiveWebsitePreview from "../components/LiveWebsitePreview";
@@ -59,7 +61,10 @@ const normalizeBlueprint = (blueprint) => {
     targetAudience: blueprint.targetAudience || "",
     uniqueSellingProposition: blueprint.uniqueSellingProposition || "",
     monetizationStrategy: blueprint.monetizationStrategy || "",
-    coreFeatures: Array.isArray(blueprint.coreFeatures) ? blueprint.coreFeatures : [],
+    futureScope: blueprint.futureScope || "",
+    coreFeatures: Array.isArray(blueprint.coreFeatures)
+      ? blueprint.coreFeatures
+      : [],
   };
 };
 
@@ -89,6 +94,8 @@ const ProjectDetails = () => {
   const [buildingWebsite, setBuildingWebsite] = useState(false);
   const [focusPreview, setFocusPreview] = useState(false);
   const [pageError, setPageError] = useState("");
+  const [expandedBlueprintCard, setExpandedBlueprintCard] = useState(null);
+  const [buildError, setBuildError] = useState("");
 
   const normalizedSections = useMemo(
     () => normalizeSections(project?.sections),
@@ -134,6 +141,7 @@ const ProjectDetails = () => {
         setProject(normalizedProject);
         setEditedIdea(normalizedProject.idea || "");
         setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
+        setGeneratedCode(normalizedProject.generatedWebsite || "");
       } catch (error) {
         console.error("Failed to load project:", error);
 
@@ -179,25 +187,39 @@ const ProjectDetails = () => {
     setProject(normalizedSavedProject);
     setEditedIdea(normalizedSavedProject.idea || "");
     setBlueprint(normalizeBlueprint(normalizedSavedProject.blueprint));
+   setGeneratedCode((prev) => normalizedSavedProject.generatedWebsite || prev);
 
     return normalizedSavedProject;
   };
 
-  const buildWebsite = async () => {
-    try {
-      setBuildingWebsite(true);
+const buildWebsite = async () => {
+  try {
+    setBuildingWebsite(true);
+    setBuildError("");
 
-      const res = await api.post("/ai/build-website", {
-        projectId: id,
-      });
+    const res = await api.post("/ai/build-website", {
+      projectId: id,
+    });
 
-      setGeneratedCode(res.data?.code || "");
-    } catch (error) {
-      console.error("Website build failed:", error);
-    } finally {
-      setBuildingWebsite(false);
+    const code = res.data?.code || "";
+    if (!code) {
+      throw new Error("No code returned from backend");
     }
-  };
+
+    setGeneratedCode(code);
+    setFocusPreview(true);
+  } catch (error) {
+    console.error("Website build failed:", error);
+    setBuildError(
+      error?.response?.data?.details ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Website build failed"
+    );
+  } finally {
+    setBuildingWebsite(false);
+  }
+};
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -214,7 +236,9 @@ const ProjectDetails = () => {
     } catch (error) {
       console.error("Delete error:", error);
       setDeleteError(
-        error?.response?.data?.message || error?.message || "Failed to delete project"
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to delete project"
       );
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -272,10 +296,12 @@ const ProjectDetails = () => {
 
     try {
       const response = await api.post("/ai/generate-blueprint", {
+        projectId: id,
         idea: sourceIdea,
       });
 
-      const nextBlueprint = normalizeBlueprint(response.data?.blueprint);
+      const responseData = response.data?.data || response.data?.blueprint || response.data;
+      const nextBlueprint = normalizeBlueprint(responseData);
 
       if (!nextBlueprint) return;
 
@@ -324,6 +350,151 @@ const ProjectDetails = () => {
     await generateBlueprint(editedIdea.trim());
   };
 
+  const generateCode = () => {
+    if (!blueprint) return "// No blueprint yet";
+
+    return `import React from "react";
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-[#050816] text-white">
+      <section className="px-8 py-24 text-center">
+        <h1 className="text-5xl font-bold mb-6">${project.title}</h1>
+        <p className="text-gray-400 max-w-2xl mx-auto">
+          ${blueprint.uniqueSellingProposition}
+        </p>
+      </section>
+
+      <section className="px-8 pb-20 grid md:grid-cols-3 gap-6">
+        ${blueprint.coreFeatures
+          ?.map(
+            (f) => `
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
+          <p className="text-gray-300">${f}</p>
+        </div>`
+          )
+          .join("")}
+      </section>
+
+      <section className="px-8 pb-24 text-center">
+        <button className="px-6 py-3 bg-indigo-500 rounded-xl">
+          Get Started
+        </button>
+      </section>
+    </div>
+  );
+}
+`;
+  };
+
+  const blueprintCards = blueprint
+    ? [
+        {
+          title: "Problem",
+          icon: "⚠️",
+          content: blueprint.problem,
+        },
+        {
+          title: "Target Audience",
+          icon: "👥",
+          content: blueprint.targetAudience,
+        },
+        {
+          title: "Solution",
+          icon: "💡",
+          content: blueprint.uniqueSellingProposition,
+        },
+        {
+          title: "Business Model",
+          icon: "💰",
+          content: blueprint.monetizationStrategy,
+        },
+        {
+          title: "Core Features",
+          icon: "⚡",
+          content:
+            blueprint.coreFeatures?.length > 0
+              ? blueprint.coreFeatures.join(", ")
+              : "",
+        },
+        {
+          title: "Future Scope",
+          icon: "🚀",
+          content: blueprint.futureScope,
+        },
+      ]
+    : [];
+
+  const renderWebsitePreviewSection = () => {
+    if (!blueprint) return null;
+
+    return (
+      <div className="mt-12">
+        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+          <Eye className="w-6 h-6" />
+          Website Preview
+        </h2>
+
+        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/40">
+            <div className="w-3 h-3 bg-red-500 rounded-full" />
+            <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+            <div className="w-3 h-3 bg-green-500 rounded-full" />
+            <span className="text-xs text-gray-400 ml-4">
+              ai-generated-site.vercel.app
+            </span>
+          </div>
+
+          <div className="p-8 md:p-12 bg-gradient-to-br from-[#0b1020] via-[#11162a] to-[#1a1f3a]">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-sm mb-5">
+                <Sparkles size={14} />
+                AI-Powered Startup
+              </div>
+
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-300 bg-clip-text text-transparent mb-4">
+                {project.title}
+              </h1>
+
+              <p className="text-gray-300 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+                {blueprint.uniqueSellingProposition || "A modern AI startup experience."}
+              </p>
+
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <button className="px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 transition text-white shadow-lg shadow-indigo-500/20">
+                  Get Started
+                </button>
+                <button className="px-6 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition text-white">
+                  Watch Demo
+                </button>
+              </div>
+            </div>
+
+            {blueprint.coreFeatures?.length > 0 && (
+              <div className="grid md:grid-cols-3 gap-6">
+                {blueprint.coreFeatures.map((feature, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl hover:bg-white/10 transition"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-indigo-300 flex items-center justify-center mb-4 font-semibold">
+                      {i + 1}
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">
+                      Feature {i + 1}
+                    </h3>
+                    <p className="text-sm text-gray-400 leading-relaxed">{feature}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <motion.div
@@ -363,142 +534,6 @@ const ProjectDetails = () => {
     );
   }
 
-  const renderPreview = () => {
-    if (!blueprint) return null;
-
-    return (
-      <div className="space-y-12 mt-8">
-        <div className="text-center py-16 bg-white/5 rounded-2xl">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
-            {project.title}
-          </h1>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            {blueprint.uniqueSellingProposition}
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {blueprint.coreFeatures?.map((feature, i) => (
-            <div
-              key={i}
-              className="bg-white/5 border border-white/10 rounded-xl p-6"
-            >
-              <h3 className="text-indigo-400 font-semibold mb-2">Feature {i + 1}</h3>
-              <p className="text-gray-400 text-sm">{feature}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold text-white mb-3">
-            Ready to get started?
-          </h2>
-          <button
-            onClick={() => {
-              const previewSection = document.getElementById("live-preview");
-              if (previewSection) {
-                previewSection.scrollIntoView({ behavior: "smooth" });
-              }
-            }}
-            className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
-          >
-            Get Started
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderLivePreview = () => {
-    if (!blueprint) return null;
-
-    return (
-      <div
-        id="live-preview"
-        className="mt-16 bg-white/5 border border-white/10 rounded-2xl p-8"
-      >
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-400">
-          Website Preview
-        </h2>
-
-        <div className="bg-black rounded-xl overflow-hidden border border-white/10">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-black/60">
-            <div className="w-3 h-3 bg-red-500 rounded-full" />
-            <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-            <div className="w-3 h-3 bg-green-500 rounded-full" />
-            <span className="text-xs text-gray-400 ml-4">
-              ai-generated-site.vercel.app
-            </span>
-          </div>
-
-          <div className="p-10 space-y-10">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-4">{project.title}</h1>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                {blueprint.uniqueSellingProposition}
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {blueprint.coreFeatures?.map((feature, i) => (
-                <div key={i} className="p-6 border border-white/10 rounded-xl">
-                  <h3 className="text-indigo-400 font-semibold mb-2">
-                    Feature {i + 1}
-                  </h3>
-                  <p className="text-gray-400 text-sm">{feature}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <button className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600">
-                Get Started
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const generateCode = () => {
-    if (!blueprint) return "// No blueprint yet";
-
-    return `import React from "react";
-
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-black text-white p-10">
-      <section className="text-center mb-20">
-        <h1 className="text-4xl font-bold">${project.title}</h1>
-        <p className="text-gray-400 mt-4">
-          ${blueprint.uniqueSellingProposition}
-        </p>
-      </section>
-
-      <section className="grid md:grid-cols-3 gap-6 mb-20">
-        ${blueprint.coreFeatures
-          ?.map(
-            (f) => `
-        <div className="p-6 border border-white/10 rounded-xl">
-          <h3 className="text-indigo-400 font-semibold mb-2">Feature</h3>
-          <p>${f}</p>
-        </div>`
-          )
-          .join("")}
-      </section>
-
-      <section className="text-center">
-        <button className="px-6 py-3 bg-indigo-500 rounded-xl">
-          Get Started
-        </button>
-      </section>
-    </div>
-  );
-}
-`;
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.98 }}
@@ -508,7 +543,7 @@ export default function LandingPage() {
           : { opacity: 1, scale: 1, y: 0 }
       }
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="p-10 max-w-6xl mx-auto text-white"
+      className="p-6 md:p-10 max-w-6xl mx-auto text-white"
     >
       <div className="flex justify-between items-center mb-8">
         <button
@@ -595,13 +630,13 @@ export default function LandingPage() {
         </AnimatePresence>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8">
-        <div className="flex justify-between items-center mb-3">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           <h2 className="text-lg font-medium text-indigo-400">
             {project.title || "Title to be decided..."}
           </h2>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <motion.button
               onClick={() => {
                 setIsEditing(!isEditing);
@@ -710,7 +745,7 @@ export default function LandingPage() {
                   handleSaveIdea();
                 }
               }}
-              className="w-full bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
+              className="w-full min-h-[140px] bg-transparent border border-white/10 rounded-xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
               placeholder="Edit your idea..."
               autoFocus
             />
@@ -733,7 +768,9 @@ export default function LandingPage() {
             </div>
           </div>
         ) : viewMode === "preview" ? (
-          renderPreview()
+          <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+            {project.idea}
+          </div>
         ) : (
           <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/30 p-4 rounded-xl overflow-x-auto">
             {generateCode()}
@@ -741,11 +778,96 @@ export default function LandingPage() {
         )}
       </div>
 
+      <div className="mt-10 mb-10">
+        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+          <Sparkles className="w-6 h-6" />
+          AI Startup Blueprint
+        </h2>
+
+        {generatingBlueprint ? (
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-gray-400">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-2"
+            >
+              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+              <span>AI is analyzing your idea...</span>
+            </motion.div>
+            <p className="text-sm mt-3 text-gray-500">
+              Identifying problem, audience, and solution...
+            </p>
+          </div>
+        ) : blueprint ? (
+          <div className="grid md:grid-cols-2 gap-6">
+            {blueprintCards.map((item, index) => {
+              const isExpanded = expandedBlueprintCard === index;
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.08 }}
+                  whileHover={{ y: -4 }}
+                  onClick={() =>
+                    setExpandedBlueprintCard(isExpanded ? null : index)
+                  }
+                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div>
+                        <h3 className="text-lg font-semibold text-indigo-400 mb-2">
+                          {item.title}
+                        </h3>
+                        <p className={`text-gray-400 text-sm leading-relaxed ${isExpanded ? "" : "line-clamp-2"}`}>
+                          {item.content || "Not available yet"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-gray-400 mt-1">
+                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && item.title === "Core Features" && blueprint.coreFeatures?.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-4 pt-4 border-t border-white/10"
+                      >
+                        <div className="flex flex-wrap gap-2">
+                          {blueprint.coreFeatures.map((feature, i) => (
+                            <span
+                              key={i}
+                              className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+
+      {renderWebsitePreviewSection()}
+
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setShowVersions(!showVersions)}
-        className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
+        className="mt-10 mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
       >
         <History size={16} />
         {showVersions ? "Hide" : "View"} Version History
@@ -775,7 +897,7 @@ export default function LandingPage() {
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.08 }}
                   className="p-4 bg-black/30 rounded-xl border border-white/5"
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -809,91 +931,26 @@ export default function LandingPage() {
         )}
       </AnimatePresence>
 
-      <div className="mt-10 mb-10">
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
-          <Sparkles className="w-6 h-6" />
-          AI Startup Blueprint
-        </h2>
-
-        {generatingBlueprint ? (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-gray-400">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-2"
-            >
-              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
-              <span>AI is analyzing your idea...</span>
-            </motion.div>
-            <p className="text-sm mt-3 text-gray-500">
-              Identifying problem, audience, and solution...
-            </p>
-          </div>
-        ) : blueprint ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { title: "Problem", content: blueprint.problem, icon: "⚠️" },
-              { title: "Target Audience", content: blueprint.targetAudience, icon: "👥" },
-              {
-                title: "Solution",
-                content: blueprint.uniqueSellingProposition,
-                icon: "💡",
-              },
-              {
-                title: "Business Model",
-                content: blueprint.monetizationStrategy,
-                icon: "💰",
-              },
-              {
-                title: "Core Features",
-                content: blueprint.coreFeatures?.join(", "),
-                icon: "⚡",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition cursor-pointer"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{item.icon}</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-indigo-400 mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {item.content || "Not available yet"}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
       {normalizedSections.length > 0 && (
         <>
           <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
             <Sparkles className="w-6 h-6" />
             Generated Sections
           </h2>
+
           <div className="grid md:grid-cols-2 gap-6">
             {normalizedSections.map((section, index) => (
               <motion.div
                 key={`${section.title}-${index}`}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.08 }}
                 whileHover={{ y: -5 }}
                 className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition ${
                   regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""
                 }`}
               >
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-start mb-3 gap-4">
                   <h3 className="text-lg font-semibold text-purple-400">
                     {section.title}
                   </h3>
@@ -933,11 +990,11 @@ export default function LandingPage() {
         </>
       )}
 
-      <div className="mt-12 text-center">
+      <div className="mt-14 text-center">
         <button
           onClick={buildWebsite}
           disabled={buildingWebsite}
-          className="px-8 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 mx-auto disabled:opacity-50"
+          className="px-8 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 mx-auto disabled:opacity-50 shadow-lg shadow-indigo-500/20"
         >
           {buildingWebsite ? (
             <>
@@ -960,8 +1017,6 @@ export default function LandingPage() {
           setFocusPreview={setFocusPreview}
         />
       )}
-
-      {renderLivePreview()}
     </motion.div>
   );
 };

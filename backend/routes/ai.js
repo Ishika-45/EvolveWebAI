@@ -312,11 +312,15 @@ Return each section on a new line.`,
   }
 });
 
-const generateReactWebsite = require("../services/aiWebsiteGenerator");
+const generateWebsiteHtml = require("../services/aiWebsiteGenerator");
 
 router.post("/build-website", protect, async (req, res) => {
   try {
     const { projectId } = req.body;
+
+    if (!projectId) {
+      return res.status(400).json({ error: "projectId is required" });
+    }
 
     const project = await Project.findById(projectId);
 
@@ -324,23 +328,29 @@ router.post("/build-website", protect, async (req, res) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
-    const websiteCode = await generateReactWebsite(project);
+    const websiteCode = await generateWebsiteHtml(project);
+
+    if (!websiteCode || typeof websiteCode !== "string") {
+      return res.status(500).json({ error: "Invalid website code generated" });
+    }
 
     project.generatedWebsite = websiteCode;
     await project.save();
 
-    res.json({
-      code: websiteCode
+    return res.json({
+      success: true,
+      code: websiteCode,
     });
-
   } catch (error) {
+    console.error("BUILD WEBSITE ERROR FULL:", error);
+  console.error("BUILD WEBSITE ERROR DATA:", error.response?.data);
+  console.error("BUILD WEBSITE ERROR MESSAGE:", error.message);
 
-    console.error("BUILD WEBSITE ERROR:", error);
-
-    res.status(500).json({
-      error: "Website build failed"
+  return res.status(500).json({
+    success: false,
+    error: "Website build failed",
+    details: error.response?.data || error.message,
     });
-
   }
 });
 
