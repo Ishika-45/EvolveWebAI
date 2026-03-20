@@ -117,6 +117,8 @@ const ProjectDetails = () => {
         sections: normalizeSections(passedProject.sections),
       });
       setEditedIdea(passedProject.idea || "");
+      setBlueprint(normalizeBlueprint(passedProject.blueprint));
+      setGeneratedCode(passedProject.generatedWebsite ?? "");
     }
   }, [passedProject, project]);
 
@@ -141,7 +143,7 @@ const ProjectDetails = () => {
         setProject(normalizedProject);
         setEditedIdea(normalizedProject.idea || "");
         setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
-        setGeneratedCode(normalizedProject.generatedWebsite || "");
+        setGeneratedCode(normalizedProject.generatedWebsite ?? "");
       } catch (error) {
         console.error("Failed to load project:", error);
 
@@ -164,11 +166,10 @@ const ProjectDetails = () => {
 
     if (project.blueprint) {
       setBlueprint(normalizeBlueprint(project.blueprint));
-      return;
+    } else if (project.idea) {
+      generateBlueprint(project.idea);
     }
-
-    generateBlueprint(project.idea);
-  }, [project?.idea]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [project?.idea, project?.blueprint]);
 
   const persistProjectUpdate = async (updatedProject) => {
     const payload = {
@@ -187,39 +188,56 @@ const ProjectDetails = () => {
     setProject(normalizedSavedProject);
     setEditedIdea(normalizedSavedProject.idea || "");
     setBlueprint(normalizeBlueprint(normalizedSavedProject.blueprint));
-   setGeneratedCode((prev) => normalizedSavedProject.generatedWebsite || prev);
+    setGeneratedCode(normalizedSavedProject.generatedWebsite ?? "");
 
     return normalizedSavedProject;
   };
 
-const buildWebsite = async () => {
-  try {
-    setBuildingWebsite(true);
-    setBuildError("");
+  const buildWebsite = async () => {
+    try {
+      setBuildingWebsite(true);
+      setBuildError("");
 
-    const res = await api.post("/ai/build-website", {
-      projectId: id,
-    });
+      const res = await api.post("/ai/build-website", {
+        projectId: id,
+      });
 
-    const code = res.data?.code || "";
-    if (!code) {
-      throw new Error("No code returned from backend");
+      const code =
+        res.data?.code ||
+        res.data?.generatedWebsite ||
+        res.data?.websiteCode ||
+        "";
+
+      if (!code) {
+        throw new Error("No code returned from backend");
+      }
+
+      setGeneratedCode(code);
+
+      setProject((prev) =>
+        prev
+          ? {
+              ...prev,
+              generatedWebsite: code,
+            }
+          : prev
+      );
+
+      setViewMode("code");
+      setFocusPreview(true);
+    } catch (error) {
+      console.error("Website build failed:", error);
+      setBuildError(
+        error?.response?.data?.details ||
+          error?.response?.data?.error ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Website build failed"
+      );
+    } finally {
+      setBuildingWebsite(false);
     }
-
-    setGeneratedCode(code);
-    setFocusPreview(true);
-  } catch (error) {
-    console.error("Website build failed:", error);
-    setBuildError(
-      error?.response?.data?.details ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Website build failed"
-    );
-  } finally {
-    setBuildingWebsite(false);
-  }
-};
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -300,12 +318,23 @@ const buildWebsite = async () => {
         idea: sourceIdea,
       });
 
-      const responseData = response.data?.data || response.data?.blueprint || response.data;
+      const responseData =
+        response.data?.data || response.data?.blueprint || response.data;
+
       const nextBlueprint = normalizeBlueprint(responseData);
 
       if (!nextBlueprint) return;
 
       setBlueprint(nextBlueprint);
+
+      setProject((prev) =>
+        prev
+          ? {
+              ...prev,
+              blueprint: nextBlueprint,
+            }
+          : prev
+      );
 
       if (project) {
         const updatedProject = {
@@ -333,6 +362,9 @@ const buildWebsite = async () => {
   const handleSaveIdea = async () => {
     if (!project) return;
 
+    const trimmedIdea = editedIdea.trim();
+    if (!trimmedIdea) return;
+
     const previousVersion = {
       idea: project.idea,
       sections: normalizedSections,
@@ -341,13 +373,15 @@ const buildWebsite = async () => {
 
     const updatedProject = {
       ...project,
-      idea: editedIdea.trim(),
+      idea: trimmedIdea,
+      blueprint: null,
+      sections: project.sections,
       versions: [...(project.versions || []), previousVersion],
     };
 
     setIsEditing(false);
     await saveProjectChanges(updatedProject);
-    await generateBlueprint(editedIdea.trim());
+    await generateBlueprint(trimmedIdea);
   };
 
   const generateCode = () => {
@@ -359,7 +393,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#050816] text-white">
       <section className="px-8 py-24 text-center">
-        <h1 className="text-5xl font-bold mb-6">${project.title}</h1>
+        <h1 className="text-5xl font-bold mb-6">${project?.title || "Project Title"}</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
           ${blueprint.uniqueSellingProposition}
         </p>
@@ -458,7 +492,8 @@ export default function LandingPage() {
               </h1>
 
               <p className="text-gray-300 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
-                {blueprint.uniqueSellingProposition || "A modern AI startup experience."}
+                {blueprint.uniqueSellingProposition ||
+                  "A modern AI startup experience."}
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -484,7 +519,9 @@ export default function LandingPage() {
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Feature {i + 1}
                     </h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">{feature}</p>
+                    <p className="text-sm text-gray-400 leading-relaxed">
+                      {feature}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -519,9 +556,12 @@ export default function LandingPage() {
       >
         <div className="text-center">
           <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-white mb-2">Project Not Found</h2>
+          <h2 className="text-2xl font-semibold text-white mb-2">
+            Project Not Found
+          </h2>
           <p className="text-gray-400 mb-6">
-            {pageError || "The project you're looking for doesn't exist or has been deleted."}
+            {pageError ||
+              "The project you're looking for doesn't exist or has been deleted."}
           </p>
           <button
             onClick={() => navigate("/dashboard")}
@@ -579,7 +619,11 @@ export default function LandingPage() {
                 disabled={isDeleting}
                 className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition disabled:opacity-50"
               >
-                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Yes"}
+                {isDeleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Yes"
+                )}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -773,7 +817,7 @@ export default function LandingPage() {
           </div>
         ) : (
           <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/30 p-4 rounded-xl overflow-x-auto">
-            {generateCode()}
+            {generatedCode || generateCode()}
           </pre>
         )}
       </div>
@@ -822,37 +866,47 @@ export default function LandingPage() {
                         <h3 className="text-lg font-semibold text-indigo-400 mb-2">
                           {item.title}
                         </h3>
-                        <p className={`text-gray-400 text-sm leading-relaxed ${isExpanded ? "" : "line-clamp-2"}`}>
+                        <p
+                          className={`text-gray-400 text-sm leading-relaxed ${
+                            isExpanded ? "" : "line-clamp-2"
+                          }`}
+                        >
                           {item.content || "Not available yet"}
                         </p>
                       </div>
                     </div>
 
                     <div className="text-gray-400 mt-1">
-                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      {isExpanded ? (
+                        <ChevronUp size={18} />
+                      ) : (
+                        <ChevronDown size={18} />
+                      )}
                     </div>
                   </div>
 
                   <AnimatePresence>
-                    {isExpanded && item.title === "Core Features" && blueprint.coreFeatures?.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 pt-4 border-t border-white/10"
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          {blueprint.coreFeatures.map((feature, i) => (
-                            <span
-                              key={i}
-                              className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs"
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
+                    {isExpanded &&
+                      item.title === "Core Features" &&
+                      blueprint.coreFeatures?.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-4 pt-4 border-t border-white/10"
+                        >
+                          <div className="flex flex-wrap gap-2">
+                            {blueprint.coreFeatures.map((feature, i) => (
+                              <span
+                                key={i}
+                                className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
                   </AnimatePresence>
                 </motion.div>
               );
@@ -910,15 +964,19 @@ export default function LandingPage() {
                     {version.idea}
                   </p>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const restoredProject = {
                         ...project,
                         idea: version.idea,
                         sections: normalizeSections(version.sections),
+                        blueprint: null,
+                        generatedWebsite: "",
                         versions: project.versions,
                       };
 
-                      saveProjectChanges(restoredProject);
+                      await saveProjectChanges(restoredProject);
+                      setGeneratedCode("");
+                      await generateBlueprint(version.idea);
                     }}
                     className="text-xs px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition"
                   >
@@ -1008,6 +1066,12 @@ export default function LandingPage() {
             </>
           )}
         </button>
+
+        {buildError && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm max-w-2xl mx-auto">
+            {buildError}
+          </div>
+        )}
       </div>
 
       {generatedCode && (
