@@ -1,41 +1,62 @@
 import { useState } from "react";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
+import { useEffect } from "react";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
+
 
 const Projects = () => {
 
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      title: "AI Startup Landing Page",
-      description: "Landing page for an AI SaaS product",
-    },
-    {
-      id: 2,
-      title: "E-commerce Builder",
-      description: "AI generated ecommerce website",
-    },
-  ]);
+  const [projects, setProjects] = useState([]);
+  const navigate = useNavigate();
+
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const res = await api.get("/projects");
+      setProjects(
+  Array.isArray(res.data)
+    ? res.data
+    : res.data.projects || []
+);
+
+    } catch (err) {
+      console.error("Failed to fetch projects");
+    }
+  };
+
+  fetchProjects();
+}, []);
 
   const [showModal, setShowModal] = useState(false);
   const [newProject, setNewProject] = useState("");
 
-  const createProject = () => {
-    if (!newProject.trim()) return;
+  const createProject = async () => {
+  if (!newProject.trim()) return;
 
-    const project = {
-      id: Date.now(),
+  try {
+    const res = await api.post("/projects", {
       title: newProject,
-      description: "AI generated project",
-    };
+      idea: newProject, // or separate field later
+    });
 
-    setProjects([...projects, project]);
+    const newProj = res.data?.project || res.data;
+setProjects((prev) => [newProj, ...prev]);
     setNewProject("");
     setShowModal(false);
-  };
+  } catch (err) {
+    console.error("Create failed");
+  }
+};
 
-  const deleteProject = (id) => {
-    setProjects(projects.filter((p) => p.id !== id));
-  };
+  const deleteProject = async (id) => {
+  try {
+    await api.delete(`/projects/${id}`);
+    setProjects(projects.filter((p) => p._id !== id));
+  } catch (err) {
+    console.error("Delete failed");
+  }
+};
 
   return (
     <div className="space-y-8">
@@ -76,53 +97,53 @@ const Projects = () => {
       {/* Project Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="group relative p-6 rounded-2xl
-                       bg-white/5 backdrop-blur-xl
-                       border border-white/10
-                       hover:border-purple-400/40
-                       transition-all duration-300
-                       hover:shadow-lg hover:shadow-purple-500/10"
-          >
+       {projects.map((project) => (
+  <div
+    key={project._id}
+    className="group relative p-6 rounded-2xl
+               bg-white/5 backdrop-blur-xl
+               border border-white/10
+               hover:border-purple-400/40
+               transition-all duration-300
+               hover:shadow-lg hover:shadow-purple-500/10"
+  >
+    <div className="absolute inset-0 rounded-2xl opacity-0
+                    group-hover:opacity-100 transition
+                    bg-gradient-to-r from-purple-500/10 to-indigo-500/10" />
 
-            {/* Glow Effect */}
-            <div className="absolute inset-0 rounded-2xl opacity-0
-                            group-hover:opacity-100 transition
-                            bg-gradient-to-r from-purple-500/10 to-indigo-500/10" />
+    <div className="relative z-10">
 
-            <div className="relative z-10">
+      <h3 className="text-lg font-semibold mb-2">
+        {project.title}
+      </h3>
 
-              <h3 className="text-lg font-semibold mb-2">
-                {project.title}
-              </h3>
+      <p className="text-gray-400 text-sm mb-6">
+  {project.idea?.length > 60
+    ? project.idea.slice(0, 60) + "..."
+    : project.idea}
+</p>
 
-              <p className="text-gray-400 text-sm mb-6">
-                {project.description}
-              </p>
+      <div className="flex justify-between items-center">
 
-              <div className="flex justify-between items-center">
+        <button
+          onClick={() => navigate(`/dashboard/project/${project._id}`)}
+          className="text-sm px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+        >
+          Open Project
+        </button>
 
-                <button
-                  className="text-sm px-4 py-2 rounded-lg
-                             bg-white/10 hover:bg-white/20 transition"
-                >
-                  Open Project
-                </button>
+        <button
+          onClick={() => deleteProject(project._id)}
+          className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
+        >
+          <Trash2 size={18} />
+        </button>
 
-                <button
-                  onClick={() => deleteProject(project.id)}
-                  className="p-2 rounded-lg hover:bg-red-500/20 text-red-400"
-                >
-                  <Trash2 size={18} />
-                </button>
+      </div>
 
-              </div>
-
-            </div>
-          </div>
-        ))}
+    </div>
+  </div>
+))}
 
       </div>
 
@@ -173,6 +194,7 @@ const Projects = () => {
       )}
 
     </div>
+    
   );
 };
 

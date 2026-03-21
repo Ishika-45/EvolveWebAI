@@ -263,7 +263,7 @@ const DashboardHome = () => {
 
       setTimeout(() => {
         navigate(`/dashboard/project/${newProject._id}`);
-      }, 1800);
+      }, 500);
     } catch (error) {
       console.error("Generation error:", error);
 
@@ -417,10 +417,19 @@ const DashboardHome = () => {
       </div>
 
       <div className="w-full max-w-5xl mt-20">
-        <h2 className="text-xl mb-6">Recent Projects</h2>
+       <div className="flex justify-between items-center mb-6">
+  <h2 className="text-xl">Recent Projects</h2>
+
+  <button
+    onClick={() => navigate("/dashboard/projects")}
+    className="text-sm px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20"
+  >
+    View All
+  </button>
+</div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {projects.slice(0, 6).map((project) => (
             <motion.div
               key={project._id}
               whileHover={{

@@ -9,6 +9,7 @@ import StartupBuilder from "./pages/StartupBuilder";
 import Projects from "./pages/Projects";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
+import ProjectPage from "./pages/ProjectPage";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
          <Route path="projects" element={<Projects />} />
          <Route path="templates" element={<Templates />} />
          <Route path="settings" element={<Settings />} />
+         <Route path="/dashboard/projects/:id" element={<ProjectPage />} />
       </Route>
     </Routes>
   </div>

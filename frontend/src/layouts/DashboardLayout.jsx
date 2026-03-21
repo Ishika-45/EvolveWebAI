@@ -92,18 +92,19 @@ const DashboardLayout = () => {
         <nav className="flex flex-col gap-2 px-3">
           {navItems.map((item, i) => (
             <NavLink
-              key={i}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl
-                transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-white/10 border border-white/10"
-                    : "hover:bg-white/10"
-                }`
-              }
-            >
+  key={i}
+  to={item.path}
+  end={item.path === "/dashboard"} // 👈 ADD THIS
+  className={({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 rounded-xl
+    transition-all duration-200
+    ${
+      isActive
+        ? "bg-white/10 border border-white/10"
+        : "hover:bg-white/10"
+    }`
+  }
+>
               <item.icon size={18} />
               {!collapsed && (
                 <span className="text-sm">{item.name}</span>
