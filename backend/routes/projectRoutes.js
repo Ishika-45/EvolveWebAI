@@ -1,6 +1,7 @@
 const express = require("express");
 const Project = require("../models/Project");
 const { protect } = require("../middleware/authMiddleware");
+const archiver = require("archiver");
 
 const router = express.Router();
 const analyzeStartupIdea = require("../services/aiStartupAnalyzer");
@@ -9,22 +10,6 @@ const generateReactWebsite = require("../services/aiWebsiteGenerator");
 ////////////////////////////////////////////////////
 // 🆕 CREATE PROJECT
 ////////////////////////////////////////////////////
-// router.post("/", protect, async (req, res) => {
-//   try {
-//     const { title, idea } = req.body;
-
-//     const project = await Project.create({
-//       user: req.user._id,
-//       title,
-//       idea,
-//     });
-
-//     res.status(201).json(project);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server Error" });
-//   }
-// });
 router.post("/", protect, async (req, res) => {
   try {
     const { title, idea } = req.body;
@@ -178,6 +163,70 @@ router.post("/:id/generate-website", protect, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Website generation failed" });
+  }
+});
+
+////////////////////////////////////////////////////
+// 📦 EXPORT PROJECT AS ZIP
+////////////////////////////////////////////////////
+router.get("/:id/export-zip", protect, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project)
+      return res.status(404).json({ message: "Project not found" });
+
+    if (project.user.toString() !== req.user._id.toString())
+      return res.status(401).json({ message: "Not authorized" });
+
+    const websiteCode =
+      project.generatedCode ||
+      "<!DOCTYPE html><html><body><h1>No website generated yet</h1></body></html>";
+
+    const safeTitle = (project.title || "website")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-");
+
+    // headers
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${safeTitle}.zip`
+    );
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    archive.on("error", (err) => {
+      console.error(err);
+      res.status(500).end();
+    });
+
+    archive.pipe(res);
+
+    // 🧾 index.html
+    archive.append(websiteCode, { name: "index.html" });
+
+    // 📄 README
+    archive.append(
+      `# ${project.title || "AI Website"}
+
+Generated using your AI builder 🚀
+
+## Idea
+${project.idea || "No idea provided"}
+
+## Files
+- index.html
+
+Open index.html in browser to view your site.
+`,
+      { name: "README.md" }
+    );
+
+    await archive.finalize();
+  } catch (error) {
+    console.error("ZIP export failed:", error);
+    res.status(500).json({ message: "ZIP export failed" });
   }
 });
 
