@@ -1,174 +1,283 @@
+// LandingNavbar.jsx - IMPROVED VERSION
+
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion"; // Add this
 
 const LandingNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+      
+      // Track active section for highlighting
+      const sections = ["features", "how-it-works", "pricing", "about"];
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
   const navLinks = [
-    { name: "Features", href: "#features", icon: "✨" },
-    { name: "How it Works", href: "#how-it-works", icon: "⚡" },
-    { name: "Pricing", href: "#pricing", icon: "💰" },
-    { name: "About", href: "#about", icon: "🚀" },
+    { name: "Features", href: "#features", icon: "✨", section: "features" },
+    { name: "How it Works", href: "#how-it-works", icon: "⚡", section: "how-it-works" },
+    { name: "Pricing", href: "#pricing", icon: "💰", section: "pricing" },
+    { name: "About", href: "#about", icon: "🚀", section: "about" },
   ];
+
+  // Smooth scroll handler
+  const handleSmoothScroll = (e, href) => {
+    e.preventDefault();
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      setIsMobileMenuOpen(false);
+    }
+  };
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-        isScrolled 
-          ? "bg-gray-950/90 backdrop-blur-2xl border-b border-purple-500/20 shadow-2xl shadow-purple-500/10" 
-          : "bg-black/30 backdrop-blur-md border-b border-white/10"
-      }`}>
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, type: "spring" }}
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          isScrolled 
+            ? "bg-gray-950/95 backdrop-blur-2xl border-b border-purple-500/20 shadow-2xl shadow-purple-500/10" 
+            : "bg-transparent border-b border-white/5"
+        }`}
+      >
+        {/* Premium animated gradient bar at top */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent" 
+             style={{ transform: `scaleX(${isScrolled ? 1 : 0})`, transition: 'transform 0.5s ease' }} />
         
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           
-          {/* Logo with animation */}
+          {/* Logo with 3D hover effect */}
           <Link to="/" className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg blur opacity-0 group-hover:opacity-50 transition duration-500" />
-            <h1 className="relative text-2xl font-bold tracking-wide bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
-              EvolveWeb AI
-              <span className="absolute -top-1 -right-6 text-xs bg-purple-500/20 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-purple-300 font-normal text-[10px]">
-                Beta
-              </span>
-            </h1>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="absolute -inset-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition duration-500"
+            />
+            <div className="relative">
+              <h1 className="text-2xl font-bold tracking-wide">
+                <span className="bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">
+                  EvolveWeb
+                </span>
+                <span className="text-white"> AI</span>
+              </h1>
+              <div className="absolute -top-1 -right-8">
+                <span className="text-[9px] font-bold bg-gradient-to-r from-purple-500 to-indigo-500 px-1.5 py-0.5 rounded-full text-white shadow-lg">
+                  BETA
+                </span>
+              </div>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop Navigation with better hover effects */}
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link, index) => (
-              <Link
+              <a
                 key={index}
-                to={link.href}
-                className="group relative text-gray-300 hover:text-purple-400 transition-all duration-300 font-medium"
+                href={link.href}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className="relative px-4 py-2 rounded-lg group"
               >
-                <span className="flex items-center gap-1">
-                  <span className="text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Active indicator */}
+                {activeSection === link.section && (
+                  <motion.div
+                    layoutId="activeSection"
+                    className="absolute inset-0 bg-purple-500/10 rounded-lg border border-purple-500/30"
+                    transition={{ type: "spring", duration: 0.5 }}
+                  />
+                )}
+                
+                <span className="relative z-10 flex items-center gap-2 text-gray-300 group-hover:text-purple-400 transition-colors duration-300 font-medium">
+                  <span className="text-base opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
                     {link.icon}
                   </span>
                   {link.name}
                 </span>
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 group-hover:w-full transition-all duration-300" />
-              </Link>
+                
+                {/* Animated underline */}
+                <motion.span 
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                  whileHover={{ width: "80%", x: "-50%", left: "50%" }}
+                  transition={{ duration: 0.3 }}
+                />
+              </a>
             ))}
             
-            {/* Divider */}
-            <div className="w-px h-6 bg-gradient-to-b from-transparent via-purple-500/50 to-transparent" />
+            {/* Premium divider with glow */}
+            <div className="mx-2 w-px h-8 bg-gradient-to-b from-transparent via-purple-500/50 to-transparent" />
             
-            {/* Auth Buttons */}
-            <Link
-              to="/login"
-              className="relative px-5 py-2 text-gray-300 hover:text-purple-400 transition-all duration-300 font-medium overflow-hidden group"
-            >
-              <span className="relative z-10">Login</span>
-              <div className="absolute inset-0 bg-purple-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-            </Link>
-            
-            <Link
-              to="/register"
-              className="group relative px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 overflow-hidden"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Get Started
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 group"
-          >
-            <div className={`w-6 h-0.5 bg-purple-400 transition-all duration-300 ${
-              isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
-            }`} />
-            <div className={`w-6 h-0.5 bg-purple-400 transition-all duration-300 ${
-              isMobileMenuOpen ? 'opacity-0' : ''
-            }`} />
-            <div className={`w-6 h-0.5 bg-purple-400 transition-all duration-300 ${
-              isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
-            }`} />
-          </button>
-
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      <div className={`fixed inset-0 z-40 md:hidden transition-all duration-500 ${
-        isMobileMenuOpen ? 'visible' : 'invisible'
-      }`}>
-        {/* Backdrop */}
-        <div 
-          className={`absolute inset-0 bg-gray-950/90 backdrop-blur-md transition-opacity duration-500 ${
-            isMobileMenuOpen ? 'opacity-100' : 'opacity-0'
-          }`}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-        
-        {/* Menu Content */}
-        <div className={`absolute top-20 left-0 right-0 mx-4 bg-gradient-to-br from-gray-900/95 to-purple-950/95 backdrop-blur-2xl rounded-2xl border border-purple-500/20 shadow-2xl transition-all duration-500 transform ${
-          isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'
-        }`}>
-          <div className="p-6 space-y-4">
-            {navLinks.map((link, index) => (
-              <Link
-                key={index}
-                to={link.href}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all duration-300 group"
-                onClick={() => setIsMobileMenuOpen(false)}
+            {/* Auth Buttons with premium animations */}
+            <Link to="/login">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative px-5 py-2 rounded-lg overflow-hidden group"
               >
-                <span className="text-2xl">{link.icon}</span>
-                <span className="font-medium">{link.name}</span>
-                <svg className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ))}
-            
-            <div className="border-t border-purple-500/20 my-4" />
-            
-            <Link
-              to="/login"
-              className="flex items-center justify-center px-4 py-3 text-gray-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all duration-300 font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Login
+                <span className="relative z-10 text-gray-300 group-hover:text-purple-400 transition-colors font-medium">
+                  Login
+                </span>
+                <div className="absolute inset-0 bg-purple-500/10 rounded-lg transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </motion.button>
             </Link>
             
-            <Link
-              to="/register"
-              className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl text-white font-semibold transition-all duration-300 hover:scale-105"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Get Started
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+            <Link to="/register">
+              <motion.button 
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="group relative px-6 py-2 rounded-lg overflow-hidden shadow-lg"
+              >
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 blur-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
+                
+                <span className="relative z-10 flex items-center gap-2 text-white font-semibold">
+                  Get Started
+                  <motion.svg 
+                    className="w-4 h-4" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    animate={{ x: 0 }}
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </motion.svg>
+                </span>
+              </motion.button>
             </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Animated Gradient Border Bottom */}
-      <div className="fixed top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent z-50 animate-pulse" 
-           style={{ top: 'auto', bottom: 0 }} />
+          {/* Mobile Menu Button - Premium animation */}
+          <motion.button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden relative w-10 h-10 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+              <motion.div 
+                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                animate={{ rotate: isMobileMenuOpen ? 45 : 0, y: isMobileMenuOpen ? 6 : 0 }}
+                transition={{ duration: 0.3 }}
+              />
+              <motion.div 
+                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                animate={{ opacity: isMobileMenuOpen ? 0 : 1 }}
+                transition={{ duration: 0.3 }}
+              />
+              <motion.div 
+                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                animate={{ rotate: isMobileMenuOpen ? -45 : 0, y: isMobileMenuOpen ? -6 : 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          </motion.button>
+        </div>
+      </motion.nav>
+
+      {/* Mobile Menu - Premium glass morphism */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-md"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Menu Panel */}
+            <motion.div 
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              className="fixed right-0 top-0 bottom-0 z-40 w-80 bg-gradient-to-br from-gray-900/95 to-purple-950/95 backdrop-blur-2xl border-l border-purple-500/20 shadow-2xl"
+            >
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="p-6 border-b border-white/10">
+                  <h2 className="text-xl font-bold gradient-text">Menu</h2>
+                  <p className="text-xs text-gray-400 mt-1">Navigate through sections</p>
+                </div>
+                
+                {/* Navigation Items */}
+                <div className="flex-1 p-6 space-y-2">
+                  {navLinks.map((link, index) => (
+                    <motion.a
+                      key={index}
+                      href={link.href}
+                      onClick={(e) => handleSmoothScroll(e, link.href)}
+                      className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-purple-500/10 transition-all duration-300 group"
+                      whileHover={{ x: 10 }}
+                    >
+                      <span className="text-2xl">{link.icon}</span>
+                      <span className="text-gray-300 group-hover:text-purple-400 transition-colors font-medium">
+                        {link.name}
+                      </span>
+                      <motion.svg 
+                        className="w-4 h-4 ml-auto text-gray-500 group-hover:text-purple-400"
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                        animate={{ x: 0 }}
+                        whileHover={{ x: 4 }}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </motion.svg>
+                    </motion.a>
+                  ))}
+                </div>
+                
+                {/* Auth Buttons */}
+                <div className="p-6 border-t border-white/10 space-y-3">
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <motion.button 
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full py-3 rounded-xl border border-purple-500/30 text-purple-400 font-semibold hover:bg-purple-500/10 transition-all duration-300"
+                    >
+                      Login
+                    </motion.button>
+                  </Link>
+                  <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                    <motion.button 
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg"
+                    >
+                      Get Started Free
+                    </motion.button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
