@@ -2,12 +2,174 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <link rel="icon" type="image/svg+xml" href="/logo1.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    
+    <!-- Primary Meta Tags -->
+    <title>EvolveWeb AI | AI-Powered Website Builder</title>
+    <meta name="title" content="EvolveWeb AI | AI-Powered Website Builder" />
+    <meta name="description" content="Build stunning websites in seconds using AI. Just describe your idea — we generate design, layout and production-ready code instantly." />
+    <meta name="keywords" content="AI website builder, web design, AI generator, website builder, no-code, AI templates" />
+    <meta name="author" content="EvolveWeb AI" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://evolveweb.ai/" />
+    <meta property="og:title" content="EvolveWeb AI | AI-Powered Website Builder" />
+    <meta property="og:description" content="Build stunning websites in seconds using AI. Just describe your idea — we generate design, layout and production-ready code instantly." />
+    <meta property="og:image" content="https://evolveweb.ai/og-image.jpg" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://evolveweb.ai/" />
+    <meta property="twitter:title" content="EvolveWeb AI | AI-Powered Website Builder" />
+    <meta property="twitter:description" content="Build stunning websites in seconds using AI. Just describe your idea — we generate design, layout and production-ready code instantly." />
+    <meta property="twitter:image" content="https://evolveweb.ai/og-image.jpg" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#7c3aed" />
+    <meta name="color-scheme" content="dark" />
+    
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Loading Animation Style -->
+    <style>
+      /* Premium Loading Screen */
+      #root {
+        min-height: 100vh;
+      }
+      
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+      }
+      
+      .loading-screen.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+      
+      .loading-logo {
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid rgba(139, 92, 246, 0.2);
+        border-top-color: #8b5cf6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      
+      .loading-bar {
+        width: 200px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 24px;
+      }
+      
+      .loading-bar-progress {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #8b5cf6, #ec4899, #8b5cf6);
+        animation: loading 2s ease-in-out infinite;
+      }
+      
+      .loading-text {
+        margin-top: 16px;
+        font-size: 14px;
+        color: #8b5cf6;
+        font-family: monospace;
+        letter-spacing: 2px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      @keyframes loading {
+        0% { width: 0%; opacity: 0.5; }
+        50% { width: 70%; opacity: 1; }
+        100% { width: 100%; opacity: 0.5; }
+      }
+      
+      /* Prevent white flash */
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      }
+    </style>
+    
     <title>EvolveWeb AI</title>
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-logo">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="2" fill="#8b5cf6"/>
+        </svg>
+      </div>
+      <div class="loading-bar">
+        <div class="loading-bar-progress"></div>
+      </div>
+      <div class="loading-text">LOADING EVOLVEWEB AI</div>
+    </div>
+    
     <script type="module" src="/src/main.jsx"></script>
+    
+    <script>
+      // Hide loading screen when app is ready
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(function() {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000);
+      });
+      
+      // Fallback: hide after 3 seconds
+      setTimeout(function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+          loadingScreen.classList.add('fade-out');
+          setTimeout(function() {
+            loadingScreen.style.display = 'none';
+          }, 500);
+        }
+      }, 3000);
+    </script>
   </body>
 </html>
