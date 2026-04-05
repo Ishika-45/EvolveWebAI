@@ -18,11 +18,11 @@ import {
   Menu
 } from "lucide-react";
 import CursorGlow from "../components/CursorGlow";
+import ThemeSwitcher from "../components/ThemeSwitcher"; // 👈 ADD THIS IMPORT
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, message: "✨ Your project 'AI Startup' was generated successfully", time: "2 min ago", read: false },
@@ -286,13 +286,9 @@ const DashboardLayout = () => {
               🔍
             </button>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-lg hover:bg-white/10 transition-all duration-300"
-            >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            {/* 👇 REPLACE THE OLD THEME TOGGLE WITH THIS 👇 */}
+            {/* Theme Switcher - New Component */}
+            <ThemeSwitcher />
 
             {/* Notifications */}
             <div className="relative group">

@@ -1,15 +1,35 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Maximize2, Minimize2, Loader2, AlertTriangle } from "lucide-react";
+import { X, Maximize2, Minimize2, Loader2, AlertTriangle, Smartphone, Monitor, Tablet, RefreshCw, ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
   const [loaded, setLoaded] = useState(false);
   const [frameError, setFrameError] = useState("");
+  const [deviceMode, setDeviceMode] = useState("desktop");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  let hideControlsTimeout;
 
   useEffect(() => {
     setLoaded(false);
     setFrameError("");
-  }, [code, focusPreview]);
+  }, [code, focusPreview, refreshKey]);
+
+  const handleMouseMove = () => {
+    setShowControls(true);
+    clearTimeout(hideControlsTimeout);
+    hideControlsTimeout = setTimeout(() => {
+      if (focusPreview) setShowControls(false);
+    }, 2000);
+  };
+
+  const getDeviceDimensions = () => {
+    switch(deviceMode) {
+      case "mobile": return "max-w-[375px]";
+      case "tablet": return "max-w-[768px]";
+      default: return "max-w-full";
+    }
+  };
 
   const safeCode = useMemo(() => {
     if (!code) return "";
@@ -31,54 +51,56 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
   <script src="https://cdn.tailwindcss.com"></script>
   <title>Preview Error</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
       padding: 24px;
-      box-sizing: border-box;
     }
     .card {
       max-width: 720px;
-      width: 100%;
       background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 24px;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
     }
     h1 {
-      font-size: 22px;
-      margin-bottom: 12px;
-      color: #a5b4fc;
+      font-size: 24px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    p {
-      color: #cbd5e1;
-      line-height: 1.6;
-      margin: 8px 0;
-    }
+    p { color: #94a3b8; line-height: 1.6; margin: 12px 0; }
     pre {
-      margin-top: 16px;
+      margin-top: 20px;
       padding: 16px;
       border-radius: 12px;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.4);
       color: #93c5fd;
       overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 13px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Preview unavailable</h1>
-    <p>This preview iframe only supports HTML, but the generated code looks like React JSX/component code.</p>
-    <p>Either convert the generated output to full HTML before previewing, or render this code through a React sandbox/compiler pipeline.</p>
+    <div class="icon">⚠️</div>
+    <h1>Preview Unavailable</h1>
+    <p>This preview only supports HTML/CSS, but the generated code appears to be React JSX.</p>
+    <p><strong>Solution:</strong> Convert the output to HTML before preview, or use a React sandbox environment.</p>
     <pre>${trimmed
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -98,13 +120,12 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <title>AI Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; }
   </style>
+  <title>AI Generated Website</title>
 </head>
 <body>
 ${trimmed}
@@ -123,10 +144,11 @@ ${trimmed}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={() => focusPreview && setFocusPreview(false)}
+        onMouseMove={handleMouseMove}
         className={`${
           focusPreview
-            ? "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xl p-4"
-            : "relative mt-10"
+            ? "fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4"
+            : "relative mt-6"
         } transition-all duration-500`}
       >
         <motion.div
@@ -136,76 +158,176 @@ ${trimmed}
           exit={{ scale: 0.96, opacity: 0, y: 20 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className={`relative overflow-hidden rounded-3xl border border-white/10 bg-black shadow-2xl ${
+          className={`relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl ${
             focusPreview
               ? "w-[95vw] h-[92vh]"
-              : "w-full max-w-6xl h-[560px] mx-auto"
-          }`}
+              : "w-full mx-auto"
+          } ${!focusPreview && getDeviceDimensions()}`}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/90">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-3 h-3 bg-red-500 rounded-full" />
-              <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-              <div className="w-3 h-3 bg-green-500 rounded-full" />
-              <span className="text-xs text-gray-400 ml-4 truncate">
-                evolveweb-ai-preview.vercel.app
+          {/* Device Controls Bar */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/90 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors cursor-pointer" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors cursor-pointer" />
+                <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors cursor-pointer" />
+              </div>
+              <span className="text-[10px] text-gray-500 ml-3 font-mono">
+                localhost:3000/preview
               </span>
             </div>
 
+            {/* Device Toggle Buttons */}
+            {!focusPreview && (
+              <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+                <button
+                  onClick={() => setDeviceMode("mobile")}
+                  className={`p-1.5 rounded-md transition-all duration-300 ${
+                    deviceMode === "mobile" 
+                      ? "bg-purple-500/20 text-purple-400" 
+                      : "text-gray-500 hover:text-white"
+                  }`}
+                  title="Mobile View"
+                >
+                  <Smartphone size={14} />
+                </button>
+                <button
+                  onClick={() => setDeviceMode("tablet")}
+                  className={`p-1.5 rounded-md transition-all duration-300 ${
+                    deviceMode === "tablet" 
+                      ? "bg-purple-500/20 text-purple-400" 
+                      : "text-gray-500 hover:text-white"
+                  }`}
+                  title="Tablet View"
+                >
+                  <Tablet size={14} />
+                </button>
+                <button
+                  onClick={() => setDeviceMode("desktop")}
+                  className={`p-1.5 rounded-md transition-all duration-300 ${
+                    deviceMode === "desktop" 
+                      ? "bg-purple-500/20 text-purple-400" 
+                      : "text-gray-500 hover:text-white"
+                  }`}
+                  title="Desktop View"
+                >
+                  <Monitor size={14} />
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
+              {/* Refresh Button */}
+              <button
+                onClick={() => setRefreshKey(prev => prev + 1)}
+                className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
+                title="Refresh Preview"
+              >
+                <RefreshCw size={14} />
+              </button>
+
+              {/* External Link Button */}
+              <button
+                onClick={() => {
+                  const blob = new Blob([safeCode], { type: 'text/html' });
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, '_blank');
+                  URL.revokeObjectURL(url);
+                }}
+                className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
+                title="Open in New Tab"
+              >
+                <ExternalLink size={14} />
+              </button>
+
               {!focusPreview ? (
                 <button
                   onClick={() => setFocusPreview(true)}
-                  className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition"
-                  aria-label="Expand preview"
+                  className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
+                  title="Expand Preview"
                 >
-                  <Maximize2 size={16} />
+                  <Maximize2 size={14} />
                 </button>
               ) : (
                 <>
                   <button
                     onClick={() => setFocusPreview(false)}
-                    className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition"
-                    aria-label="Minimize preview"
+                    className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
+                    title="Minimize Preview"
                   >
-                    <Minimize2 size={16} />
+                    <Minimize2 size={14} />
                   </button>
-
                   <button
                     onClick={() => setFocusPreview(false)}
-                    className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition"
-                    aria-label="Close preview"
+                    className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
+                    title="Close Preview"
                   >
-                    <X size={16} />
+                    <X size={14} />
                   </button>
                 </>
               )}
             </div>
           </div>
 
+          {/* Preview Area */}
           <div className="relative w-full h-[calc(100%-57px)] bg-white">
             {!loaded && !frameError && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-950 via-black to-gray-900 text-gray-400">
-                <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
-                <p className="text-sm">Loading preview...</p>
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-950 via-black to-gray-900">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Loader2 className="w-8 h-8 text-purple-400" />
+                </motion.div>
+                <p className="text-sm text-gray-400">Loading preview...</p>
+                <div className="flex gap-1 mt-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
+                </div>
               </div>
             )}
 
             {frameError && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-950 via-black to-gray-900 text-red-400 p-6 text-center">
-                <AlertTriangle className="w-6 h-6" />
-                <p className="text-sm">{frameError}</p>
+                <AlertTriangle className="w-10 h-10" />
+                <p className="text-sm font-medium">{frameError}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+                >
+                  Retry
+                </button>
               </div>
             )}
 
-           <iframe
-  title="ai-preview"
-  srcDoc={safeCode}
-  className="w-full h-full border-none"
-  sandbox="allow-scripts allow-popups"
-  onLoad={() => setLoaded(true)}
-/>
+            <iframe
+              key={refreshKey}
+              title="ai-preview"
+              srcDoc={safeCode}
+              className="w-full h-full border-none"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              onLoad={() => setLoaded(true)}
+              onError={() => setFrameError("Failed to load preview")}
+            />
+
+            {/* Device Frame Overlay for Mobile/Tablet */}
+            {(deviceMode === "mobile" || deviceMode === "tablet") && !focusPreview && (
+              <div className="absolute inset-0 pointer-events-none rounded-2xl border-8 border-gray-900 shadow-2xl" />
+            )}
           </div>
+
+          {/* Status Bar */}
+          {loaded && !focusPreview && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute bottom-2 right-3 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm text-[10px] text-green-400 flex items-center gap-1"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              Live Preview
+            </motion.div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
