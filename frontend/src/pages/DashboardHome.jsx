@@ -1,11 +1,19 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import { 
+  Sparkles, 
+  ArrowRight, 
+  Clock, 
+  Layers, 
+  Zap,
+  Star,
+  Code,
+  Rocket,
+  Loader2,
+  Folder
+} from "lucide-react";
 import api from "../services/api";
-
-import AIStreamingText from "../components/AIStreamingText";
-import FlowCard from "../components/FlowCard";
-import AIGenerationModal from "../components/AIGenerationModal";
 
 const FALLBACK_SECTIONS = [
   { title: "Hero Section", description: "A strong hero area introducing the product and value proposition." },
@@ -19,71 +27,12 @@ const FALLBACK_SECTIONS = [
 ];
 
 const generationSteps = [
-  "🧠 Understanding your idea",
-  "🧩 Structuring layout architecture",
-  "🎨 Designing interface components",
-  "⚡ Optimizing responsiveness",
-  "🚀 Finalizing your website",
+  { icon: "🧠", title: "Understanding your idea", desc: "Analyzing requirements and goals" },
+  { icon: "🧩", title: "Structuring layout", desc: "Creating optimal information architecture" },
+  { icon: "🎨", title: "Designing components", desc: "Applying modern design patterns" },
+  { icon: "⚡", title: "Optimizing performance", desc: "Ensuring fast load times" },
+  { icon: "🚀", title: "Finalizing", desc: "Preparing your website for launch" },
 ];
-
-const normalizeSection = (section, index = 0) => {
-  if (typeof section === "string") {
-    return {
-      title: section.trim() || `Section ${index + 1}`,
-      description: "",
-    };
-  }
-
-  if (section && typeof section === "object") {
-    return {
-      title:
-        section.title?.trim() ||
-        section.name?.trim() ||
-        section.heading?.trim() ||
-        `Section ${index + 1}`,
-      description:
-        section.description?.trim() ||
-        section.content?.trim() ||
-        section.summary?.trim() ||
-        "",
-    };
-  }
-
-  return {
-    title: `Section ${index + 1}`,
-    description: "",
-  };
-};
-
-const normalizeSections = (sections) => {
-  if (!Array.isArray(sections) || sections.length === 0) {
-    return FALLBACK_SECTIONS;
-  }
-
-  const normalized = sections
-    .map((section, index) => normalizeSection(section, index))
-    .filter((section) => section.title);
-
-  return normalized.length ? normalized : FALLBACK_SECTIONS;
-};
-
-const startTypingSequence = (items, setter, delay = 400) => {
-  if (!items?.length) return null;
-
-  let i = 0;
-  setter([]);
-
-  const interval = setInterval(() => {
-    setter((prev) => [...prev, items[i]]);
-    i += 1;
-
-    if (i >= items.length) {
-      clearInterval(interval);
-    }
-  }, delay);
-
-  return interval;
-};
 
 const DashboardHome = () => {
   const navigate = useNavigate();
@@ -93,16 +42,19 @@ const DashboardHome = () => {
   const [projects, setProjects] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [blueprintSections, setBlueprintSections] = useState([]);
   const [typedSections, setTypedSections] = useState([]);
   const [userName, setUserName] = useState("User");
   const [streamingText, setStreamingText] = useState("");
   const [generateError, setGenerateError] = useState("");
-
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   const stepIntervalRef = useRef(null);
   const typingIntervalRef = useRef(null);
+
+  // Calculate stats
+  const totalProjects = projects.length;
+  const aiGenerations = projects.length * 3;
+  const productivityScore = 94;
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -221,7 +173,6 @@ const DashboardHome = () => {
     setIsGenerating(true);
     setGenerateError("");
     setStreamingText("");
-    setBlueprintSections([]);
     setTypedSections([]);
 
     beginStepAnimation();
@@ -235,16 +186,45 @@ const DashboardHome = () => {
 
       const aiRes = await api.post("/ai/generate-website", { idea });
       const rawSections = aiRes.data?.sections;
-      const normalizedSections = normalizeSections(rawSections);
+      
+      // Normalize sections safely
+      let normalizedSections = [];
+      if (Array.isArray(rawSections) && rawSections.length > 0) {
+        normalizedSections = rawSections.map((section, index) => {
+          if (typeof section === "string") {
+            return { title: section.trim() || `Section ${index + 1}`, description: "" };
+          }
+          if (section && typeof section === "object") {
+            return {
+              title: section.title?.trim() || section.name?.trim() || section.heading?.trim() || `Section ${index + 1}`,
+              description: section.description?.trim() || section.content?.trim() || section.summary?.trim() || "",
+            };
+          }
+          return { title: `Section ${index + 1}`, description: "" };
+        });
+      } else {
+        normalizedSections = FALLBACK_SECTIONS;
+      }
 
-      setBlueprintSections(normalizedSections);
+      // Filter out any invalid sections
+      normalizedSections = normalizedSections.filter(section => section && section.title);
 
       if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
-      typingIntervalRef.current = startTypingSequence(
-        normalizedSections,
-        setTypedSections,
-        350
-      );
+      
+      // Type out sections one by one
+      let i = 0;
+      setTypedSections([]);
+      
+      const interval = setInterval(() => {
+        if (i < normalizedSections.length) {
+          setTypedSections(prev => [...prev, normalizedSections[i]]);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 350);
+      
+      typingIntervalRef.current = interval;
 
       const payload = {
         title: idea.length > 30 ? `${idea.slice(0, 30)}...` : idea,
@@ -289,172 +269,397 @@ const DashboardHome = () => {
 
   return (
     <div className="relative w-full flex flex-col items-center overflow-hidden">
+      {/* Animated Cursor Glow */}
       <div
-        className="pointer-events-none fixed w-[500px] h-[500px] rounded-full blur-[120px] bg-indigo-600/20"
+        className="pointer-events-none fixed w-[400px] h-[400px] rounded-full blur-[100px] bg-purple-600/15 transition-transform duration-300"
         style={{
-          left: mouse.x - 250,
-          top: mouse.y - 250,
+          left: mouse.x - 200,
+          top: mouse.y - 200,
         }}
       />
 
-      <div className="text-center mt-16 mb-20">
+      {/* Welcome Section */}
+      <div className="text-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 mb-6"
+        >
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <span className="text-sm text-purple-300">AI-Powered Website Builder</span>
+        </motion.div>
+
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-semibold"
+          transition={{ delay: 0.1 }}
+          className="text-4xl lg:text-5xl font-bold"
         >
           Welcome back,
-          <span className="text-indigo-400 ml-3">{userName}</span>
+          <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent ml-3">
+            {userName}
+          </span>
           <motion.span
             animate={{ rotate: [0, 20, -10, 20, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 2 }}
-            className="inline-block ml-3"
+            className="inline-block ml-2"
           >
             👋
           </motion.span>
         </motion.h1>
 
-        <p className="text-gray-400 mt-4">
-          Describe your idea and let AI craft a stunning website instantly.
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-gray-400 mt-3 max-w-2xl mx-auto"
+        >
+          Describe your idea and let AI craft a stunning, production-ready website in seconds
+        </motion.p>
       </div>
 
-      <div className="w-full max-w-3xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-[0_0_60px_rgba(99,102,241,0.25)]">
-        <textarea
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Describe your startup idea..."
-          className="w-full h-36 p-5 rounded-xl bg-white/5 border border-indigo-500/40 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-400"
-        />
-
-        {streamingText && (
-          <div className="mt-6 bg-black/40 p-5 rounded-xl border border-indigo-500/30">
-            <p className="text-indigo-300 mb-3">⚡ AI Generating Website Blueprint</p>
-            <pre className="text-gray-300 whitespace-pre-wrap">{streamingText}</pre>
+      {/* AI Generator Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="w-full max-w-4xl relative mb-12"
+      >
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl blur-xl opacity-30" />
+        
+        <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+          <div className="flex items-center gap-2 mb-4">
+            <Rocket className="w-5 h-5 text-purple-400" />
+            <h3 className="text-lg font-semibold text-white">AI Website Generator</h3>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">Active</span>
           </div>
-        )}
 
-        {generateError && (
-          <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-            {generateError}
+          <textarea
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Describe your startup idea, business, or website concept..."
+            className="w-full h-32 p-5 rounded-xl bg-black/30 border border-purple-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all resize-none"
+          />
+
+          {/* Prompt Suggestions */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {prompts.map((p, i) => (
+              <button
+                key={i}
+                onClick={() => setIdea(p)}
+                className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg hover:border-purple-400 hover:bg-purple-500/10 transition-all duration-300"
+              >
+                {p}
+              </button>
+            ))}
           </div>
-        )}
 
-        <div className="flex flex-wrap gap-3 mt-4">
-          {prompts.map((p, i) => (
-            <button
-              key={i}
-              onClick={() => setIdea(p)}
-              className="text-sm px-3 py-1 bg-white/5 border border-white/10 rounded-lg hover:border-indigo-400"
+          {/* Streaming Text */}
+          <AnimatePresence>
+            {streamingText && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-6 bg-black/40 p-5 rounded-xl border border-purple-500/30"
+              >
+                <p className="text-purple-300 text-sm mb-2 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  AI Generating Website Blueprint
+                </p>
+                <pre className="text-gray-300 text-sm whitespace-pre-wrap font-mono">{streamingText}</pre>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Error Message */}
+          <AnimatePresence>
+            {generateError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3"
+              >
+                <p className="text-sm text-red-300">{generateError}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Generation Steps */}
+          <AnimatePresence>
+            {isGenerating && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-6 space-y-3"
+              >
+                {generationSteps.map((step, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+                      i === currentStep
+                        ? "bg-purple-500/20 border border-purple-500/30"
+                        : i < currentStep
+                        ? "bg-green-500/10 border border-green-500/30 opacity-60"
+                        : "bg-white/5 border border-white/10 opacity-40"
+                    }`}
+                  >
+                    <div className="text-2xl">{step.icon}</div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white">{step.title}</p>
+                      <p className="text-xs text-gray-400">{step.desc}</p>
+                    </div>
+                    {i < currentStep && (
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                    {i === currentStep && (
+                      <div className="w-5 h-5 rounded-full border-2 border-purple-400 border-t-transparent animate-spin" />
+                    )}
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Generate Button */}
+          <div className="flex justify-end mt-6">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleGenerate}
+              disabled={isGenerating || !idea.trim()}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {p}
-            </button>
-          ))}
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate Website
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-5xl mb-12"
+      >
+        <div className="relative group cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+          <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-purple-500/50 transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 rounded-xl bg-purple-500/20">
+                <Folder className="w-5 h-5 text-purple-400" />
+              </div>
+              <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
+                +{totalProjects}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-white">{totalProjects}</h3>
+            <p className="text-xs text-gray-500 mt-1">Total Projects</p>
+          </div>
         </div>
 
-        {isGenerating && (
-          <div className="mt-8 space-y-6">
-            <AIStreamingText text="Analyzing your idea and generating website structure..." />
-            <div className="grid gap-3">
-              {generationSteps.map((step, i) => (
-                <FlowCard key={i} step={step} index={i} active={i === currentStep} />
-              ))}
+        <div className="relative group cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+          <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-pink-500/50 transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 rounded-xl bg-pink-500/20">
+                <Layers className="w-5 h-5 text-pink-400" />
+              </div>
+              <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
+                +8
+              </span>
             </div>
+            <h3 className="text-2xl font-bold text-white">12</h3>
+            <p className="text-xs text-gray-500 mt-1">Templates Used</p>
           </div>
-        )}
+        </div>
 
-        <div className="flex justify-end mt-6">
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:scale-105 transition disabled:opacity-50 disabled:hover:scale-100"
+        <div className="relative group cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+          <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-blue-500/50 transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 rounded-xl bg-blue-500/20">
+                <Zap className="w-5 h-5 text-blue-400" />
+              </div>
+              <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
+                +{aiGenerations}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-white">{aiGenerations}</h3>
+            <p className="text-xs text-gray-500 mt-1">AI Generations</p>
+          </div>
+        </div>
+
+        <div className="relative group cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-purple-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+          <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-green-500/50 transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 rounded-xl bg-green-500/20">
+                <Star className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
+                +15%
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-white">{productivityScore}%</h3>
+            <p className="text-xs text-gray-500 mt-1">Productivity Score</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Generated Structure Preview - FIXED: Added safety check */}
+      <AnimatePresence>
+        {typedSections && typedSections.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-4xl mb-12"
           >
-            {isGenerating ? "Generating..." : "⚡ Generate Website"}
-          </button>
-        </div>
-      </div>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Code className="w-5 h-5 text-purple-400" />
+                  AI Generated Structure
+                </h3>
+                <span className="text-xs text-purple-400">{typedSections.length} sections</span>
+              </div>
 
-      {typedSections.length > 0 && (
-        <div className="w-full max-w-5xl mt-16">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg mb-4">AI Generated Structure</h2>
-
-            <div className="space-y-3">
-              {typedSections.map((section, i) => (
-                <motion.div
-                  key={`${section.title}-${i}`}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="p-4 bg-white/5 rounded-lg border border-white/10"
-                >
-                  <p className="font-medium text-white">{section.title}</p>
-                  {section.description ? (
-                    <p className="text-sm text-gray-400 mt-1">{section.description}</p>
-                  ) : null}
-                </motion.div>
-              ))}
+              <div className="space-y-3">
+                {typedSections.map((section, i) => (
+                  <motion.div
+                    key={`${section?.title || i}-${i}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-white group-hover:text-purple-400 transition-colors">
+                          {section?.title || `Section ${i + 1}`}
+                        </p>
+                        {section?.description && (
+                          <p className="text-sm text-gray-400 mt-1">{section.description}</p>
+                        )}
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Recent Projects Section */}
+      {projects.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="w-full max-w-6xl mb-12"
+        >
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Recent Projects</h2>
+              <p className="text-sm text-gray-500 mt-1">Continue where you left off</p>
+            </div>
+            <button
+              onClick={() => navigate("/dashboard/projects")}
+              className="text-sm px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center gap-2 group"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.slice(0, 3).map((project, idx) => (
+              <motion.div
+                key={project._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5 }}
+                onClick={() => navigate(`/dashboard/project/${project._id}`)}
+                className="group relative cursor-pointer"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+                <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 rounded-xl bg-purple-500/20">
+                      <Folder className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>{project.createdAt ? new Date(project.createdAt).toLocaleDateString() : "Recent"}</span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors mb-2 line-clamp-1">
+                    {project.title || "Untitled Project"}
+                  </h3>
+                  <p className="text-sm text-gray-400 line-clamp-2">
+                    {project.idea || "AI-generated website project"}
+                  </p>
+                  <div className="mt-4 flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs text-green-400">Ready to edit</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       )}
 
-      <div className="grid grid-cols-3 gap-6 mt-16 w-full max-w-5xl">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">Projects</p>
-          <h3 className="text-2xl mt-2">{projects.length}</h3>
+      {/* Quick Tips */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="w-full max-w-4xl mb-8"
+      >
+        <div className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-2xl p-6 border border-purple-500/20">
+          <h3 className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
+            <Zap className="w-4 h-4" />
+            Pro Tips
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="flex items-start gap-2">
+              <span className="text-purple-400">✨</span>
+              <p className="text-xs text-gray-300">Be specific about your industry and target audience</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-purple-400">🎨</span>
+              <p className="text-xs text-gray-300">Mention preferred color schemes or design styles</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-purple-400">🚀</span>
+              <p className="text-xs text-gray-300">Include key features you want to highlight</p>
+            </div>
+          </div>
         </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">Templates Used</p>
-          <h3 className="text-2xl mt-2">12</h3>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-          <p className="text-gray-400 text-sm">AI Generations</p>
-          <h3 className="text-2xl mt-2">{projects.length}</h3>
-        </div>
-      </div>
-
-      <div className="w-full max-w-5xl mt-20">
-       <div className="flex justify-between items-center mb-6">
-  <h2 className="text-xl">Recent Projects</h2>
-
-  <button
-    onClick={() => navigate("/dashboard/projects")}
-    className="text-sm px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20"
-  >
-    View All
-  </button>
-</div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {projects.slice(0, 6).map((project) => (
-            <motion.div
-              key={project._id}
-              whileHover={{
-                y: -8,
-                boxShadow: "0 0 40px rgba(99,102,241,0.35)",
-              }}
-              onClick={() => navigate(`/dashboard/project/${project._id}`)}
-              className="bg-white/5 border border-white/10 rounded-2xl p-6 cursor-pointer"
-            >
-              <h3 className="text-lg">{project.title}</h3>
-              <p className="text-gray-400 text-sm mt-2">
-                {project.createdAt
-                  ? new Date(project.createdAt).toLocaleDateString()
-                  : "Recently created"}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <AIGenerationModal
-        isGenerating={isGenerating}
-        generationSteps={generationSteps}
-        currentStep={currentStep}
-      />
+      </motion.div>
     </div>
   );
 };
