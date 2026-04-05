@@ -1,5 +1,6 @@
 import LandingNavbar from "../components/LandingNavbar";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 const Landing = () => {
@@ -12,6 +13,7 @@ const Landing = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
   const [hoveredTestimonial, setHoveredTestimonial] = useState(null);
+  const navigate = useNavigate();
   const canvasRef = useRef(null);
   
   const words = ["Intelligent", "Dynamic", "Interactive", "Revolutionary"];
@@ -368,6 +370,7 @@ const Landing = () => {
               <motion.button 
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/register")}
                 className="group relative px-9 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-2">
@@ -792,16 +795,18 @@ const Landing = () => {
                 </div>
                 
                 <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl"
-                      : "border border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
-                  }`}
-                >
-                  Get Started
-                </motion.button>
+  whileHover={{ scale: 1.05, y: -2 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={() => navigate("/register")}
+  className="group relative px-9 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
+>
+  <span className="relative z-10 flex items-center gap-2">
+    Get Started
+    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+    </svg>
+  </span>
+</motion.button>
               </motion.div>
             ))}
           </div>
@@ -937,6 +942,7 @@ const Landing = () => {
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/register")}
                 className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 Start Building for Free →
