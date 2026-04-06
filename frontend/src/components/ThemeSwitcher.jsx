@@ -6,6 +6,7 @@ import { themeOptions } from "../themes/themeConfig";
 
 const ThemeSwitcher = () => {
   const { currentTheme, changeTheme, isThemeMenuOpen, toggleThemeMenu } = useTheme();
+  
 
   const getThemeIcon = (themeId) => {
     switch(themeId) {

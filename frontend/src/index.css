@@ -5,6 +5,11 @@
 
 :root {
   /* Default theme variables (fallback) */
+   --theme-accent: #6366f1;
+  --theme-accent-hover: #818cf8;
+  --theme-gradient-start: #4f46e5;
+  --theme-gradient-end: #6366f1;
+
   --theme-bgPrimary: #0f172a;
   --theme-bgSecondary: #1e293b;
   --theme-accent: #6366f1;
@@ -54,4 +59,69 @@ body {
 
 .glow-theme {
   box-shadow: 0 0 20px var(--theme-glow);
+}
+
+/* Theme-based Tailwind overrides */
+[data-theme="neoIndigo"] {
+  --theme-accent: #6366f1;
+  --theme-accent-hover: #818cf8;
+  --theme-gradient-start: #4f46e5;
+  --theme-gradient-end: #6366f1;
+}
+
+[data-theme="auroraGlass"] {
+  --theme-accent: #ffffff;
+  --theme-accent-hover: #e0e7ff;
+  --theme-gradient-start: #ffffff;
+  --theme-gradient-end: #e0e7ff;
+}
+
+[data-theme="midnightPro"] {
+  --theme-accent: #ffffff;
+  --theme-accent-hover: #cccccc;
+  --theme-gradient-start: #333333;
+  --theme-gradient-end: #000000;
+}
+
+[data-theme="cyberPurple"] {
+  --theme-accent: #c084fc;
+  --theme-accent-hover: #d8b4fe;
+  --theme-gradient-start: #8b5cf6;
+  --theme-gradient-end: #c084fc;
+}
+
+[data-theme="oceanBreeze"] {
+  --theme-accent: #38bdf8;
+  --theme-accent-hover: #7dd3fc;
+  --theme-gradient-start: #0284c7;
+  --theme-gradient-end: #38bdf8;
+}
+
+/* Utility classes using CSS variables */
+.bg-theme-accent {
+  background-color: var(--theme-accent);
+}
+
+.bg-theme-accent-hover:hover {
+  background-color: var(--theme-accent-hover);
+}
+
+.text-theme-accent {
+  color: var(--theme-accent);
+}
+
+.border-theme-accent {
+  border-color: var(--theme-accent);
+}
+
+.gradient-theme {
+  background: linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end));
+}
+
+.shadow-theme {
+  box-shadow: 0 0 20px var(--theme-accent);
+}
+
+.hover\:shadow-theme:hover {
+  box-shadow: 0 0 30px var(--theme-accent);
 }

@@ -1,18 +1,17 @@
-import { createContext, useState, useEffect, useCallback ,useContext} from "react";
+// src/themes/ThemeContext.jsx
+import { createContext, useState, useEffect, useCallback, useContext } from "react";
 import { themes } from "./themeConfig";
 
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState(() => {
-    // Load saved theme from localStorage
     const savedTheme = localStorage.getItem("evolveweb-theme");
     return savedTheme && themes[savedTheme] ? savedTheme : "neoIndigo";
   });
   
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
 
-  // Apply theme to root element
   const applyTheme = useCallback((themeName) => {
     const theme = themes[themeName];
     if (!theme) return;
@@ -26,14 +25,16 @@ export const ThemeProvider = ({ children }) => {
       }
     });
 
-    // Apply background class
+    // Add a data attribute to the root for Tailwind theme targeting
+    root.setAttribute('data-theme', themeName);
+
+    // Apply background
     if (theme.bgPrimary.includes('linear-gradient')) {
       root.style.background = theme.bgPrimary;
     } else {
       root.style.backgroundColor = theme.bgPrimary;
     }
 
-    // Save to localStorage
     localStorage.setItem("evolveweb-theme", themeName);
   }, []);
 
@@ -75,7 +76,6 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-// Custom hook for using theme
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {

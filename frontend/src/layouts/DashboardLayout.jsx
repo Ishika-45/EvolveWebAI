@@ -9,8 +9,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Bell,
-  Moon,
-  Sun,
   LogOut,
   User,
   ChevronRight,
@@ -18,7 +16,7 @@ import {
   Menu
 } from "lucide-react";
 import CursorGlow from "../components/CursorGlow";
-import ThemeSwitcher from "../components/ThemeSwitcher"; // 👈 ADD THIS IMPORT
+import ThemeSwitcher from "../components/ThemeSwitcher";
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -76,7 +74,7 @@ const DashboardLayout = () => {
         {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-purple-400 rounded-full animate-float"
+            className="absolute w-1 h-1 bg-[var(--theme-accent)] rounded-full animate-float"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -110,7 +108,7 @@ const DashboardLayout = () => {
               bg-gradient-to-b from-gray-900/95 to-purple-950/95 backdrop-blur-2xl
               border-r border-white/10
               transition-all duration-300 flex flex-col
-              shadow-2xl shadow-purple-500/10`}
+              shadow-2xl shadow-[var(--theme-accent)]/10`}
           >
             {/* Logo Section */}
             <div className="flex items-center justify-between p-5 border-b border-white/10">
@@ -120,11 +118,11 @@ const DashboardLayout = () => {
                   animate={{ opacity: 1 }}
                   className="flex items-center gap-2"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
                     <Zap className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h1 className="font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                    <h1 className="font-bold bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent">
                       EvolveWeb
                     </h1>
                     <p className="text-[10px] text-gray-500">AI Platform</p>
@@ -132,7 +130,7 @@ const DashboardLayout = () => {
                 </motion.div>
               )}
               {collapsed && (
-                <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
+                <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
                   <Zap className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -160,7 +158,7 @@ const DashboardLayout = () => {
                     `group relative flex items-center gap-3 mx-3 px-4 py-3 rounded-xl
                     transition-all duration-300
                     ${isActive 
-                      ? "bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 shadow-lg shadow-purple-500/10" 
+                      ? "bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 border border-[var(--theme-accent)]/30 shadow-lg shadow-[var(--theme-accent)]/10" 
                       : "hover:bg-white/5"
                     }`
                   }
@@ -171,7 +169,7 @@ const DashboardLayout = () => {
                       {isActive && (
                         <motion.div
                           layoutId="activeNav"
-                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600/20 to-indigo-600/20"
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20"
                           transition={{ type: "spring", duration: 0.5 }}
                         />
                       )}
@@ -179,7 +177,7 @@ const DashboardLayout = () => {
                       <item.icon 
                         size={20} 
                         className={`relative z-10 transition-all duration-300 ${
-                          isActive ? "text-purple-400" : "text-gray-500 group-hover:text-purple-400"
+                          isActive ? "text-[var(--theme-accent)]" : "text-gray-500 group-hover:text-[var(--theme-accent)]"
                         }`}
                       />
                       
@@ -197,7 +195,7 @@ const DashboardLayout = () => {
                       )}
                       
                       {!collapsed && isActive && (
-                        <ChevronRight size={14} className="text-purple-400" />
+                        <ChevronRight size={14} className="text-[var(--theme-accent)]" />
                       )}
                     </>
                   )}
@@ -210,7 +208,7 @@ const DashboardLayout = () => {
               <div className="relative group">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center shadow-lg">
                       <span className="text-sm font-bold">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                       </span>
@@ -286,8 +284,7 @@ const DashboardLayout = () => {
               🔍
             </button>
 
-            {/* 👇 REPLACE THE OLD THEME TOGGLE WITH THIS 👇 */}
-            {/* Theme Switcher - New Component */}
+            {/* Theme Switcher */}
             <ThemeSwitcher />
 
             {/* Notifications */}
@@ -317,14 +314,14 @@ const DashboardLayout = () => {
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.map((notif) => (
-                        <div key={notif.id} className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!notif.read ? 'bg-purple-500/5' : ''}`}>
+                        <div key={notif.id} className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!notif.read ? 'bg-[var(--theme-accent)]/5' : ''}`}>
                           <p className="text-sm text-gray-300">{notif.message}</p>
                           <p className="text-xs text-gray-500 mt-1">{notif.time}</p>
                         </div>
                       ))}
                     </div>
                     <div className="p-3 text-center">
-                      <button className="text-xs text-purple-400 hover:text-purple-300">
+                      <button className="text-xs text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">
                         Mark all as read
                       </button>
                     </div>
@@ -335,7 +332,7 @@ const DashboardLayout = () => {
 
             {/* User Avatar (Mobile) */}
             <div className="lg:hidden flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
                 <span className="text-xs font-bold">
                   {user?.name?.charAt(0).toUpperCase() || "U"}
                 </span>
