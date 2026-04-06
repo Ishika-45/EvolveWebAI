@@ -530,8 +530,8 @@ const ProjectDetails = () => {
         className="p-10 max-w-6xl mx-auto text-white min-h-screen flex items-center justify-center"
       >
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading your project...</p>
+          <Loader2 className="w-12 h-12 text-[var(--theme-accent)] animate-spin mx-auto mb-4" />
+          <p className="text-[var(--theme-textSecondary)]">Loading your project...</p>
         </div>
       </motion.div>
     );
@@ -549,13 +549,17 @@ const ProjectDetails = () => {
           <h2 className="text-2xl font-semibold text-white mb-2">
             Project Not Found
           </h2>
-          <p className="text-gray-400 mb-6">
+          <p className="text-[var(--theme-textSecondary)] mb-6">
             {pageError ||
               "The project you're looking for doesn't exist or has been deleted."}
           </p>
           <button
             onClick={() => navigate("/dashboard")}
-            className="px-6 py-3 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition"
+            className="px-6 py-3 rounded-xl text-white transition"
+            style={{
+              background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+              boxShadow: `0 0 20px var(--theme-glow)`
+            }}
           >
             Return to Dashboard
           </button>
@@ -578,7 +582,7 @@ const ProjectDetails = () => {
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition"
+          className="flex items-center gap-2 text-[var(--theme-textSecondary)] hover:text-white transition"
         >
           <ArrowLeft size={18} />
           Back
@@ -599,7 +603,7 @@ const ProjectDetails = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1"
+              className="flex items-center gap-2 bg-[var(--theme-cardBg)] border border-[var(--theme-borderColor)] rounded-xl p-1"
             >
               <span className="text-sm text-gray-400 px-2">Are you sure?</span>
               <button
@@ -631,7 +635,7 @@ const ProjectDetails = () => {
       )}
 
       <div className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] text-xs mb-4">
           <Sparkles size={12} />
           Premium AI Project Workspace
         </div>
@@ -640,7 +644,7 @@ const ProjectDetails = () => {
           {project.title}
         </h1>
 
-        <p className="text-gray-400">
+        <p className="text-[var(--theme-textSecondary)]">
           Created on{" "}
           {project.createdAt
             ? new Date(project.createdAt).toLocaleDateString()
@@ -663,15 +667,15 @@ const ProjectDetails = () => {
       </div>
 
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+        <h2 className="text-2xl font-semibold mb-6 text-[var(--theme-accent)] flex items-center gap-2">
           <Sparkles className="w-6 h-6" />
           AI Startup Blueprint
         </h2>
 
         {generatingBlueprint ? (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-gray-400">
+          <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-6 text-gray-400">
             <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+              <Loader2 className="w-4 h-4 text-[var(--theme-accent)] animate-spin" />
               <span>AI is analyzing your idea...</span>
             </div>
             <p className="text-sm mt-3 text-gray-500">
@@ -690,7 +694,7 @@ const ProjectDetails = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   whileHover={{ y: -4 }}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition"
+                  className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-6 hover:bg-white/10 transition"
                 >
                   <button
                     type="button"
@@ -703,11 +707,11 @@ const ProjectDetails = () => {
                       <div className="flex items-start gap-3">
                         <span className="text-2xl shrink-0">{item.icon}</span>
                         <div>
-                          <h3 className="text-lg font-semibold text-indigo-400 mb-2">
+                          <h3 className="text-lg font-semibold text-[var(--theme-accent)] mb-2">
                             {item.title}
                           </h3>
                           <p
-                            className={`text-gray-400 text-sm leading-relaxed ${
+                            className={`text-[var(--theme-textSecondary)] text-sm leading-relaxed ${
                               isExpanded ? "" : "line-clamp-2"
                             }`}
                           >
@@ -734,13 +738,13 @@ const ProjectDetails = () => {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 pt-4 border-t border-white/10"
+                          className="mt-4 pt-4 border-t border-[var(--theme-borderColor)]"
                         >
                           <div className="flex flex-wrap gap-2">
                             {blueprint.coreFeatures.map((feature, i) => (
                               <span
                                 key={i}
-                                className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs"
+                                className="px-3 py-1.5 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] text-xs"
                               >
                                 {feature}
                               </span>
@@ -754,7 +758,7 @@ const ProjectDetails = () => {
             })}
           </div>
         ) : (
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-gray-400">
+          <div className="bg-[var(--theme-cardBg)] border border-[var(--theme-borderColor)] rounded-3xl p-8 text-gray-400">
             No blueprint available yet.
           </div>
         )}
@@ -762,13 +766,13 @@ const ProjectDetails = () => {
 
       <section className="mb-12">
         <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-semibold text-indigo-400 flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-[var(--theme-accent)] flex items-center gap-2">
             <Eye className="w-6 h-6" />
             Website Preview
           </h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
+            <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
               <button
                 onClick={() => setDeviceMode("desktop")}
                 className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
@@ -804,7 +808,7 @@ const ProjectDetails = () => {
               </button>
             </div>
 
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1">
+            <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
               <button
                 onClick={() => setViewMode("preview")}
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
@@ -820,7 +824,7 @@ const ProjectDetails = () => {
                 onClick={() => setViewMode("code")}
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
                   viewMode === "code"
-                    ? "bg-indigo-500/20 text-indigo-400"
+                    ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]"
                     : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -831,7 +835,7 @@ const ProjectDetails = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 md:p-6">
+        <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-4 md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
             <div>
               <p className="text-sm text-gray-300 font-medium">
@@ -847,7 +851,7 @@ const ProjectDetails = () => {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={copyCode}
-                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
               >
                 {copiedCode ? <Check size={15} /> : <Copy size={15} />}
                 {copiedCode ? "Copied" : "Copy Code"}
@@ -855,7 +859,7 @@ const ProjectDetails = () => {
 
               <button
                 onClick={downloadCodeFile}
-                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
               >
                 <Download size={15} />
                 Download Code
@@ -863,7 +867,7 @@ const ProjectDetails = () => {
 
               <button
                 onClick={downloadZip}
-                className="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 hover:bg-[var(--theme-accent)]/30 transition text-sm flex items-center gap-2"
               >
                 <Download size={15} />
                 Download ZIP
@@ -881,7 +885,7 @@ const ProjectDetails = () => {
                 />
               ) : (
                 <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-14 text-center">
-                  <Wand2 className="w-10 h-10 text-indigo-400 mx-auto mb-3" />
+                  <Wand2 className="w-10 h-10 text-[var(--theme-accent)] mx-auto mb-3" />
                   <h3 className="text-lg font-medium text-white mb-2">
                     Build your first live website
                   </h3>
@@ -891,7 +895,7 @@ const ProjectDetails = () => {
                 </div>
               )
             ) : (
-              <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/40 p-5 rounded-2xl overflow-x-auto border border-white/10 min-h-[300px]">
+              <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/40 p-5 rounded-2xl overflow-x-auto border border-[var(--theme-borderColor)] min-h-[300px]">
                 {generatedCode || generateFallbackCode()}
               </pre>
             )}
@@ -900,14 +904,14 @@ const ProjectDetails = () => {
       </section>
 
       <section className="mb-12">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8">
+        <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-6 md:p-8">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-5">
             <div>
-              <h2 className="text-2xl font-semibold text-indigo-400 flex items-center gap-2">
+              <h2 className="text-2xl font-semibold text-[var(--theme-accent)] flex items-center gap-2">
                 <Pencil className="w-5 h-5" />
                 Refine Idea
               </h2>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-sm text-[var(--theme-textSecondary)] mt-2">
                 Update the product direction before generating the final website.
               </p>
             </div>
@@ -915,7 +919,7 @@ const ProjectDetails = () => {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={copyIdea}
-                className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
               >
                 {copied ? <Check size={15} /> : <Copy size={15} />}
                 {copied ? "Copied" : "Copy Idea"}
@@ -923,7 +927,7 @@ const ProjectDetails = () => {
 
               <button
                 onClick={() => setIsEditingIdea((prev) => !prev)}
-                className="px-4 py-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition text-sm flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 hover:bg-[var(--theme-accent)]/30 transition text-sm flex items-center gap-2"
               >
                 <Pencil size={15} />
                 {isEditingIdea ? "Close Editor" : "Edit Idea"}
@@ -936,7 +940,7 @@ const ProjectDetails = () => {
               <textarea
                 value={editedIdea}
                 onChange={(e) => setEditedIdea(e.target.value)}
-                className="w-full min-h-[200px] bg-black/20 border border-white/10 rounded-2xl p-4 text-gray-200 focus:outline-none focus:border-indigo-500/50 transition"
+                className="w-full min-h-[200px] bg-black/20 border border-[var(--theme-borderColor)] rounded-2xl p-4 text-gray-200 focus:outline-none focus:border-[var(--theme-accent)]/50 transition"
                 placeholder="Refine your idea here..."
               />
 
@@ -953,7 +957,10 @@ const ProjectDetails = () => {
 
                 <button
                   onClick={handleSaveIdea}
-                  className="px-4 py-2 bg-indigo-500 rounded-xl hover:bg-indigo-600 transition flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl text-white transition flex items-center gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                  }}
                 >
                   <RefreshCw size={15} />
                   Save & Regenerate Blueprint
@@ -961,7 +968,7 @@ const ProjectDetails = () => {
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+            <div className="rounded-2xl border border-[var(--theme-borderColor)] bg-black/20 p-5">
               <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {project.idea}
               </p>
@@ -974,7 +981,11 @@ const ProjectDetails = () => {
         <button
           onClick={buildWebsite}
           disabled={buildingWebsite}
-          className="px-8 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 mx-auto disabled:opacity-50 shadow-lg shadow-indigo-500/20"
+          className="px-8 py-3 rounded-xl text-white transition flex items-center gap-2 mx-auto disabled:opacity-50"
+          style={{
+            background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+            boxShadow: `0 0 20px var(--theme-glow)`
+          }}
         >
           {buildingWebsite ? (
             <>
@@ -998,7 +1009,7 @@ const ProjectDetails = () => {
 
       {normalizedSections.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-indigo-400 flex items-center gap-2">
+          <h2 className="text-2xl font-semibold mb-6 text-[var(--theme-accent)] flex items-center gap-2">
             <Sparkles className="w-6 h-6" />
             Generated Sections
           </h2>
@@ -1011,19 +1022,19 @@ const ProjectDetails = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06 }}
                 whileHover={{ y: -4 }}
-                className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition ${
-                  regeneratingIndex === index ? "ring-1 ring-indigo-400/40" : ""
+                className={`bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-6 hover:bg-white/10 transition ${
+                  regeneratingIndex === index ? "ring-1 ring-[var(--theme-accent)]/40" : ""
                 }`}
               >
                 <div className="flex justify-between items-start mb-3 gap-4">
-                  <h3 className="text-lg font-semibold text-purple-400">
+                  <h3 className="text-lg font-semibold text-[var(--theme-accent)]">
                     {section.title}
                   </h3>
 
                   <button
                     onClick={() => handleRegenerateSection(index)}
                     disabled={regeneratingIndex !== null}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {regeneratingIndex === index ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -1035,11 +1046,11 @@ const ProjectDetails = () => {
 
                 {regeneratingIndex === index ? (
                   <div className="text-gray-400 text-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
+                    <Loader2 className="w-4 h-4 text-[var(--theme-accent)] animate-spin" />
                     AI is improving this section...
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">
+                  <p className="text-[var(--theme-textSecondary)] text-sm leading-relaxed whitespace-pre-wrap">
                     {section.description || "No description generated yet."}
                   </p>
                 )}
@@ -1052,12 +1063,12 @@ const ProjectDetails = () => {
       <section>
         <button
           onClick={() => setShowVersions(!showVersions)}
-          className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 transition"
+          className="mb-6 px-4 py-2 rounded-xl flex items-center gap-2 bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 hover:bg-[var(--theme-accent)]/30 transition"
         >
           <History size={16} />
           {showVersions ? "Hide" : "View"} Version History
           {project.versions?.length > 0 && (
-            <span className="ml-1 px-2 py-0.5 bg-indigo-500/20 rounded-full text-xs">
+            <span className="ml-1 px-2 py-0.5 bg-[var(--theme-accent)]/20 rounded-full text-xs">
               {project.versions.length}
             </span>
           )}
@@ -1069,9 +1080,9 @@ const ProjectDetails = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+              className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-6 overflow-hidden"
             >
-              <h3 className="text-lg font-semibold mb-4 text-indigo-400 flex items-center gap-2">
+              <h3 className="text-lg font-semibold mb-4 text-[var(--theme-accent)] flex items-center gap-2">
                 <History className="w-5 h-5" />
                 Version History
               </h3>
