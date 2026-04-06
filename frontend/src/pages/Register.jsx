@@ -99,19 +99,16 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950/30 to-gray-950" />
-      
+    <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: 'var(--theme-bgPrimary)' }}>
       {/* Animated gradient orbs */}
       <div 
-        className="absolute w-[600px] h-[600px] bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
+        className="absolute w-[600px] h-[600px] bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
         style={{
           transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
         }}
       />
       <div 
-        className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-l from-pink-600/20 to-purple-600/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
+        className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-l from-pink-600/20 to-[var(--theme-accent)]/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
         style={{
           transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`,
         }}
@@ -131,20 +128,20 @@ const Register = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 backdrop-blur-md mb-8">
-              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-              <span className="text-sm text-purple-300 font-medium">✨ Join the Future of Web Creation</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30 backdrop-blur-md mb-8">
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-accent)] animate-pulse" />
+              <span className="text-sm text-[var(--theme-accent)] font-medium">✨ Join the Future of Web Creation</span>
             </div>
 
             <h1 className="text-7xl xl:text-8xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[var(--theme-gradient-start)] via-[var(--theme-accent)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent">
                 Start Your
               </span>
               <br />
               <span className="text-white">Journey Today</span>
             </h1>
 
-            <p className="text-gray-300 text-xl max-w-lg leading-relaxed mb-12">
+            <p className="text-[var(--theme-textSecondary)] text-xl max-w-lg leading-relaxed mb-12">
               Join thousands of creators building amazing websites with cutting-edge AI technology.
             </p>
 
@@ -161,12 +158,12 @@ const Register = () => {
                   transition={{ delay: idx * 0.1 }}
                   className="flex items-start gap-4 group cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="text-xl">{feature.icon}</span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold group-hover:text-purple-400 transition-colors">{feature.text}</p>
-                    <p className="text-gray-500 text-sm">{feature.desc}</p>
+                    <p className="text-white font-semibold group-hover:text-[var(--theme-accent)] transition-colors">{feature.text}</p>
+                    <p className="text-[var(--theme-textSecondary)] text-sm">{feature.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -177,19 +174,19 @@ const Register = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="mt-12 pt-8 border-t border-white/10"
+              className="mt-12 pt-8 border-t border-[var(--theme-borderColor)]"
             >
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border-2 border-gray-950 flex items-center justify-center text-xs font-bold text-white">
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] border-2 border-gray-950 flex items-center justify-center text-xs font-bold text-white">
                       {String.fromCharCode(64 + i)}
                     </div>
                   ))}
                 </div>
                 <div>
-                  <p className="text-sm text-gray-300">Join <span className="text-purple-400 font-semibold">10,000+</span> creators</p>
-                  <p className="text-xs text-gray-500">Already building with EvolveWeb AI</p>
+                  <p className="text-sm text-gray-300">Join <span className="text-[var(--theme-accent)] font-semibold">10,000+</span> creators</p>
+                  <p className="text-xs text-[var(--theme-textSecondary)]">Already building with EvolveWeb AI</p>
                 </div>
               </div>
             </motion.div>
@@ -205,9 +202,15 @@ const Register = () => {
             className="w-full max-w-md"
           >
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl opacity-30" />
+              <div className="absolute -inset-1 rounded-2xl blur-xl opacity-30"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                }}
+              />
               
-              <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl p-8 transition-all duration-500 hover:border-purple-500/40 hover:shadow-[0_0_60px_rgba(99,102,241,0.35)]">
+              <div className="relative bg-[var(--theme-cardBg)] backdrop-blur-2xl border border-[var(--theme-borderColor)] rounded-2xl p-8 transition-all duration-500 hover:border-[var(--theme-accent)]/40"
+                style={{ boxShadow: `0 0 60px var(--theme-glow)` }}
+              >
                 
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -215,23 +218,26 @@ const Register = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", duration: 0.5 }}
-                    className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center"
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+                    style={{
+                      background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                    }}
                   >
                     <Sparkles className="w-8 h-8 text-white" />
                   </motion.div>
                   <h2 className="text-3xl font-bold text-white mb-2">Create Account ✨</h2>
-                  <p className="text-gray-400">Start building amazing websites with AI</p>
+                  <p className="text-[var(--theme-textSecondary)]">Start building amazing websites with AI</p>
                 </div>
 
                 <form onSubmit={handleRegister} className="space-y-5">
                   {/* Name Field */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-[var(--theme-textSecondary)] mb-2 block">
                       Full Name
                     </label>
                     <div className={`relative transition-all duration-300 ${focusedField === 'name' ? 'scale-[1.02]' : ''}`}>
                       <User className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${
-                        focusedField === 'name' ? 'text-purple-400' : 'text-gray-500'
+                        focusedField === 'name' ? 'text-[var(--theme-accent)]' : 'text-gray-500'
                       }`} />
                       <input
                         type="text"
@@ -246,7 +252,7 @@ const Register = () => {
                           setName(e.target.value);
                           validateName(e.target.value);
                         }}
-                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20"
                         placeholder="John Doe"
                       />
                       <AnimatePresence>
@@ -265,12 +271,12 @@ const Register = () => {
 
                   {/* Email Field */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-[var(--theme-textSecondary)] mb-2 block">
                       Email Address
                     </label>
                     <div className={`relative transition-all duration-300 ${focusedField === 'email' ? 'scale-[1.02]' : ''}`}>
                       <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${
-                        focusedField === 'email' ? 'text-purple-400' : 'text-gray-500'
+                        focusedField === 'email' ? 'text-[var(--theme-accent)]' : 'text-gray-500'
                       }`} />
                       <input
                         type="email"
@@ -285,7 +291,7 @@ const Register = () => {
                           setEmail(e.target.value);
                           validateEmail(e.target.value);
                         }}
-                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20"
                         placeholder="you@example.com"
                       />
                       <AnimatePresence>
@@ -304,12 +310,12 @@ const Register = () => {
 
                   {/* Password Field */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-[var(--theme-textSecondary)] mb-2 block">
                       Password
                     </label>
                     <div className={`relative transition-all duration-300 ${focusedField === 'password' ? 'scale-[1.02]' : ''}`}>
                       <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${
-                        focusedField === 'password' ? 'text-purple-400' : 'text-gray-500'
+                        focusedField === 'password' ? 'text-[var(--theme-accent)]' : 'text-gray-500'
                       }`} />
                       <input
                         type={showPassword ? "text" : "password"}
@@ -321,23 +327,18 @@ const Register = () => {
                           setPassword(e.target.value);
                           checkStrength(e.target.value);
                         }}
-                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] transition-all duration-300 text-white placeholder-gray-500 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20"
                         placeholder="Create a strong password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-400 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[var(--theme-accent)] transition-colors"
                       >
-                        {showPassword ? (
-                          <span className="text-2xl">🙈</span>
-                        ) : (
-                          <span className="text-2xl">🐵</span>
-                        )}
+                        {showPassword ? <span className="text-2xl">🙈</span> : <span className="text-2xl">🐵</span>}
                       </button>
                     </div>
 
-                    {/* Password Strength Indicator */}
                     <AnimatePresence>
                       {password && (
                         <motion.div
@@ -373,15 +374,15 @@ const Register = () => {
                       id="terms"
                       checked={agreeToTerms}
                       onChange={(e) => setAgreeToTerms(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-white/20 bg-white/5 text-[var(--theme-accent)] focus:ring-[var(--theme-accent)] focus:ring-offset-0"
                     />
-                    <label htmlFor="terms" className="text-sm text-gray-400">
+                    <label htmlFor="terms" className="text-sm text-[var(--theme-textSecondary)]">
                       I agree to the{" "}
-                      <button type="button" className="text-purple-400 hover:text-purple-300">
+                      <button type="button" className="text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">
                         Terms of Service
                       </button>{" "}
                       and{" "}
-                      <button type="button" className="text-purple-400 hover:text-purple-300">
+                      <button type="button" className="text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">
                         Privacy Policy
                       </button>
                     </label>
@@ -393,7 +394,10 @@ const Register = () => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={loading || !nameValid || !emailValid || !agreeToTerms}
-                    className="relative w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative w-full py-3 rounded-xl text-white font-semibold overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                    }}
                   >
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       {loading ? (
@@ -408,13 +412,13 @@ const Register = () => {
                         </>
                       )}
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.button>
 
                   {/* Divider */}
                   <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/10"></div>
+                      <div className="w-full border-t border-[var(--theme-borderColor)]"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
                       <span className="px-4 bg-transparent text-gray-500">Or continue with</span>
@@ -427,7 +431,7 @@ const Register = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-purple-500/50 transition-all duration-300"
+                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] text-gray-300 hover:text-white hover:border-[var(--theme-accent)]/50 transition-all duration-300"
                     >
                       <Github className="w-4 h-4" />
                       <span className="text-sm">GitHub</span>
@@ -436,7 +440,7 @@ const Register = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-purple-500/50 transition-all duration-300"
+                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] text-gray-300 hover:text-white hover:border-[var(--theme-accent)]/50 transition-all duration-300"
                     >
                       <Chrome className="w-4 h-4" />
                       <span className="text-sm">Google</span>
@@ -444,11 +448,11 @@ const Register = () => {
                   </div>
 
                   {/* Login Link */}
-                  <p className="text-center text-gray-400 text-sm mt-6">
+                  <p className="text-center text-[var(--theme-textSecondary)] text-sm mt-6">
                     Already have an account?{" "}
                     <button
                       onClick={() => navigate("/login")}
-                      className="text-purple-400 hover:text-purple-300 font-semibold hover:underline transition-all"
+                      className="text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)] font-semibold hover:underline transition-all"
                     >
                       Sign In
                     </button>
