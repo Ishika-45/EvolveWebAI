@@ -8,13 +8,12 @@ const AIGenerationModal = ({
   generationSteps,
   currentStep,
 }) => {
-  // Icons for different steps
   const stepIcons = [
-    { icon: Brain, color: "purple" },
-    { icon: Code, color: "blue" },
-    { icon: Zap, color: "yellow" },
-    { icon: Rocket, color: "pink" },
-    { icon: Sparkles, color: "green" },
+    { icon: Brain },
+    { icon: Code },
+    { icon: Zap },
+    { icon: Rocket },
+    { icon: Sparkles },
   ];
 
   const getStepIcon = (index, isActive, isComplete) => {
@@ -25,8 +24,8 @@ const AIGenerationModal = ({
 
   const getIconColor = (index, isActive, isComplete) => {
     if (isComplete) return "text-green-400";
-    if (isActive) return "text-purple-400 animate-spin";
-    return `text-${stepIcons[index]?.color || 'gray'}-400`;
+    if (isActive) return "text-[var(--theme-accent)] animate-spin";
+    return "text-gray-400";
   };
 
   return (
@@ -38,10 +37,9 @@ const AIGenerationModal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Background gradient orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600/30 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-600/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse bg-purple-600/30" />
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse bg-indigo-600/30" style={{ animationDelay: '1s' }} />
           </div>
 
           <motion.div
@@ -51,13 +49,10 @@ const AIGenerationModal = ({
             transition={{ duration: 0.3, type: "spring" }}
             className="relative w-full max-w-xl mx-4"
           >
-            {/* Glow effect behind modal */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl opacity-30" />
+            <div className="absolute -inset-1 rounded-2xl blur-xl opacity-30 bg-gradient-to-r from-purple-600 to-indigo-600" />
             
-            {/* Modal Content */}
-            <div className="relative bg-gradient-to-br from-gray-900 to-purple-950 border border-white/10 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+            <div className="relative rounded-2xl p-8 shadow-2xl backdrop-blur-xl bg-[var(--theme-cardBg)] border border-[var(--theme-borderColor)]">
               
-              {/* Header with animated icon */}
               <div className="flex items-center gap-4 mb-6">
                 <motion.div
                   animate={{
@@ -70,8 +65,8 @@ const AIGenerationModal = ({
                   }}
                   className="relative"
                 >
-                  <div className="absolute inset-0 bg-purple-500/30 rounded-full blur-md" />
-                  <div className="relative p-3 rounded-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/30 border border-purple-500/30">
+                  <div className="absolute inset-0 rounded-full blur-md bg-purple-500/30" />
+                  <div className="relative p-3 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-600/30 to-indigo-600/30">
                     <Sparkles className="text-purple-400" size={24} />
                   </div>
                 </motion.div>
@@ -86,12 +81,10 @@ const AIGenerationModal = ({
                 </div>
               </div>
 
-              {/* AI Streaming Text */}
               <div className="mb-6 p-4 rounded-xl bg-black/30 border border-purple-500/20">
                 <AIStreamingText text="Analyzing your requirements and crafting a beautiful website structure with modern design patterns..." />
               </div>
 
-              {/* Generation Steps */}
               <div className="space-y-3 mb-6">
                 {generationSteps.map((step, index) => {
                   const isActive = index === currentStep;
@@ -143,7 +136,6 @@ const AIGenerationModal = ({
                 })}
               </div>
 
-              {/* Progress Bar with Percentage */}
               <div className="space-y-2">
                 <div className="flex justify-between text-xs">
                   <span className="text-gray-400">Generation Progress</span>
@@ -160,7 +152,6 @@ const AIGenerationModal = ({
                     }}
                     transition={{ ease: "easeInOut", duration: 0.5 }}
                   />
-                  {/* Animated shimmer effect */}
                   <motion.div
                     className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                     animate={{ x: ['0%', '500%'] }}
@@ -170,7 +161,6 @@ const AIGenerationModal = ({
                 </div>
               </div>
 
-              {/* Estimated Time */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -182,7 +172,6 @@ const AIGenerationModal = ({
                 </p>
               </motion.div>
 
-              {/* Tip Section */}
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

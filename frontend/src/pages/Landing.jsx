@@ -261,13 +261,14 @@ const Landing = () => {
       
       {/* Advanced Gradient Background */}
       <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -10 }}>
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-purple-950/30 to-gray-950" />
+       <div className="absolute inset-0" style={{ backgroundColor: 'var(--theme-bgPrimary)' }} />
         
         {/* Animated gradient orbs */}
         <div 
-          className="absolute w-[600px] h-[600px] bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
+          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
+             background: `radial-gradient(circle, var(--theme-accent)/20, transparent)`
           }}
         />
         <div 
@@ -371,7 +372,7 @@ const Landing = () => {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/register")}
-                className="group relative px-9 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
+                className="group relative px-9 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Get Started
@@ -379,14 +380,14 @@ const Landing = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 blur-xl opacity-0 group-hover:opacity-50 transition-opacity" />
               </motion.button>
               
               <motion.button 
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-9 py-4 border-2 border-purple-500/50 text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all duration-300 font-semibold backdrop-blur-sm"
+                className="group px-9 py-4 border-2 border-purple-500/50 text-[var(--theme-accent)] hover:bg-purple-500/10 rounded-xl transition-all duration-300 font-semibold backdrop-blur-sm"
               >
                 <span className="flex items-center gap-2">
                   Explore Demo
@@ -428,7 +429,7 @@ const Landing = () => {
               <p className="text-xs text-gray-500 mb-3 tracking-wider">TRUSTED BY INNOVATIVE TEAMS</p>
               <div className="flex gap-6 opacity-50 hover:opacity-100 transition-opacity">
                 {["Google", "Microsoft", "OpenAI", "Meta"].map((company, i) => (
-                  <span key={i} className="text-sm font-semibold text-gray-400 hover:text-purple-400 transition-colors cursor-pointer">
+                  <span key={i} className="text-sm font-semibold text-gray-400 hover:text-[var(--theme-accent)] transition-colors cursor-pointer">
                     {company}
                   </span>
                 ))}
@@ -458,14 +459,14 @@ const Landing = () => {
 
             {/* Main Interactive Card */}
             <div className="relative group">
-              <div className={`absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+              <div className={`absolute -inset-1 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-2xl blur-xl transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
               
               <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-2xl p-6 shadow-2xl transition-all duration-500 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl" />
                 
                 {/* Preview Header */}
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <h3 className="text-purple-400 font-semibold flex items-center gap-2">
+                  <h3 className="text-[var(--theme-accent)] font-semibold flex items-center gap-2">
                     <div className="relative">
                       <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-ping" />
                       <div className="w-2.5 h-2.5 bg-purple-400 rounded-full absolute top-0" />
@@ -491,12 +492,12 @@ const Landing = () => {
                   >
                     {/* Animated 3D Cube */}
                     <div className="relative w-32 h-32 mb-8">
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl" style={{
+                      <div className="absolute inset-0 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl" style={{
                         animation: 'float3D 3s ease-in-out infinite'
                       }} />
                       <div className="absolute inset-2 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-lg animate-pulse" />
                       <div className="absolute inset-4 bg-gray-900 rounded-md flex items-center justify-center">
-                        <svg className="w-12 h-12 text-purple-400 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 text-[var(--theme-accent)] animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                       </div>
@@ -505,42 +506,42 @@ const Landing = () => {
                     {/* Animated Code Editor */}
                     <div className="w-full max-w-md space-y-3 px-6">
                       <div className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-purple-400">&lt;div</span>
+                        <span className="text-[var(--theme-accent)]">&lt;div</span>
                         <span className="text-blue-400">className</span>
                         <span className="text-gray-400">=</span>
                         <span className="text-green-400">"hero-section"</span>
-                        <span className="text-purple-400">&gt;</span>
+                        <span className="text-[var(--theme-accent)]">&gt;</span>
                       </div>
                       
                       <div className="pl-6 space-y-2">
                         <div className="flex items-center gap-2 text-sm font-mono group/code">
-                          <span className="text-purple-400">&lt;h1&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&lt;h1&gt;</span>
                           <span className="text-white bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent" style={{
                             backgroundSize: '200% auto',
                             animation: 'gradientShift 3s ease infinite'
                           }}>
                             AI-Powered Evolution
                           </span>
-                          <span className="text-purple-400">&lt;/h1&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&lt;/h1&gt;</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm font-mono">
-                          <span className="text-purple-400">&lt;p&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&lt;p&gt;</span>
                           <span className="text-gray-300 animate-pulse">Building the future of web development</span>
-                          <span className="text-purple-400">&lt;/p&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&lt;/p&gt;</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm font-mono">
-                          <span className="text-purple-400">&lt;button</span>
+                          <span className="text-[var(--theme-accent)]">&lt;button</span>
                           <span className="text-yellow-400">onClick</span>
                           <span className="text-gray-400">=</span>
                           <span className="text-green-400">"deploy()"</span>
-                          <span className="text-purple-400">&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&gt;</span>
                           <span className="text-white">Deploy Now</span>
-                          <span className="text-purple-400">&lt;/button&gt;</span>
+                          <span className="text-[var(--theme-accent)]">&lt;/button&gt;</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-purple-400">&lt;/div&gt;</span>
+                        <span className="text-[var(--theme-accent)]">&lt;/div&gt;</span>
                       </div>
                     </div>
 
@@ -561,7 +562,7 @@ const Landing = () => {
                       Live
                     </span>
                     <span className="text-gray-400">•</span>
-                    <span className="flex items-center gap-1 text-purple-400">
+                    <span className="flex items-center gap-1 text-[var(--theme-accent)]">
                       <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
@@ -616,7 +617,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
               Powerful Features
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
@@ -667,7 +668,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
               Simple Process
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -714,7 +715,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
               Pricing Plans
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
@@ -731,7 +732,7 @@ const Landing = () => {
                 onClick={() => setSelectedPlan("monthly")}
                 className={`px-6 py-2 rounded-lg transition-all duration-300 font-semibold ${
                   selectedPlan === "monthly" 
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg" 
+                    ? "bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) text-white shadow-lg" 
                     : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -741,7 +742,7 @@ const Landing = () => {
                 onClick={() => setSelectedPlan("yearly")}
                 className={`px-6 py-2 rounded-lg transition-all duration-300 font-semibold ${
                   selectedPlan === "yearly" 
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg" 
+                    ? "bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) text-white shadow-lg" 
                     : "text-gray-400 hover:text-white"
                 }`}
               >
@@ -798,7 +799,7 @@ const Landing = () => {
   whileHover={{ scale: 1.05, y: -2 }}
   whileTap={{ scale: 0.95 }}
   onClick={() => navigate("/register")}
-  className="group relative px-9 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
+  className="group relative px-9 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
 >
   <span className="relative z-10 flex items-center gap-2">
     Get Started
@@ -822,7 +823,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
               Testimonials
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -871,7 +872,7 @@ const Landing = () => {
                   animate={{ opacity: hoveredTestimonial === idx ? 1 : 0, scale: hoveredTestimonial === idx ? 1 : 0 }}
                   className="mt-4 flex justify-end"
                 >
-                  <svg className="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-[var(--theme-accent)]" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                   </svg>
                 </motion.div>
@@ -890,7 +891,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-wider">
+            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
               FAQ
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -909,7 +910,7 @@ const Landing = () => {
                 transition={{ delay: idx * 0.1 }}
                 className="glass-card p-6 group cursor-pointer hover:border-purple-500/30 transition-all duration-300"
               >
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[var(--theme-accent)] transition-colors">
                   {faq.q}
                 </h3>
                 <p className="text-gray-400">
@@ -943,7 +944,7 @@ const Landing = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/register")}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="px-8 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 Start Building for Free →
               </motion.button>
@@ -964,7 +965,7 @@ const Landing = () => {
               </p>
               <div className="flex gap-4">
                 {["twitter", "github", "linkedin", "discord"].map((social) => (
-                  <a key={social} href="#" className="text-gray-400 hover:text-purple-400 transition-colors">
+                  <a key={social} href="#" className="text-gray-400 hover:text-[var(--theme-accent)] transition-colors">
                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-purple-500/20 transition-all">
                       <span className="text-sm">{social[0].toUpperCase()}</span>
                     </div>
@@ -983,7 +984,7 @@ const Landing = () => {
                 <ul className="space-y-2">
                   {section.links.map((link, lIdx) => (
                     <li key={lIdx}>
-                      <a href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">
+                      <a href="#" className="text-gray-400 hover:text-[var(--theme-accent)] transition-colors text-sm">
                         {link}
                       </a>
                     </li>
@@ -1084,19 +1085,19 @@ const Landing = () => {
           animation: spin-slow 20s linear infinite;
         }
         
-        .glass-card {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 1.5rem;
-        }
+       .glass-card {
+  background: var(--theme-cardBg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--theme-borderColor);
+  border-radius: 1.5rem;
+}
         
         .gradient-text {
-          background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
+  background: linear-gradient(135deg, var(--theme-gradient-start) 0%, var(--theme-gradient-end) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
         /* Scroll margin for fixed navbar */
         .scroll-mt-20 {

@@ -1,8 +1,7 @@
-// LandingNavbar.jsx - IMPROVED VERSION
-
+// LandingNavbar.jsx - THEME READY VERSION
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Add this
+import { motion, AnimatePresence } from "framer-motion";
 
 const LandingNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,7 +13,6 @@ const LandingNavbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
       
-      // Track active section for highlighting
       const sections = ["features", "how-it-works", "pricing", "about"];
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -42,7 +40,6 @@ const LandingNavbar = () => {
     { name: "About", href: "#about", icon: "🚀", section: "about" },
   ];
 
-  // Smooth scroll handler
   const handleSmoothScroll = (e, href) => {
     e.preventDefault();
     const element = document.querySelector(href);
@@ -60,38 +57,38 @@ const LandingNavbar = () => {
         transition={{ duration: 0.5, type: "spring" }}
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
           isScrolled 
-            ? "bg-gray-950/95 backdrop-blur-2xl border-b border-purple-500/20 shadow-2xl shadow-purple-500/10" 
+            ? "bg-gray-950/95 backdrop-blur-2xl border-b border-[var(--theme-borderColor)] shadow-2xl shadow-[var(--theme-accent)]/10" 
             : "bg-transparent border-b border-white/5"
         }`}
       >
-        {/* Premium animated gradient bar at top */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent" 
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--theme-accent)] to-transparent" 
              style={{ transform: `scaleX(${isScrolled ? 1 : 0})`, transition: 'transform 0.5s ease' }} />
         
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           
-          {/* Logo with 3D hover effect */}
           <Link to="/" className="group relative">
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="absolute -inset-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition duration-500"
+              className="absolute -inset-2 rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition duration-500"
+              style={{
+                background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+              }}
             />
             <div className="relative">
               <h1 className="text-2xl font-bold tracking-wide">
-                <span className="bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[var(--theme-gradient-start)] via-[var(--theme-accent)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent">
                   EvolveWeb
                 </span>
                 <span className="text-white"> AI</span>
               </h1>
               <div className="absolute -top-1 -right-8">
-                <span className="text-[9px] font-bold bg-gradient-to-r from-purple-500 to-indigo-500 px-1.5 py-0.5 rounded-full text-white shadow-lg">
+                <span className="text-[9px] font-bold bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] px-1.5 py-0.5 rounded-full text-white shadow-lg">
                   BETA
                 </span>
               </div>
             </div>
           </Link>
 
-          {/* Desktop Navigation with better hover effects */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link, index) => (
               <a
@@ -100,45 +97,49 @@ const LandingNavbar = () => {
                 onClick={(e) => handleSmoothScroll(e, link.href)}
                 className="relative px-4 py-2 rounded-lg group"
               >
-                {/* Active indicator */}
                 {activeSection === link.section && (
                   <motion.div
                     layoutId="activeSection"
-                    className="absolute inset-0 bg-purple-500/10 rounded-lg border border-purple-500/30"
+                    className="absolute inset-0 rounded-lg border"
+                    style={{
+                      background: `linear-gradient(135deg, var(--theme-accent)/10, var(--theme-gradient-end)/10)`,
+                      borderColor: 'var(--theme-accent)/30'
+                    }}
                     transition={{ type: "spring", duration: 0.5 }}
                   />
                 )}
                 
-                <span className="relative z-10 flex items-center gap-2 text-gray-300 group-hover:text-purple-400 transition-colors duration-300 font-medium">
+                <span className="relative z-10 flex items-center gap-2 text-gray-300 group-hover:text-[var(--theme-accent)] transition-colors duration-300 font-medium">
                   <span className="text-base opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
                     {link.icon}
                   </span>
                   {link.name}
                 </span>
                 
-                {/* Animated underline */}
                 <motion.span 
-                  className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                  className="absolute bottom-0 left-1/2 w-0 h-0.5 rounded-full"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                  }}
                   whileHover={{ width: "80%", x: "-50%", left: "50%" }}
                   transition={{ duration: 0.3 }}
                 />
               </a>
             ))}
             
-            {/* Premium divider with glow */}
-            <div className="mx-2 w-px h-8 bg-gradient-to-b from-transparent via-purple-500/50 to-transparent" />
+            <div className="mx-2 w-px h-8 bg-gradient-to-b from-transparent via-[var(--theme-accent)]/50 to-transparent" />
             
-            {/* Auth Buttons with premium animations */}
             <Link to="/login">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative px-5 py-2 rounded-lg overflow-hidden group"
               >
-                <span className="relative z-10 text-gray-300 group-hover:text-purple-400 transition-colors font-medium">
+                <span className="relative z-10 text-gray-300 group-hover:text-[var(--theme-accent)] transition-colors font-medium">
                   Login
                 </span>
-                <div className="absolute inset-0 bg-purple-500/10 rounded-lg transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="absolute inset-0 rounded-lg transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"
+                     style={{ background: `linear-gradient(135deg, var(--theme-accent)/10, var(--theme-gradient-end)/10)` }} />
               </motion.button>
             </Link>
             
@@ -148,10 +149,18 @@ const LandingNavbar = () => {
                 whileTap={{ scale: 0.95 }}
                 className="group relative px-6 py-2 rounded-lg overflow-hidden shadow-lg"
               >
-                {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 blur-xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
+                <div className="absolute inset-0"
+                     style={{
+                       background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                     }} />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                     style={{
+                       background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                     }} />
+                <div className="absolute inset-0 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"
+                     style={{
+                       background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                     }} />
                 
                 <span className="relative z-10 flex items-center gap-2 text-white font-semibold">
                   Get Started
@@ -171,7 +180,6 @@ const LandingNavbar = () => {
             </Link>
           </div>
 
-          {/* Mobile Menu Button - Premium animation */}
           <motion.button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden relative w-10 h-10 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
@@ -179,17 +187,20 @@ const LandingNavbar = () => {
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
               <motion.div 
-                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                className="w-5 h-0.5 rounded-full"
+                style={{ backgroundColor: 'var(--theme-accent)' }}
                 animate={{ rotate: isMobileMenuOpen ? 45 : 0, y: isMobileMenuOpen ? 6 : 0 }}
                 transition={{ duration: 0.3 }}
               />
               <motion.div 
-                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                className="w-5 h-0.5 rounded-full"
+                style={{ backgroundColor: 'var(--theme-accent)' }}
                 animate={{ opacity: isMobileMenuOpen ? 0 : 1 }}
                 transition={{ duration: 0.3 }}
               />
               <motion.div 
-                className="w-5 h-0.5 bg-purple-400 rounded-full"
+                className="w-5 h-0.5 rounded-full"
+                style={{ backgroundColor: 'var(--theme-accent)' }}
                 animate={{ rotate: isMobileMenuOpen ? -45 : 0, y: isMobileMenuOpen ? -6 : 0 }}
                 transition={{ duration: 0.3 }}
               />
@@ -198,11 +209,9 @@ const LandingNavbar = () => {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu - Premium glass morphism */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -211,22 +220,24 @@ const LandingNavbar = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             />
             
-            {/* Menu Panel */}
             <motion.div 
               initial={{ opacity: 0, x: "100%" }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25 }}
-              className="fixed right-0 top-0 bottom-0 z-40 w-80 bg-gradient-to-br from-gray-900/95 to-purple-950/95 backdrop-blur-2xl border-l border-purple-500/20 shadow-2xl"
+              className="fixed right-0 top-0 bottom-0 z-40 w-80 bg-gradient-to-br from-gray-900/95 to-purple-950/95 backdrop-blur-2xl border-l border-[var(--theme-borderColor)] shadow-2xl"
             >
               <div className="flex flex-col h-full">
-                {/* Header */}
                 <div className="p-6 border-b border-white/10">
-                  <h2 className="text-xl font-bold gradient-text">Menu</h2>
+                  <h2 className="text-xl font-bold"
+                      style={{
+                        background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}>Menu</h2>
                   <p className="text-xs text-gray-400 mt-1">Navigate through sections</p>
                 </div>
                 
-                {/* Navigation Items */}
                 <div className="flex-1 p-6 space-y-2">
                   {navLinks.map((link, index) => (
                     <motion.a
@@ -237,11 +248,11 @@ const LandingNavbar = () => {
                       whileHover={{ x: 10 }}
                     >
                       <span className="text-2xl">{link.icon}</span>
-                      <span className="text-gray-300 group-hover:text-purple-400 transition-colors font-medium">
+                      <span className="text-gray-300 group-hover:text-[var(--theme-accent)] transition-colors font-medium">
                         {link.name}
                       </span>
                       <motion.svg 
-                        className="w-4 h-4 ml-auto text-gray-500 group-hover:text-purple-400"
+                        className="w-4 h-4 ml-auto text-gray-500 group-hover:text-[var(--theme-accent)]"
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
@@ -254,12 +265,12 @@ const LandingNavbar = () => {
                   ))}
                 </div>
                 
-                {/* Auth Buttons */}
                 <div className="p-6 border-t border-white/10 space-y-3">
                   <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                     <motion.button 
                       whileTap={{ scale: 0.98 }}
-                      className="w-full py-3 rounded-xl border border-purple-500/30 text-purple-400 font-semibold hover:bg-purple-500/10 transition-all duration-300"
+                      className="w-full py-3 rounded-xl border text-[var(--theme-accent)] font-semibold hover:bg-purple-500/10 transition-all duration-300"
+                      style={{ borderColor: 'var(--theme-accent)/30' }}
                     >
                       Login
                     </motion.button>
@@ -267,7 +278,10 @@ const LandingNavbar = () => {
                   <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
                     <motion.button 
                       whileTap={{ scale: 0.98 }}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg"
+                      className="w-full py-3 rounded-xl text-white font-semibold shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                      }}
                     >
                       Get Started Free
                     </motion.button>
