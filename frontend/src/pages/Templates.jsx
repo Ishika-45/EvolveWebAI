@@ -81,7 +81,6 @@ const Templates = () => {
     setIsCreating(true);
     
     try {
-      // Create project via API
       const res = await api.post("/projects", {
         title: projectName,
         idea: `Template: ${selectedTemplate.name} - ${selectedTemplate.desc}`,
@@ -94,7 +93,6 @@ const Templates = () => {
       setOpenModal(false);
       setIsCreating(false);
       
-      // Navigate to project page
       navigate(`/dashboard/project/${newProject._id}`);
     } catch (err) {
       console.error("Failed to create project:", err);
@@ -104,10 +102,10 @@ const Templates = () => {
 
   const getColorClasses = (color) => {
     const colors = {
-      purple: "from-purple-600 to-indigo-600",
-      pink: "from-pink-600 to-rose-600",
-      blue: "from-blue-600 to-cyan-600",
-      green: "from-green-600 to-emerald-600"
+      purple: "from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]",
+      pink: "from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]",
+      blue: "from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]",
+      green: "from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]"
     };
     return colors[color] || colors.purple;
   };
@@ -116,14 +114,14 @@ const Templates = () => {
     <div className="space-y-8">
       {/* Header Section */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 mb-3">
-          <Sparkles className="w-3 h-3 text-purple-400" />
-          <span className="text-xs text-purple-300">Template Library</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30 mb-3">
+          <Sparkles className="w-3 h-3 text-[var(--theme-accent)]" />
+          <span className="text-xs text-[var(--theme-accent)]">Template Library</span>
         </div>
         <h1 className="text-3xl font-bold text-white flex items-center gap-2">
           Templates
         </h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <p className="text-[var(--theme-textSecondary)] text-sm mt-1">
           Choose from professionally designed, AI-powered templates to kickstart your project
         </p>
       </div>
@@ -131,23 +129,23 @@ const Templates = () => {
       {/* Stats Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Premium Templates", value: templates.length, icon: Star, color: "purple" },
-          { label: "Categories", value: "4+", icon: Sparkles, color: "pink" },
-          { label: "Happy Users", value: "10K+", icon: TrendingUp, color: "blue" },
-          { label: "AI Ready", value: "100%", icon: Zap, color: "green" }
+          { label: "Premium Templates", value: templates.length, icon: Star },
+          { label: "Categories", value: "4+", icon: Sparkles },
+          { label: "Happy Users", value: "10K+", icon: TrendingUp },
+          { label: "AI Ready", value: "100%", icon: Zap }
         ].map((stat, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4"
+            className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-4"
           >
-            <div className={`p-2 rounded-xl bg-${stat.color}-500/20 w-fit mb-2`}>
-              <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+            <div className="p-2 rounded-xl bg-[var(--theme-accent)]/20 w-fit mb-2">
+              <stat.icon className="w-4 h-4 text-[var(--theme-accent)]" />
             </div>
             <p className="text-2xl font-bold text-white">{stat.value}</p>
-            <p className="text-xs text-gray-500">{stat.label}</p>
+            <p className="text-xs text-[var(--theme-textSecondary)]">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -172,21 +170,28 @@ const Templates = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isHovered ? 1 : 0 }}
-                className={`absolute -inset-0.5 bg-gradient-to-r ${getColorClasses(template.color)} rounded-2xl blur-xl transition-all duration-500`}
+                className="absolute -inset-0.5 rounded-2xl blur-xl transition-all duration-500"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                }}
               />
               
-              <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300">
+              <div className="relative bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl overflow-hidden hover:border-[var(--theme-accent)]/50 transition-all duration-300">
                 {/* Template Preview Area */}
-                <div className="relative h-48 bg-gradient-to-br from-purple-900/30 to-indigo-900/30 overflow-hidden">
+                <div className="relative h-48 overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-accent)/10, var(--theme-gradient-end)/10)`
+                  }}
+                >
                   <motion.div
                     animate={{ scale: isHovered ? 1.05 : 1 }}
                     transition={{ duration: 0.4 }}
                     className="absolute inset-0 flex flex-col items-center justify-center"
                   >
-                    <TemplateIcon className="w-16 h-16 text-purple-400 mb-3 opacity-50" />
+                    <TemplateIcon className="w-16 h-16 text-[var(--theme-accent)] mb-3 opacity-50" />
                     <div className="flex gap-1">
                       {template.features.slice(0, 3).map((feature, idx) => (
-                        <div key={idx} className="w-1.5 h-1.5 rounded-full bg-purple-400/50" />
+                        <div key={idx} className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]/50" />
                       ))}
                     </div>
                   </motion.div>
@@ -202,7 +207,11 @@ const Templates = () => {
                       >
                         <button
                           onClick={() => handleUseTemplate(template)}
-                          className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm flex items-center gap-2 hover:shadow-lg transition-all duration-300"
+                          className="px-4 py-2 rounded-lg text-white text-sm flex items-center gap-2 hover:shadow-lg transition-all duration-300"
+                          style={{
+                            background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                            boxShadow: `0 0 20px var(--theme-glow)`
+                          }}
                         >
                           <Zap className="w-4 h-4" />
                           Use Template
@@ -215,7 +224,7 @@ const Templates = () => {
                 {/* Template Info */}
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-[var(--theme-accent)] transition-colors">
                       {template.name}
                     </h3>
                     <div className="flex items-center gap-1">
@@ -224,12 +233,12 @@ const Templates = () => {
                     </div>
                   </div>
                   
-                  <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                  <p className="text-[var(--theme-textSecondary)] text-sm mb-3 line-clamp-2">
                     {template.desc}
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className={`text-xs px-2 py-1 rounded-full bg-${template.color}-500/10 text-${template.color}-300`}>
+                    <span className="text-xs px-2 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]">
                       {template.tag}
                     </span>
                     <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-gray-400">
@@ -239,7 +248,7 @@ const Templates = () => {
 
                   {/* Features Preview */}
                   <div className="mb-4">
-                    <p className="text-xs text-gray-500 mb-2">Includes:</p>
+                    <p className="text-xs text-[var(--theme-textSecondary)] mb-2">Includes:</p>
                     <div className="flex flex-wrap gap-1">
                       {template.features.slice(0, 3).map((feature, idx) => (
                         <span key={idx} className="text-xs text-gray-400">• {feature}</span>
@@ -254,7 +263,7 @@ const Templates = () => {
                     onClick={() => handleUseTemplate(template)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl
                                bg-white/10 hover:bg-white/20 transition-all duration-300
-                               text-sm font-medium group/btn"
+                               text-sm font-medium group/btn text-white"
                   >
                     Use Template
                     <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -281,9 +290,7 @@ const Templates = () => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md p-6 rounded-2xl
-                         bg-gradient-to-br from-gray-900 to-purple-950 
-                         border border-white/10 shadow-2xl"
+              className="relative w-full max-w-md p-6 rounded-2xl bg-[var(--theme-cardBg)] border border-[var(--theme-borderColor)] shadow-2xl"
             >
               {/* Close Button */}
               <button
@@ -295,20 +302,20 @@ const Templates = () => {
 
               {/* Modal Header */}
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
+                <div className="p-2 rounded-xl bg-[var(--theme-accent)]/20">
+                  <Sparkles className="w-5 h-5 text-[var(--theme-accent)]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-white">Create New Project</h2>
-                  <p className="text-xs text-gray-400">Using {selectedTemplate?.name} template</p>
+                  <p className="text-xs text-[var(--theme-textSecondary)]">Using {selectedTemplate?.name} template</p>
                 </div>
               </div>
 
               {/* Template Preview Badge */}
-              <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+              <div className="mb-4 p-3 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20">
                 <div className="flex items-center gap-2">
-                  {selectedTemplate?.icon && <selectedTemplate.icon className="w-4 h-4 text-purple-400" />}
-                  <span className="text-sm text-purple-300">{selectedTemplate?.name}</span>
+                  {selectedTemplate?.icon && <selectedTemplate.icon className="w-4 h-4 text-[var(--theme-accent)]" />}
+                  <span className="text-sm text-[var(--theme-accent)]">{selectedTemplate?.name}</span>
                   <span className="text-xs text-gray-500 ml-auto">{selectedTemplate?.tag}</span>
                 </div>
               </div>
@@ -318,8 +325,8 @@ const Templates = () => {
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Enter project name..."
-                className="w-full p-3 rounded-xl bg-white/5 border border-white/10
-                           focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20
+                className="w-full p-3 rounded-xl bg-white/5 border border-[var(--theme-borderColor)]
+                           focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20
                            text-white placeholder-gray-500 transition-all duration-300
                            text-sm mb-4"
                 autoFocus
@@ -327,8 +334,8 @@ const Templates = () => {
               />
 
               {/* Features Preview */}
-              <div className="mb-6 p-3 rounded-xl bg-white/5 border border-white/10">
-                <p className="text-xs text-gray-500 mb-2">Template includes:</p>
+              <div className="mb-6 p-3 rounded-xl bg-white/5 border border-[var(--theme-borderColor)]">
+                <p className="text-xs text-[var(--theme-textSecondary)] mb-2">Template includes:</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedTemplate?.features?.slice(0, 4).map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-1">
@@ -350,13 +357,13 @@ const Templates = () => {
                 <button
                   onClick={createProject}
                   disabled={!projectName.trim() || isCreating}
-                  className="flex-1 px-4 py-2 rounded-xl
-                             bg-gradient-to-r from-purple-600 to-indigo-600
-                             text-white font-medium
-                             hover:shadow-lg hover:shadow-purple-500/25
-                             transition-all duration-300
-                             disabled:opacity-50 disabled:cursor-not-allowed
+                  className="flex-1 px-4 py-2 rounded-xl text-white font-medium
+                             transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
                              flex items-center justify-center gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                    boxShadow: `0 0 20px var(--theme-glow)`
+                  }}
                 >
                   {isCreating ? (
                     <>

@@ -37,7 +37,6 @@ const DashboardLayout = () => {
     }
   }, []);
 
-  // Get current page title
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === "/dashboard") return "Overview";
@@ -58,33 +57,14 @@ const DashboardLayout = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen flex text-white relative overflow-hidden bg-gradient-to-br from-gray-950 via-purple-950/20 to-gray-950">
+    // MAIN CONTAINER - Uses theme background
+    <div className="min-h-screen flex text-white relative overflow-hidden" style={{ backgroundColor: 'var(--theme-bgPrimary)' }}>
       
       <CursorGlow />
       
-      {/* Animated Background Grid */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
-        
-        {/* Animated gradient orbs */}
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-indigo-500/10 blur-[160px] rounded-full animate-pulse-glow" />
-        <div className="absolute bottom-[-200px] right-[-100px] w-[600px] h-[600px] bg-purple-500/10 blur-[120px] rounded-full animate-pulse-glow" style={{ animationDelay: '2s' }} />
-        
-        {/* Floating particles */}
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-[var(--theme-accent)] rounded-full animate-float"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              opacity: 0.3 + Math.random() * 0.3,
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-            }}
-          />
-        ))}
+      {/* Animated Background Grid - Optional decorative element */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
 
       {/* Mobile Sidebar Toggle */}
@@ -95,7 +75,7 @@ const DashboardLayout = () => {
         <Menu size={20} />
       </button>
 
-      {/* Sidebar - Desktop & Mobile */}
+      {/* Sidebar */}
       <AnimatePresence>
         {(showMobileSidebar || window.innerWidth >= 1024) && (
           <motion.aside
@@ -105,13 +85,12 @@ const DashboardLayout = () => {
             transition={{ duration: 0.3, type: "spring" }}
             className={`fixed lg:relative z-40 min-h-screen flex-shrink-0
               ${collapsed ? "w-20" : "w-64"}
-              bg-gradient-to-b from-gray-900/95 to-purple-950/95 backdrop-blur-2xl
-              border-r border-white/10
-              transition-all duration-300 flex flex-col
-              shadow-2xl shadow-[var(--theme-accent)]/10`}
+              bg-[var(--theme-cardBg)] backdrop-blur-2xl
+              border-r border-[var(--theme-borderColor)]
+              transition-all duration-300 flex flex-col`}
           >
             {/* Logo Section */}
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--theme-borderColor)]">
               {!collapsed && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -139,11 +118,7 @@ const DashboardLayout = () => {
                 onClick={() => setCollapsed(!collapsed)}
                 className="p-1.5 rounded-lg hover:bg-white/10 transition-all duration-300 hover:scale-110"
               >
-                {collapsed ? (
-                  <PanelLeftOpen size={18} />
-                ) : (
-                  <PanelLeftClose size={18} />
-                )}
+                {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
               </button>
             </div>
 
@@ -155,42 +130,28 @@ const DashboardLayout = () => {
                   to={item.path}
                   end={item.path === "/dashboard"}
                   className={({ isActive }) =>
-                    `group relative flex items-center gap-3 mx-3 px-4 py-3 rounded-xl
-                    transition-all duration-300
+                    `group relative flex items-center gap-3 mx-3 px-4 py-3 rounded-xl transition-all duration-300
                     ${isActive 
-                      ? "bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 border border-[var(--theme-accent)]/30 shadow-lg shadow-[var(--theme-accent)]/10" 
+                      ? "bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30" 
                       : "hover:bg-white/5"
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      {/* Active indicator */}
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeNav"
-                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20"
-                          transition={{ type: "spring", duration: 0.5 }}
-                        />
-                      )}
-                      
                       <item.icon 
                         size={20} 
-                        className={`relative z-10 transition-all duration-300 ${
+                        className={`transition-all duration-300 ${
                           isActive ? "text-[var(--theme-accent)]" : "text-gray-500 group-hover:text-[var(--theme-accent)]"
                         }`}
                       />
                       
                       {!collapsed && (
-                        <div className="relative z-10 flex-1">
-                          <span className={`text-sm transition-colors duration-300 ${
-                            isActive ? "text-white font-medium" : "text-gray-400 group-hover:text-white"
-                          }`}>
+                        <div className="flex-1">
+                          <span className={`text-sm ${isActive ? "text-white font-medium" : "text-gray-400"}`}>
                             {item.name}
                           </span>
-                          <p className="text-[10px] text-gray-500 group-hover:text-gray-400">
-                            {item.description}
-                          </p>
+                          <p className="text-[10px] text-gray-500">{item.description}</p>
                         </div>
                       )}
                       
@@ -204,7 +165,7 @@ const DashboardLayout = () => {
             </nav>
 
             {/* User Section */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-[var(--theme-borderColor)]">
               <div className="relative group">
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -225,8 +186,8 @@ const DashboardLayout = () => {
                 </div>
 
                 {/* User Dropdown */}
-                <div className="absolute bottom-full left-0 mb-2 w-56 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <div className="p-3 border-b border-white/10">
+                <div className="absolute bottom-full left-0 mb-2 w-56 bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  <div className="p-3 border-b border-[var(--theme-borderColor)]">
                     <p className="text-sm font-medium text-white">{user?.name || "User"}</p>
                     <p className="text-xs text-gray-400">{user?.email || "user@example.com"}</p>
                   </div>
@@ -251,7 +212,6 @@ const DashboardLayout = () => {
               </div>
             </div>
 
-            {/* Footer */}
             {!collapsed && (
               <div className="p-4 text-center">
                 <p className="text-[10px] text-gray-600">© 2026 EvolveWeb AI</p>
@@ -266,12 +226,10 @@ const DashboardLayout = () => {
       <div className="flex-1 flex flex-col relative z-10 min-h-screen">
         
         {/* Topbar */}
-        <header className="sticky top-0 z-20 h-16 px-6 flex items-center justify-between bg-white/5 backdrop-blur-xl border-b border-white/10">
+        <header className="sticky top-0 z-20 h-16 px-6 flex items-center justify-between bg-[var(--theme-cardBg)] backdrop-blur-xl border-b border-[var(--theme-borderColor)]">
           <div className="flex items-center gap-3">
             <div className="hidden lg:block">
-              <h2 className="text-lg font-semibold text-white">
-                {getPageTitle()}
-              </h2>
+              <h2 className="text-lg font-semibold text-white">{getPageTitle()}</h2>
               <p className="text-xs text-gray-500">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
@@ -279,63 +237,48 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Search (Optional) */}
-            <button className="hidden md:flex p-2 rounded-lg hover:bg-white/10 transition-all duration-300">
-              🔍
-            </button>
-
-            {/* Theme Switcher */}
+            <button className="hidden md:flex p-2 rounded-lg hover:bg-white/10 transition-all duration-300">🔍</button>
             <ThemeSwitcher />
 
             {/* Notifications */}
             <div className="relative group">
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-lg hover:bg-white/10 transition-all duration-300"
-              >
+              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 rounded-lg hover:bg-white/10 transition-all duration-300">
                 <Bell size={18} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                )}
+                {unreadCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
               </button>
 
-              {/* Notifications Dropdown */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-80 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50"
+                    className="absolute right-0 mt-2 w-80 bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-xl shadow-2xl z-50"
                   >
-                    <div className="p-4 border-b border-white/10">
+                    <div className="p-4 border-b border-[var(--theme-borderColor)]">
                       <h3 className="font-semibold text-white">Notifications</h3>
                       <p className="text-xs text-gray-500">You have {unreadCount} unread notifications</p>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.map((notif) => (
-                        <div key={notif.id} className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!notif.read ? 'bg-[var(--theme-accent)]/5' : ''}`}>
+                        <div key={notif.id} className={`p-4 border-b border-[var(--theme-borderColor)]/50 hover:bg-white/5 transition-colors cursor-pointer ${!notif.read ? 'bg-[var(--theme-accent)]/5' : ''}`}>
                           <p className="text-sm text-gray-300">{notif.message}</p>
                           <p className="text-xs text-gray-500 mt-1">{notif.time}</p>
                         </div>
                       ))}
                     </div>
                     <div className="p-3 text-center">
-                      <button className="text-xs text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">
-                        Mark all as read
-                      </button>
+                      <button className="text-xs text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]">Mark all as read</button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* User Avatar (Mobile) */}
+            {/* User Avatar Mobile */}
             <div className="lg:hidden flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
-                <span className="text-xs font-bold">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </span>
+                <span className="text-xs font-bold">{user?.name?.charAt(0).toUpperCase() || "U"}</span>
               </div>
             </div>
           </div>

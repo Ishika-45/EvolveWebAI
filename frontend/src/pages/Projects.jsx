@@ -70,7 +70,7 @@ const Projects = () => {
   };
 
   const deleteProject = async (id, e) => {
-    e.stopPropagation(); // Prevent card click when clicking delete
+    e.stopPropagation();
     try {
       await api.delete(`/projects/${id}`);
       setProjects(projects.filter((p) => p._id !== id));
@@ -136,9 +136,9 @@ const Projects = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 mb-3">
-            <Sparkles className="w-3 h-3 text-purple-400" />
-            <span className="text-xs text-purple-300">AI Workspace</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30 mb-3">
+            <Sparkles className="w-3 h-3 text-[var(--theme-accent)]" />
+            <span className="text-xs text-[var(--theme-accent)]">AI Workspace</span>
           </div>
           <h1 className="text-3xl font-bold text-white">Projects</h1>
           <p className="text-gray-400 text-sm mt-1">
@@ -151,9 +151,9 @@ const Projects = () => {
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-5 py-2.5
-                     bg-gradient-to-r from-purple-500 to-indigo-500
-                     rounded-xl hover:shadow-lg hover:shadow-purple-500/25
-                     transition-all duration-300 font-medium"
+                     bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]
+                     rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+          style={{ boxShadow: `0 0 20px var(--theme-glow)` }}
         >
           <Plus size={18} />
           New Project
@@ -172,7 +172,7 @@ const Projects = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 rounded-xl
                        bg-white/5 border border-white/10
-                       focus:outline-none focus:border-purple-500
+                       focus:outline-none focus:border-[var(--theme-accent)]
                        text-white placeholder-gray-500
                        transition-all duration-300"
           />
@@ -193,7 +193,7 @@ const Projects = () => {
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-lg transition-all duration-300 ${
                 viewMode === "grid" 
-                  ? "bg-purple-500/20 text-purple-400" 
+                  ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]" 
                   : "text-gray-500 hover:text-white"
               }`}
               title="Grid View"
@@ -204,7 +204,7 @@ const Projects = () => {
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-lg transition-all duration-300 ${
                 viewMode === "list" 
-                  ? "bg-purple-500/20 text-purple-400" 
+                  ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]" 
                   : "text-gray-500 hover:text-white"
               }`}
               title="List View"
@@ -220,7 +220,7 @@ const Projects = () => {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl
                          border transition-all duration-300
                          ${showFilterDropdown 
-                           ? "bg-purple-500/20 border-purple-500/50 text-purple-400" 
+                           ? "bg-[var(--theme-accent)]/20 border-[var(--theme-accent)]/50 text-[var(--theme-accent)]" 
                            : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
                          }`}
             >
@@ -257,14 +257,14 @@ const Projects = () => {
                         }}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-300
                           ${sortBy === option.value 
-                            ? "bg-purple-500/20 text-purple-400" 
+                            ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]" 
                             : "text-gray-400 hover:bg-white/10 hover:text-white"
                           }`}
                       >
                         <span>{option.icon}</span>
                         <span className="flex-1 text-left">{option.label}</span>
                         {sortBy === option.value && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
                         )}
                       </button>
                     ))}
@@ -286,11 +286,11 @@ const Projects = () => {
           <span className="text-xs text-gray-500">Active filters:</span>
           
           {searchTerm && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-500/20 border border-purple-500/30">
-              <span className="text-xs text-purple-300">Search: "{searchTerm}"</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30">
+              <span className="text-xs text-[var(--theme-accent)]">Search: "{searchTerm}"</span>
               <button
                 onClick={() => setSearchTerm("")}
-                className="ml-1 text-purple-400 hover:text-purple-300"
+                className="ml-1 text-[var(--theme-accent)] hover:text-[var(--theme-accent-hover)]"
               >
                 <X size={12} />
               </button>
@@ -299,7 +299,7 @@ const Projects = () => {
           
           <button
             onClick={clearFilters}
-            className="text-xs text-gray-500 hover:text-purple-400 transition-colors ml-2"
+            className="text-xs text-gray-500 hover:text-[var(--theme-accent)] transition-colors ml-2"
           >
             Clear all
           </button>
@@ -318,7 +318,7 @@ const Projects = () => {
       {/* Loading State */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-12 h-12 border-3 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4" />
+          <div className="w-12 h-12 border-3 border-[var(--theme-accent)]/30 border-t-[var(--theme-accent)] rounded-full animate-spin mb-4" />
           <p className="text-gray-400">Loading your projects...</p>
         </div>
       )}
@@ -330,8 +330,8 @@ const Projects = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-20 border border-white/10 rounded-2xl bg-white/5"
         >
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-            <FolderOpen className="text-purple-400" size={40} />
+          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 flex items-center justify-center">
+            <FolderOpen className="text-[var(--theme-accent)]" size={40} />
           </div>
           <h3 className="text-xl font-medium text-white mb-2">
             {searchTerm ? "No matching projects found" : "No Projects Yet"}
@@ -352,7 +352,7 @@ const Projects = () => {
           ) : (
             <button
               onClick={() => setShowModal(true)}
-              className="mt-6 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl text-white font-medium inline-flex items-center gap-2"
+              className="mt-6 px-5 py-2.5 bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] rounded-xl text-white font-medium inline-flex items-center gap-2"
             >
               <Plus size={18} />
               Create Your First Project
@@ -361,7 +361,7 @@ const Projects = () => {
         </motion.div>
       )}
 
-      {/* Project Grid/List View - NOW FULLY CLICKABLE */}
+      {/* Project Grid/List View - FULLY CLICKABLE */}
       {!loading && filteredProjects.length > 0 && (
         <div className={viewMode === "grid" 
           ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
@@ -381,20 +381,20 @@ const Projects = () => {
                   transition={{ delay: index * 0.05 }}
                   onHoverStart={() => setHoveredProject(project._id)}
                   onHoverEnd={() => setHoveredProject(null)}
-                  onClick={() => openProject(project._id)} // 👈 CARD CLICK OPENS PROJECT
+                  onClick={() => openProject(project._id)}
                   className={`group relative cursor-pointer
                     ${viewMode === "grid" 
                       ? "bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden"
                       : "bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl flex items-center gap-4 p-4"
                     }
-                    hover:border-purple-500/50 transition-all duration-300
-                    hover:shadow-lg hover:shadow-purple-500/10`}
+                    hover:border-[var(--theme-accent)]/50 transition-all duration-300
+                    hover:shadow-lg hover:shadow-[var(--theme-accent)]/10`}
                 >
                   {/* Animated gradient overlay on hover */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isHovered ? 0.1 : 0 }}
-                    className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl pointer-events-none"
+                    className="absolute inset-0 bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] rounded-2xl pointer-events-none"
                   />
 
                   {viewMode === "grid" ? (
@@ -402,8 +402,8 @@ const Projects = () => {
                     <>
                       <div className="relative p-6">
                         <div className="flex items-start justify-between mb-4">
-                          <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20">
-                            <Sparkles className="w-5 h-5 text-purple-400" />
+                          <div className="p-3 rounded-xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20">
+                            <Sparkles className="w-5 h-5 text-[var(--theme-accent)]" />
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -416,7 +416,7 @@ const Projects = () => {
                             </div>
                             <button
                               onClick={(e) => {
-                                e.stopPropagation(); // 👈 Prevents card click when clicking delete
+                                e.stopPropagation();
                                 setDeleteConfirm(project._id);
                               }}
                               className="p-1.5 rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all duration-300"
@@ -426,7 +426,7 @@ const Projects = () => {
                           </div>
                         </div>
 
-                        <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1 group-hover:text-purple-400 transition-colors">
+                        <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1 group-hover:text-[var(--theme-accent)] transition-colors">
                           {project.title}
                         </h3>
 
@@ -437,7 +437,7 @@ const Projects = () => {
                         {/* Stats Badges */}
                         <div className="flex flex-wrap gap-2 mb-4">
                           {stats.sectionsCount > 0 && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-300">
+                            <span className="text-xs px-2 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]">
                               {stats.sectionsCount} sections
                             </span>
                           )}
@@ -453,13 +453,13 @@ const Projects = () => {
                           )}
                         </div>
 
-                        {/* Open Button - Still clickable, but card also works */}
+                        {/* Open Button */}
                         <div 
                           className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl
                                      bg-white/10 hover:bg-white/20 transition-all duration-300
                                      text-sm font-medium group/btn"
                           onClick={(e) => {
-                            e.stopPropagation(); // Prevent double trigger, but card click already handles it
+                            e.stopPropagation();
                             openProject(project._id);
                           }}
                         >
@@ -471,12 +471,12 @@ const Projects = () => {
                   ) : (
                     // List View
                     <>
-                      <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 shrink-0">
-                        <Sparkles className="w-5 h-5 text-purple-400" />
+                      <div className="p-3 rounded-xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 shrink-0">
+                        <Sparkles className="w-5 h-5 text-[var(--theme-accent)]" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-semibold text-white mb-1 group-hover:text-purple-400 transition-colors">
+                        <h3 className="text-base font-semibold text-white mb-1 group-hover:text-[var(--theme-accent)] transition-colors">
                           {project.title}
                         </h3>
                         <p className="text-gray-400 text-sm line-clamp-1">
@@ -488,7 +488,7 @@ const Projects = () => {
                           </span>
                           <div className="flex gap-2">
                             {stats.sectionsCount > 0 && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300">
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]">
                                 {stats.sectionsCount} sections
                               </span>
                             )}
@@ -513,7 +513,7 @@ const Projects = () => {
                         </div>
                         <button
                           onClick={(e) => {
-                            e.stopPropagation(); // 👈 Prevents card click when clicking delete
+                            e.stopPropagation();
                             setDeleteConfirm(project._id);
                           }}
                           className="p-2 rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all duration-300"
@@ -593,8 +593,8 @@ const Projects = () => {
               className="w-[450px] p-6 rounded-2xl bg-gradient-to-br from-gray-900 to-purple-950 border border-white/10 shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20">
+                  <Sparkles className="w-5 h-5 text-[var(--theme-accent)]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-white">Create New Project</h2>
@@ -610,7 +610,7 @@ const Projects = () => {
                 onKeyDown={(e) => e.key === "Enter" && createProject()}
                 className="w-full p-3 rounded-xl
                            bg-white/5 border border-white/10
-                           focus:outline-none focus:border-purple-500
+                           focus:outline-none focus:border-[var(--theme-accent)]
                            text-white placeholder-gray-500
                            transition-all duration-300"
                 autoFocus
@@ -627,11 +627,11 @@ const Projects = () => {
                   onClick={createProject}
                   disabled={!newProject.trim()}
                   className="px-4 py-2 rounded-xl
-                             bg-gradient-to-r from-purple-500 to-indigo-500
+                             bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)]
                              text-white font-medium
-                             hover:shadow-lg hover:shadow-purple-500/25
-                             transition-all duration-300
+                             hover:shadow-lg transition-all duration-300
                              disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ boxShadow: `0 0 20px var(--theme-glow)` }}
                 >
                   Create Project
                 </button>

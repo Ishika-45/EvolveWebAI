@@ -1,6 +1,6 @@
 // components/ThemeSwitcher.jsx
 import { motion, AnimatePresence } from "framer-motion";
-import { Palette, Check, Moon, Sun, Sparkles } from "lucide-react";
+import { Palette, Check, Moon, Sun, Sparkles, Zap } from "lucide-react";
 import { useTheme } from "../themes/ThemeContext";
 import { themeOptions } from "../themes/themeConfig";
 
@@ -8,16 +8,19 @@ const ThemeSwitcher = () => {
   const { currentTheme, changeTheme, isThemeMenuOpen, toggleThemeMenu } = useTheme();
   
 
-  const getThemeIcon = (themeId) => {
-    switch(themeId) {
-      case "neoIndigo": return <Moon size={14} />;
-      case "auroraGlass": return <Sparkles size={14} />;
-      case "midnightPro": return <Moon size={14} />;
-      case "cyberPurple": return <Sparkles size={14} />;
-      case "oceanBreeze": return <Sun size={14} />;
-      default: return <Palette size={14} />;
-    }
-  };
+  // In ThemeSwitcher.jsx, update the getThemeIcon function:
+const getThemeIcon = (themeId) => {
+  switch(themeId) {
+    case "neoIndigo": return <Moon size={14} />;
+    case "auroraGlass": return <Sparkles size={14} />;
+    case "electricBlue": return <Zap size={14} />;
+    case "neonPink": return <Sparkles size={14} />;
+    case "midnightPro": return <Moon size={14} />;
+    case "cyberPurple": return <Sparkles size={14} />;
+    case "oceanBreeze": return <Sun size={14} />;
+    default: return <Palette size={14} />;
+  }
+};
 
   return (
     <div className="relative">

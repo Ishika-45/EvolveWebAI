@@ -45,6 +45,7 @@ export const ThemeProvider = ({ children }) => {
   const changeTheme = (themeName) => {
     if (themes[themeName]) {
       setCurrentTheme(themeName);
+    } else {
     }
   };
 
