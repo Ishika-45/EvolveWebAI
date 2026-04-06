@@ -28,7 +28,7 @@ const BrandMotion = () => {
     // Christmas (Dec 24-26)
     if (month === 12 && date >= 24 && date <= 26) {
       return { 
-        animation: testAnim, // Replace with christmasAnim
+        animation: testAnim,
         type: "christmas", 
         message: "🎄 Merry Christmas! 🎄" 
       };
@@ -37,7 +37,7 @@ const BrandMotion = () => {
     // New Year (Dec 31 - Jan 2)
     if ((month === 12 && date === 31) || (month === 1 && date <= 2)) {
       return { 
-        animation: testAnim, // Replace with newYearAnim
+        animation: testAnim,
         type: "newyear", 
         message: "🎆 Happy New Year! 🎆" 
       };
@@ -46,7 +46,7 @@ const BrandMotion = () => {
     // Halloween (Oct 31)
     if (month === 10 && date === 31) {
       return { 
-        animation: testAnim, // Replace with halloweenAnim
+        animation: testAnim,
         type: "halloween", 
         message: "🎃 Happy Halloween! 🎃" 
       };
@@ -55,7 +55,7 @@ const BrandMotion = () => {
     // Valentine's Day (Feb 14)
     if (month === 2 && date === 14) {
       return { 
-        animation: testAnim, // Replace with valentineAnim
+        animation: testAnim,
         type: "valentine", 
         message: "💝 Happy Valentine's Day! 💝" 
       };
@@ -78,7 +78,6 @@ const BrandMotion = () => {
   if (specialEvent) {
     return (
       <div className="relative mb-6">
-        {/* Animated container */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -87,17 +86,21 @@ const BrandMotion = () => {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Glow effect behind animation */}
           <motion.div
             animate={{ 
               scale: isHovered ? 1.2 : 1,
               opacity: isHovered ? 0.3 : 0.1
             }}
-            className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 blur-2xl"
+            className="absolute inset-0 rounded-full blur-2xl"
+            style={{
+              background: `radial-gradient(circle, var(--theme-accent), var(--theme-gradient-end))`
+            }}
           />
           
-          {/* Main Animation */}
-          <div className="relative w-28 opacity-95 drop-shadow-[0_0_30px_rgba(139,92,246,0.4)]">
+          <div className="relative w-28 opacity-95"
+            style={{
+              filter: `drop-shadow(0 0 30px var(--theme-glow))`
+            }}>
             <Lottie 
               animationData={specialEvent.animation} 
               loop={true} 
@@ -106,7 +109,6 @@ const BrandMotion = () => {
             />
           </div>
           
-          {/* Hover tooltip */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
@@ -115,7 +117,11 @@ const BrandMotion = () => {
                 exit={{ opacity: 0, y: 10 }}
                 className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
               >
-                <div className="px-3 py-1.5 rounded-full bg-purple-500/90 backdrop-blur-sm text-white text-xs font-medium shadow-lg">
+                <div className="px-3 py-1.5 rounded-full backdrop-blur-sm text-white text-xs font-medium shadow-lg"
+                  style={{
+                    backgroundColor: 'var(--theme-accent)/90',
+                    borderColor: 'var(--theme-borderColor)'
+                  }}>
                   {specialEvent.type === "christmas" && "🎄 Holiday Special! 🎄"}
                   {specialEvent.type === "newyear" && "🎆 New Year Celebration! 🎆"}
                   {specialEvent.type === "halloween" && "🎃 Spooky Season! 🎃"}
@@ -127,7 +133,6 @@ const BrandMotion = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Event Message Banner */}
         <AnimatePresence>
           {showMessage && specialEvent.message && (
             <motion.div
@@ -136,7 +141,10 @@ const BrandMotion = () => {
               exit={{ opacity: 0, y: -20 }}
               className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap z-50"
             >
-              <div className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium shadow-lg">
+              <div className="px-4 py-2 rounded-full text-white text-sm font-medium shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                }}>
                 {specialEvent.message}
               </div>
             </motion.div>

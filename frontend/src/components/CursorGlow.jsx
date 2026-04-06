@@ -7,7 +7,6 @@ const CursorGlow = () => {
   const [trail, setTrail] = useState([]);
   const moveTimeoutRef = useRef(null);
 
-  // Smooth spring motion for cursor
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
   const springConfig = { damping: 25, stiffness: 700 };
@@ -23,17 +22,14 @@ const CursorGlow = () => {
       
       setIsMoving(true);
       
-      // Clear previous timeout
       if (moveTimeoutRef.current) {
         clearTimeout(moveTimeoutRef.current);
       }
       
-      // Set moving to false after mouse stops
       moveTimeoutRef.current = setTimeout(() => {
         setIsMoving(false);
       }, 100);
       
-      // Add to trail (for trailing effect)
       setTrail(prev => {
         const newTrail = [...prev, newPos];
         if (newTrail.length > 8) newTrail.shift();
@@ -56,20 +52,20 @@ const CursorGlow = () => {
         style={{
           background: `radial-gradient(
             400px at ${position.x}px ${position.y}px,
-            rgba(139, 92, 246, 0.25),
-            rgba(99, 102, 241, 0.1) 40%,
+            var(--theme-accent) 0.15,
+            var(--theme-gradient-end) 0.08 40%,
             transparent 80%
           )`
         }}
       />
       
-      {/* Secondary Glow (smaller, more intense) */}
+      {/* Secondary Glow */}
       <div
         className="pointer-events-none fixed inset-0 z-0 transition-all duration-75"
         style={{
           background: `radial-gradient(
             150px at ${position.x}px ${position.y}px,
-            rgba(168, 85, 247, 0.3),
+            var(--theme-accent) 0.2,
             transparent 60%
           )`
         }}
@@ -83,7 +79,6 @@ const CursorGlow = () => {
           y: cursorYSpring,
         }}
       >
-        {/* Outer ring */}
         <motion.div
           animate={{
             scale: isMoving ? 1.2 : 1,
@@ -92,10 +87,11 @@ const CursorGlow = () => {
           transition={{ duration: 0.2 }}
           className="relative"
         >
-          <div className="w-8 h-8 rounded-full border-2 border-purple-400/50" />
+          <div className="w-8 h-8 rounded-full border-2 opacity-50"
+            style={{ borderColor: 'var(--theme-accent)' }} />
           
-          {/* Inner dot */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-purple-400" />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
+            style={{ backgroundColor: 'var(--theme-accent)' }} />
         </motion.div>
       </motion.div>
 
@@ -111,14 +107,17 @@ const CursorGlow = () => {
             transition: 'opacity 0.3s ease-out'
           }}
         >
-          <div className="w-1 h-1 rounded-full bg-purple-400" />
+          <div className="w-1 h-1 rounded-full"
+            style={{ backgroundColor: 'var(--theme-accent)' }} />
         </div>
       ))}
 
-      {/* Static ambient glow (always present) */}
+      {/* Static ambient glow */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-600/10 blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-600/10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse"
+          style={{ backgroundColor: 'var(--theme-accent)/0.1' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse"
+          style={{ backgroundColor: 'var(--theme-gradient-end)/0.1', animationDelay: '2s' }} />
       </div>
     </>
   );

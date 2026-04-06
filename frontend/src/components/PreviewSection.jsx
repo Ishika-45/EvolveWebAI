@@ -13,13 +13,15 @@ const PreviewSection = ({ onExpand, onRefresh }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-indigo-600/10" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute inset-0"
+          style={{
+            background: `linear-gradient(135deg, var(--theme-accent)/0.1, var(--theme-gradient-end)/0.1)`
+          }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl animate-pulse"
+          style={{ backgroundColor: 'var(--theme-accent)/0.2' }} />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 text-center">
         <motion.div
           animate={{
@@ -29,8 +31,11 @@ const PreviewSection = ({ onExpand, onRefresh }) => {
           transition={{ duration: 0.5 }}
           className="mb-4"
         >
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-            <Globe className="w-10 h-10 text-purple-400" />
+          <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, var(--theme-accent)/0.2, var(--theme-gradient-end)/0.2)`
+            }}>
+            <Globe className="w-10 h-10" style={{ color: 'var(--theme-accent)' }} />
           </div>
         </motion.div>
 
@@ -38,30 +43,34 @@ const PreviewSection = ({ onExpand, onRefresh }) => {
           Website Preview
         </h3>
         
-        <p className="text-gray-400 text-sm max-w-sm mx-auto mb-6">
+        <p className="text-sm max-w-sm mx-auto mb-6" style={{ color: 'var(--theme-textSecondary)' }}>
           Your generated website will appear here once you've built it using the AI generator.
         </p>
 
         <div className="flex gap-3 justify-center">
           <button
             onClick={onRefresh}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-300 text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 text-sm"
+            style={{ backgroundColor: 'var(--theme-cardBg)' }}
           >
             <RefreshCw size={14} />
             Refresh
           </button>
           <button
             onClick={onExpand}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm hover:shadow-lg transition-all duration-300"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm hover:shadow-lg transition-all duration-300"
+            style={{
+              background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+              boxShadow: `0 0 20px var(--theme-glow)`
+            }}
           >
             <Maximize2 size={14} />
             Expand Preview
           </button>
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute -top-4 -right-4 w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-        <div className="absolute -bottom-4 -left-4 w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-4 -right-4 w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--theme-accent)' }} />
+        <div className="absolute -bottom-4 -left-4 w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--theme-gradient-end)', animationDelay: '1s' }} />
       </div>
     </motion.div>
   );

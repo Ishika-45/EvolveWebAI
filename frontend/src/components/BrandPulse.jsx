@@ -7,7 +7,6 @@ const BrandPulse = () => {
   const [rippleActive, setRippleActive] = useState(false);
 
   useEffect(() => {
-    // Continuous pulse animation
     const pulseSequence = async () => {
       while (true) {
         await controls.start({
@@ -35,70 +34,74 @@ const BrandPulse = () => {
         onClick={handleClick}
         whileTap={{ scale: 0.95 }}
       >
-        {/* Multiple Glow Layers */}
         <motion.span
           animate={controls}
-          className="absolute w-32 h-32 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur-2xl"
+          className="absolute w-32 h-32 rounded-full opacity-20 blur-2xl"
+          style={{
+            background: `radial-gradient(circle, var(--theme-accent), var(--theme-gradient-end))`
+          }}
         />
         
-        {/* Outer soft glow */}
         <motion.span
           animate={{
             scale: isHovered ? 1.2 : 1,
             opacity: isHovered ? 0.3 : 0.2,
           }}
           transition={{ duration: 0.3 }}
-          className="absolute w-24 h-24 rounded-full bg-purple-500 opacity-20 blur-xl"
+          className="absolute w-24 h-24 rounded-full blur-xl"
+          style={{ backgroundColor: 'var(--theme-accent)' }}
         />
 
-        {/* Middle subtle ring */}
         <motion.span
           animate={{
             scale: isHovered ? 1.1 : 1,
             rotate: isHovered ? 360 : 0,
           }}
           transition={{ duration: 0.5 }}
-          className="absolute w-20 h-20 rounded-full border-2 border-purple-400 opacity-40"
+          className="absolute w-20 h-20 rounded-full border-2 opacity-40"
+          style={{ borderColor: 'var(--theme-accent)' }}
         />
 
-        {/* Inner ring with animation */}
         <motion.span
           animate={{
             scale: isHovered ? 1.05 : 1,
-            borderColor: isHovered ? "#a78bfa" : "#8b5cf6",
           }}
-          className="absolute w-14 h-14 rounded-full border border-purple-400 opacity-60"
+          className="absolute w-14 h-14 rounded-full border opacity-60"
+          style={{
+            borderColor: 'var(--theme-accent)',
+            boxShadow: isHovered ? `0 0 20px var(--theme-glow)` : 'none'
+          }}
         />
 
-        {/* Ripple Effect on Click */}
         {rippleActive && (
           <>
             <motion.span
               initial={{ scale: 1, opacity: 0.6 }}
               animate={{ scale: 2, opacity: 0 }}
               transition={{ duration: 0.8 }}
-              className="absolute w-14 h-14 rounded-full bg-purple-500"
+              className="absolute w-14 h-14 rounded-full"
+              style={{ backgroundColor: 'var(--theme-accent)' }}
             />
             <motion.span
               initial={{ scale: 1, opacity: 0.4 }}
               animate={{ scale: 3, opacity: 0 }}
               transition={{ duration: 1, delay: 0.1 }}
-              className="absolute w-14 h-14 rounded-full bg-purple-400"
+              className="absolute w-14 h-14 rounded-full"
+              style={{ backgroundColor: 'var(--theme-accent)' }}
             />
           </>
         )}
 
-        {/* Core energy dot with gradient */}
         <motion.span
           animate={{
             scale: isHovered ? 1.1 : 1,
-            boxShadow: isHovered 
-              ? "0 0 45px rgba(139,92,246,1)" 
-              : "0 0 35px rgba(139,92,246,0.8)",
           }}
-          className="relative w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 shadow-lg"
+          className="relative w-12 h-12 rounded-full shadow-lg"
+          style={{
+            background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+            boxShadow: isHovered ? `0 0 45px var(--theme-glow)` : `0 0 35px var(--theme-glow)`
+          }}
         >
-          {/* Inner pulsing dot */}
           <motion.span
             animate={{
               scale: [0.8, 1, 0.8],
@@ -109,7 +112,6 @@ const BrandPulse = () => {
           />
         </motion.span>
 
-        {/* Floating particles around the logo */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
@@ -126,15 +128,15 @@ const BrandPulse = () => {
               repeat: Infinity,
               repeatDelay: 1,
             }}
-            className="absolute w-1 h-1 rounded-full bg-purple-400"
+            className="absolute w-1 h-1 rounded-full"
             style={{
+              backgroundColor: 'var(--theme-accent)',
               top: '50%',
               left: '50%',
             }}
           />
         ))}
 
-        {/* Hover tooltip */}
         {isHovered && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -142,7 +144,13 @@ const BrandPulse = () => {
             exit={{ opacity: 0, y: 10 }}
             className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
           >
-            <div className="px-3 py-1.5 rounded-full bg-gray-900/90 backdrop-blur-sm border border-purple-500/30 text-purple-300 text-xs font-medium shadow-lg">
+            <div className="px-3 py-1.5 rounded-full backdrop-blur-sm text-xs font-medium shadow-lg"
+              style={{
+                backgroundColor: 'var(--theme-cardBg)',
+                borderColor: 'var(--theme-accent)/30',
+                borderWidth: '1px',
+                color: 'var(--theme-accent)'
+              }}>
               ✨ AI Powered ✨
             </div>
           </motion.div>

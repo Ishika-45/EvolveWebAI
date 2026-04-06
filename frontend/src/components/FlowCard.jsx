@@ -15,18 +15,16 @@ const FlowCard = ({ step, index, active, completed = false }) => {
     });
   };
 
-  // Get step icon based on status
   const getStepIcon = () => {
-    if (completed) return <CheckCircle className="w-4 h-4 text-green-400" />;
-    if (active) return <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />;
+    if (completed) return <CheckCircle className="w-4 h-4" style={{ color: 'var(--theme-success)' }} />;
+    if (active) return <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--theme-accent)' }} />;
     return <div className="w-2 h-2 rounded-full bg-gray-500" />;
   };
 
-  // Get status text and color
   const getStatus = () => {
-    if (completed) return { text: "Completed", color: "text-green-400", bg: "bg-green-500/20" };
-    if (active) return { text: "In Progress", color: "text-purple-400", bg: "bg-purple-500/20" };
-    return { text: "Pending", color: "text-gray-500", bg: "bg-gray-500/10" };
+    if (completed) return { text: "Completed", color: 'var(--theme-success)', bg: 'var(--theme-success)/0.2' };
+    if (active) return { text: "In Progress", color: 'var(--theme-accent)', bg: 'var(--theme-accent)/0.2' };
+    return { text: "Pending", color: 'var(--theme-textSecondary)', bg: 'var(--theme-textSecondary)/0.1' };
   };
 
   const status = getStatus();
@@ -42,7 +40,6 @@ const FlowCard = ({ step, index, active, completed = false }) => {
       transition={{ delay: index * 0.1 }}
       className="relative p-[1px] rounded-xl overflow-hidden group"
     >
-      {/* Animated gradient border */}
       <AnimatePresence>
         {(active || isHovered) && (
           <motion.div
@@ -52,8 +49,8 @@ const FlowCard = ({ step, index, active, completed = false }) => {
             className="absolute inset-0 rounded-xl"
             style={{
               background: active
-                ? "linear-gradient(120deg, rgba(99,102,241,0.8), rgba(168,85,247,0.8), rgba(99,102,241,0.8))"
-                : "linear-gradient(120deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3), rgba(99,102,241,0.3))"
+                ? `linear-gradient(120deg, var(--theme-accent) 0.5, var(--theme-gradient-end) 0.5, var(--theme-accent) 0.5)`
+                : `linear-gradient(120deg, var(--theme-accent) 0.2, var(--theme-gradient-end) 0.2, var(--theme-accent) 0.2)`
             }}
           >
             {active && (
@@ -62,38 +59,35 @@ const FlowCard = ({ step, index, active, completed = false }) => {
                 style={{
                   background: "linear-gradient(120deg, transparent, rgba(255,255,255,0.2), transparent)"
                 }}
-                animate={{
-                  x: ["-100%", "100%"]
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
+                animate={{ x: ["-100%", "100%"] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
               />
             )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Card content wrapper */}
       <div
         className={`relative rounded-xl p-4 backdrop-blur-xl border transition-all duration-300
         ${
           active
-            ? "bg-purple-500/10 border-purple-400/40 shadow-lg shadow-purple-500/20"
+            ? "shadow-lg"
             : completed
-            ? "bg-green-500/10 border-green-400/30"
-            : "bg-white/5 border-white/10 hover:bg-white/10"
+            ? ""
+            : "hover:bg-white/10"
         }`}
+        style={{
+          backgroundColor: active ? 'var(--theme-accent)/0.1' : completed ? 'var(--theme-success)/0.1' : 'var(--theme-cardBg)',
+          borderColor: active ? 'var(--theme-accent)/0.4' : completed ? 'var(--theme-success)/0.3' : 'var(--theme-borderColor)',
+          boxShadow: active ? `0 0 20px var(--theme-glow)` : 'none'
+        }}
       >
-        {/* Cursor glow effect on hover */}
         <motion.div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
           style={{
             background: `radial-gradient(
               200px at ${pos.x}px ${pos.y}px,
-              ${active ? 'rgba(99,102,241,0.3)' : 'rgba(139,92,246,0.2)'},
+              ${active ? 'var(--theme-accent)/0.3' : 'var(--theme-accent)/0.2'},
               transparent 70%
             )`
           }}
@@ -101,54 +95,54 @@ const FlowCard = ({ step, index, active, completed = false }) => {
 
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            {/* Status Icon */}
             <div className="flex-shrink-0">
               {getStepIcon()}
             </div>
 
-            {/* Step Content */}
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <p
-                  className={`text-sm font-medium transition-colors duration-300
-                  ${active ? "text-purple-300" : completed ? "text-green-300" : "text-gray-400 group-hover:text-gray-300"}`}
-                >
+                <p className={`text-sm font-medium transition-colors duration-300
+                  ${active ? "" : completed ? "" : "group-hover:text-gray-300"}`}
+                  style={{
+                    color: active ? 'var(--theme-accent)' : completed ? 'var(--theme-success)' : 'var(--theme-textSecondary)'
+                  }}>
                   {step}
                 </p>
                 
-                {/* Status Badge */}
-                <span className={`text-[10px] px-2 py-0.5 rounded-full ${status.bg} ${status.color} ml-2`}>
+                <span className="text-[10px] px-2 py-0.5 rounded-full ml-2"
+                  style={{
+                    backgroundColor: status.bg,
+                    color: status.color
+                  }}>
                   {status.text}
                 </span>
               </div>
               
-              {/* Progress indicator for active step */}
               {active && (
                 <div className="mt-2">
                   <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0s' }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.15s' }} />
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.3s' }} />
+                    <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0s' }} />
+                    <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0.15s' }} />
+                    <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0.3s' }} />
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Icon decoration */}
             {(active || completed) && (
               <div className="flex-shrink-0">
                 {active ? (
-                  <Zap className="w-3 h-3 text-purple-400 animate-pulse" />
+                  <Zap className="w-3 h-3 animate-pulse" style={{ color: 'var(--theme-accent)' }} />
                 ) : completed ? (
-                  <Sparkles className="w-3 h-3 text-green-400" />
+                  <Sparkles className="w-3 h-3" style={{ color: 'var(--theme-success)' }} />
                 ) : null}
               </div>
             )}
           </div>
 
-          {/* Optional: Step description (if provided) */}
           {step.description && (
-            <p className={`text-xs mt-2 pl-6 ${active ? "text-purple-300/70" : "text-gray-500"}`}>
+            <p className={`text-xs mt-2 pl-6 ${active ? "" : "text-gray-500"}`}
+              style={active ? { color: 'var(--theme-accent)/0.7' } : {}}>
               {step.description}
             </p>
           )}

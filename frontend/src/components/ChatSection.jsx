@@ -56,9 +56,14 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 mb-4">
-          <Sparkles className="w-3 h-3 text-purple-400" />
-          <span className="text-xs text-purple-300 font-medium">AI-Powered Generation</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4"
+          style={{
+            backgroundColor: 'var(--theme-accent)/10',
+            borderColor: 'var(--theme-accent)/30',
+            borderWidth: '1px'
+          }}>
+          <Sparkles className="w-3 h-3" style={{ color: 'var(--theme-accent)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--theme-accent)' }}>AI-Powered Generation</span>
         </div>
         
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
@@ -68,7 +73,7 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
           </span>
         </h1>
         
-        <p className="text-gray-400 text-sm max-w-md mx-auto">
+        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--theme-textSecondary)' }}>
           Describe your dream website and let our AI bring it to life in seconds
         </p>
       </motion.div>
@@ -84,19 +89,24 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
           <div className={`relative transition-all duration-300 ${
             isFocused ? 'scale-[1.02]' : ''
           }`}>
-            {/* Glow effect on focus */}
             {isFocused && (
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur-xl opacity-30" />
+              <div className="absolute -inset-0.5 rounded-2xl blur-xl opacity-30"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                }} />
             )}
             
-            {/* Input Container */}
-            <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-              {/* Message Icon */}
-              <div className="absolute left-4 top-4 text-gray-500">
+            <div className="relative rounded-2xl overflow-hidden"
+              style={{
+                backgroundColor: 'var(--theme-cardBg)',
+                borderColor: 'var(--theme-borderColor)',
+                borderWidth: '1px',
+                backdropFilter: 'blur(12px)'
+              }}>
+              <div className="absolute left-4 top-4" style={{ color: 'var(--theme-textSecondary)' }}>
                 <MessageSquare size={18} />
               </div>
               
-              {/* Textarea */}
               <textarea
                 ref={inputRef}
                 value={message}
@@ -109,38 +119,49 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
                 className="w-full pl-12 pr-4 pt-4 pb-12 bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none"
               />
               
-              {/* Bottom Bar */}
-              <div className="absolute bottom-2 left-0 right-0 px-3 py-2 flex items-center justify-between border-t border-white/10 bg-white/5">
-                {/* Left side - Character count and attachments */}
+              <div className="absolute bottom-2 left-0 right-0 px-3 py-2 flex items-center justify-between border-t"
+                style={{
+                  borderColor: 'var(--theme-borderColor)',
+                  backgroundColor: 'var(--theme-cardBg)'
+                }}>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-gray-500 hover:text-purple-400"
+                    className="p-1.5 rounded-lg transition-colors"
+                    style={{ color: 'var(--theme-textSecondary)' }}
                     title="Attach file"
                   >
                     <Paperclip size={14} />
                   </button>
                   <button
                     type="button"
-                    className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-gray-500 hover:text-purple-400"
+                    className="p-1.5 rounded-lg transition-colors"
+                    style={{ color: 'var(--theme-textSecondary)' }}
                     title="Voice input"
                   >
                     <Mic size={14} />
                   </button>
-                  <span className={`text-[10px] ${charCount > 500 ? 'text-red-400' : 'text-gray-500'}`}>
+                  <span className={`text-[10px] ${charCount > 500 ? 'text-red-400' : ''}`}
+                    style={charCount > 500 ? {} : { color: 'var(--theme-textSecondary)' }}>
                     {charCount}/500
                   </span>
                 </div>
                 
-                {/* Right side - Submit button */}
                 <button
                   type="submit"
                   disabled={!message.trim() || isLoading}
                   className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300
                     ${message.trim() && !isLoading
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:shadow-lg hover:shadow-purple-500/25"
-                      : "bg-white/10 text-gray-500 cursor-not-allowed"
+                      ? "text-white hover:shadow-lg"
+                      : "cursor-not-allowed"
                     }`}
+                  style={message.trim() && !isLoading ? {
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                    boxShadow: `0 0 20px var(--theme-glow)`
+                  } : {
+                    backgroundColor: 'var(--theme-cardBg)',
+                    color: 'var(--theme-textSecondary)'
+                  }}
                 >
                   {isLoading ? (
                     <>
@@ -168,8 +189,8 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
         className="mt-6"
       >
         <div className="flex items-center gap-2 mb-3">
-          <Lightbulb size={12} className="text-purple-400" />
-          <span className="text-xs text-gray-500">Try these ideas:</span>
+          <Lightbulb size={12} style={{ color: 'var(--theme-accent)' }} />
+          <span className="text-xs" style={{ color: 'var(--theme-textSecondary)' }}>Try these ideas:</span>
         </div>
         
         <div className="flex flex-wrap gap-2">
@@ -182,10 +203,17 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 hover:text-purple-400 hover:border-purple-500/50 transition-all duration-300"
+              className="group flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all duration-300"
+              style={{
+                backgroundColor: 'var(--theme-cardBg)',
+                borderColor: 'var(--theme-borderColor)',
+                borderWidth: '1px',
+                color: 'var(--theme-textSecondary)'
+              }}
             >
               <span>{suggestion}</span>
-              <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: 'var(--theme-accent)' }} />
             </motion.button>
           ))}
         </div>
@@ -196,10 +224,15 @@ const ChatSection = ({ onGenerate, isLoading = false }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="mt-6 p-3 rounded-xl bg-purple-500/5 border border-purple-500/20"
+        className="mt-6 p-3 rounded-xl"
+        style={{
+          backgroundColor: 'var(--theme-accent)/5',
+          borderColor: 'var(--theme-accent)/20',
+          borderWidth: '1px'
+        }}
       >
-        <div className="flex items-center gap-2 text-xs text-gray-400">
-          <Zap size={12} className="text-purple-400" />
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-textSecondary)' }}>
+          <Zap size={12} style={{ color: 'var(--theme-accent)' }} />
           <span>
             AI generates fully responsive HTML/CSS websites. Include specific details for better results!
           </span>

@@ -54,7 +54,7 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      background: var(--theme-bgPrimary);
       color: white;
       display: flex;
       align-items: center;
@@ -64,9 +64,9 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
     }
     .card {
       max-width: 720px;
-      background: rgba(255,255,255,0.05);
+      background: var(--theme-cardBg);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid var(--theme-borderColor);
       border-radius: 24px;
       padding: 32px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
@@ -74,11 +74,11 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
     h1 {
       font-size: 24px;
       margin-bottom: 16px;
-      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      background: linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    p { color: #94a3b8; line-height: 1.6; margin: 12px 0; }
+    p { color: var(--theme-textSecondary); line-height: 1.6; margin: 12px 0; }
     pre {
       margin-top: 20px;
       padding: 16px;
@@ -89,10 +89,7 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
       font-size: 12px;
       font-family: 'Courier New', monospace;
     }
-    .icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
@@ -158,14 +155,16 @@ ${trimmed}
           exit={{ scale: 0.96, opacity: 0, y: 20 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className={`relative overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl ${
+          className={`relative overflow-hidden rounded-2xl border shadow-2xl ${
             focusPreview
               ? "w-[95vw] h-[92vh]"
               : "w-full mx-auto"
           } ${!focusPreview && getDeviceDimensions()}`}
+          style={{ borderColor: 'var(--theme-borderColor)', backgroundColor: 'black' }}
         >
           {/* Device Controls Bar */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/90 backdrop-blur-sm">
+          <div className="flex items-center justify-between px-4 py-3 border-b backdrop-blur-sm"
+            style={{ borderColor: 'var(--theme-borderColor)', backgroundColor: 'black/0.9' }}>
             <div className="flex items-center gap-2">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors cursor-pointer" />
@@ -177,16 +176,20 @@ ${trimmed}
               </span>
             </div>
 
-            {/* Device Toggle Buttons */}
             {!focusPreview && (
-              <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+              <div className="flex items-center gap-1 rounded-lg p-1"
+                style={{ backgroundColor: 'var(--theme-cardBg)' }}>
                 <button
                   onClick={() => setDeviceMode("mobile")}
                   className={`p-1.5 rounded-md transition-all duration-300 ${
                     deviceMode === "mobile" 
-                      ? "bg-purple-500/20 text-purple-400" 
+                      ? "text-white" 
                       : "text-gray-500 hover:text-white"
                   }`}
+                  style={deviceMode === "mobile" ? {
+                    backgroundColor: 'var(--theme-accent)/0.2',
+                    color: 'var(--theme-accent)'
+                  } : {}}
                   title="Mobile View"
                 >
                   <Smartphone size={14} />
@@ -195,9 +198,13 @@ ${trimmed}
                   onClick={() => setDeviceMode("tablet")}
                   className={`p-1.5 rounded-md transition-all duration-300 ${
                     deviceMode === "tablet" 
-                      ? "bg-purple-500/20 text-purple-400" 
+                      ? "text-white" 
                       : "text-gray-500 hover:text-white"
                   }`}
+                  style={deviceMode === "tablet" ? {
+                    backgroundColor: 'var(--theme-accent)/0.2',
+                    color: 'var(--theme-accent)'
+                  } : {}}
                   title="Tablet View"
                 >
                   <Tablet size={14} />
@@ -206,9 +213,13 @@ ${trimmed}
                   onClick={() => setDeviceMode("desktop")}
                   className={`p-1.5 rounded-md transition-all duration-300 ${
                     deviceMode === "desktop" 
-                      ? "bg-purple-500/20 text-purple-400" 
+                      ? "text-white" 
                       : "text-gray-500 hover:text-white"
                   }`}
+                  style={deviceMode === "desktop" ? {
+                    backgroundColor: 'var(--theme-accent)/0.2',
+                    color: 'var(--theme-accent)'
+                  } : {}}
                   title="Desktop View"
                 >
                   <Monitor size={14} />
@@ -217,7 +228,6 @@ ${trimmed}
             )}
 
             <div className="flex items-center gap-2">
-              {/* Refresh Button */}
               <button
                 onClick={() => setRefreshKey(prev => prev + 1)}
                 className="p-1.5 rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-300"
@@ -226,7 +236,6 @@ ${trimmed}
                 <RefreshCw size={14} />
               </button>
 
-              {/* External Link Button */}
               <button
                 onClick={() => {
                   const blob = new Blob([safeCode], { type: 'text/html' });
@@ -272,29 +281,32 @@ ${trimmed}
           {/* Preview Area */}
           <div className="relative w-full h-[calc(100%-57px)] bg-white">
             {!loaded && !frameError && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-950 via-black to-gray-900">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3"
+                style={{ background: 'var(--theme-bgPrimary)' }}>
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 >
-                  <Loader2 className="w-8 h-8 text-purple-400" />
+                  <Loader2 className="w-8 h-8" style={{ color: 'var(--theme-accent)' }} />
                 </motion.div>
-                <p className="text-sm text-gray-400">Loading preview...</p>
+                <p className="text-sm" style={{ color: 'var(--theme-textSecondary)' }}>Loading preview...</p>
                 <div className="flex gap-1 mt-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.4s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0.2s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ backgroundColor: 'var(--theme-accent)', animationDelay: '0.4s' }} />
                 </div>
               </div>
             )}
 
             {frameError && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-950 via-black to-gray-900 text-red-400 p-6 text-center">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 p-6 text-center"
+                style={{ background: 'var(--theme-bgPrimary)', color: 'var(--theme-error)' }}>
                 <AlertTriangle className="w-10 h-10" />
                 <p className="text-sm font-medium">{frameError}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="mt-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+                  className="mt-2 px-4 py-2 rounded-lg transition-colors text-sm"
+                  style={{ backgroundColor: 'var(--theme-cardBg)' }}
                 >
                   Retry
                 </button>
@@ -311,20 +323,19 @@ ${trimmed}
               onError={() => setFrameError("Failed to load preview")}
             />
 
-            {/* Device Frame Overlay for Mobile/Tablet */}
             {(deviceMode === "mobile" || deviceMode === "tablet") && !focusPreview && (
               <div className="absolute inset-0 pointer-events-none rounded-2xl border-8 border-gray-900 shadow-2xl" />
             )}
           </div>
 
-          {/* Status Bar */}
           {loaded && !focusPreview && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-2 right-3 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm text-[10px] text-green-400 flex items-center gap-1"
+              className="absolute bottom-2 right-3 px-2 py-1 rounded-md bg-black/50 backdrop-blur-sm text-[10px] flex items-center gap-1"
+              style={{ color: 'var(--theme-success)' }}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--theme-success)' }} />
               Live Preview
             </motion.div>
           )}

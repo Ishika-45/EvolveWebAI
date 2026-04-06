@@ -239,52 +239,37 @@ const Landing = () => {
     }
   ];
 
-  // Smooth scroll function for navigation
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const navbarHeight = 80; // Height of fixed navbar
-      const elementPosition = element.offsetTop - navbarHeight;
-      window.scrollTo({
-        top: elementPosition,
-        behavior: "smooth"
-      });
-    }
-  };
-
   return (
     <>
       <LandingNavbar />
       
-      {/* Canvas for particle background */}
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: -20 }} />
       
-      {/* Advanced Gradient Background */}
+      {/* Background */}
       <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -10 }}>
-       <div className="absolute inset-0" style={{ backgroundColor: 'var(--theme-bgPrimary)' }} />
+        <div className="absolute inset-0" style={{ backgroundColor: 'var(--theme-bgPrimary)' }} />
         
-        {/* Animated gradient orbs */}
         <div 
           className="absolute w-[600px] h-[600px] rounded-full blur-[120px] transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
-             background: `radial-gradient(circle, var(--theme-accent)/20, transparent)`
+            background: `radial-gradient(circle, rgba(139,92,246,0.2), transparent)`
           }}
         />
         <div 
-          className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-l from-pink-600/20 to-purple-600/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
+          className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] transition-transform duration-300 ease-out"
           style={{
             transform: `translate(${-mousePosition.x * 0.01}px, ${-mousePosition.y * 0.01}px)`,
+            background: `radial-gradient(circle, rgba(236,72,153,0.2), transparent)`
           }}
         />
         
-        {/* Grid pattern */}
         <div className="absolute inset-0 opacity-50" style={{
           backgroundImage: `url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(168, 85, 247, 0.05)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100%" height="100%" fill="url(%23grid)"/%3E%3C/svg%3E')`
         }} />
       </div>
 
-      {/* Main Hero Section - FIXED: Added pt-32 to prevent navbar overlap */}
+      {/* Hero Section */}
       <motion.section 
         style={{ opacity: heroOpacity, scale: heroScale }}
         className="min-h-screen flex items-center justify-center px-6 pt-32 pb-20 relative"
@@ -292,9 +277,8 @@ const Landing = () => {
       >
         <div className="max-w-7xl w-full grid lg:grid-cols-2 gap-16 items-center">
           
-          {/* LEFT SIDE - TEXT with advanced animations */}
+          {/* LEFT SIDE */}
           <div className="space-y-8 relative">
-            {/* Animated badge */}
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -310,7 +294,6 @@ const Landing = () => {
               </span>
             </motion.div>
 
-            {/* Main Heading with typewriter effect */}
             <motion.h1 
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -328,7 +311,6 @@ const Landing = () => {
                   {typedText}
                   <span style={{ animation: 'blink 1s step-end infinite' }}>|</span>
                 </span>
-                {/* Animated underline */}
                 <svg className="absolute -bottom-4 left-0 w-full h-4 -z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
                   <path 
                     d="M0 5 L100 5" 
@@ -350,7 +332,6 @@ const Landing = () => {
               Websites
             </motion.h1>
 
-            {/* Description */}
             <motion.p 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -361,7 +342,6 @@ const Landing = () => {
               Modify. Collaborate. Evolve. All powered by cutting-edge AI.
             </motion.p>
 
-            {/* CTA Buttons */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -372,7 +352,11 @@ const Landing = () => {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/register")}
-                className="group relative px-9 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
+                className="group relative px-9 py-4 rounded-xl transition-all duration-300 hover:shadow-2xl font-bold text-white overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                  boxShadow: `0 0 20px var(--theme-glow)`
+                }}
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Get Started
@@ -380,14 +364,16 @@ const Landing = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
-                <div className="absolute inset-0 bg-linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 blur-xl opacity-0 group-hover:opacity-50 transition-opacity" />
               </motion.button>
               
               <motion.button 
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-9 py-4 border-2 border-purple-500/50 text-[var(--theme-accent)] hover:bg-purple-500/10 rounded-xl transition-all duration-300 font-semibold backdrop-blur-sm"
+                className="group px-9 py-4 border-2 rounded-xl transition-all duration-300 font-semibold backdrop-blur-sm"
+                style={{
+                  borderColor: 'var(--theme-accent)/50',
+                  color: 'var(--theme-accent)'
+                }}
               >
                 <span className="flex items-center gap-2">
                   Explore Demo
@@ -398,7 +384,6 @@ const Landing = () => {
               </motion.button>
             </motion.div>
 
-            {/* Stats */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -419,7 +404,6 @@ const Landing = () => {
               ))}
             </motion.div>
 
-            {/* Trusted by */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -437,7 +421,7 @@ const Landing = () => {
             </motion.div>
           </div>
 
-          {/* RIGHT SIDE - 3D Interactive Preview */}
+          {/* RIGHT SIDE - Preview */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -446,7 +430,6 @@ const Landing = () => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            {/* 3D Rotating Orbs */}
             <div className="absolute -top-32 -right-32 w-96 h-96">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-indigo-600/30 rounded-full blur-3xl" style={{
                 animation: 'orbit 12s linear infinite'
@@ -457,16 +440,22 @@ const Landing = () => {
               }} />
             </div>
 
-            {/* Main Interactive Card */}
             <div className="relative group">
-              <div className={`absolute -inset-1 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-2xl blur-xl transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
+              <div className={`absolute -inset-1 rounded-2xl blur-xl transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                }}
+              />
               
               <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-2xl p-6 shadow-2xl transition-all duration-500 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                  }}
+                />
                 
-                {/* Preview Header */}
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <h3 className="text-[var(--theme-accent)] font-semibold flex items-center gap-2">
+                  <h3 className="font-semibold flex items-center gap-2" style={{ color: 'var(--theme-accent)' }}>
                     <div className="relative">
                       <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-ping" />
                       <div className="w-2.5 h-2.5 bg-purple-400 rounded-full absolute top-0" />
@@ -480,7 +469,6 @@ const Landing = () => {
                   </div>
                 </div>
 
-                {/* Preview Content */}
                 <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
                   <div 
                     className={`h-96 flex flex-col items-center justify-center transition-all duration-700 transform-gpu ${
@@ -490,71 +478,66 @@ const Landing = () => {
                       transform: `perspective(1000px) rotateX(${isHovered ? '5deg' : '0deg'}) rotateY(${mousePosition.x * 0.01}deg)`,
                     }}
                   >
-                    {/* Animated 3D Cube */}
                     <div className="relative w-32 h-32 mb-8">
-                      <div className="absolute inset-0 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl" style={{
+                      <div className="absolute inset-0 rounded-xl" style={{
+                        background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
                         animation: 'float3D 3s ease-in-out infinite'
                       }} />
                       <div className="absolute inset-2 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-lg animate-pulse" />
                       <div className="absolute inset-4 bg-gray-900 rounded-md flex items-center justify-center">
-                        <svg className="w-12 h-12 text-[var(--theme-accent)] animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 animate-spin-slow" style={{ color: 'var(--theme-accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                       </div>
                     </div>
 
-                    {/* Animated Code Editor */}
                     <div className="w-full max-w-md space-y-3 px-6">
                       <div className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-[var(--theme-accent)]">&lt;div</span>
+                        <span style={{ color: 'var(--theme-accent)' }}>&lt;div</span>
                         <span className="text-blue-400">className</span>
                         <span className="text-gray-400">=</span>
                         <span className="text-green-400">"hero-section"</span>
-                        <span className="text-[var(--theme-accent)]">&gt;</span>
+                        <span style={{ color: 'var(--theme-accent)' }}>&gt;</span>
                       </div>
                       
                       <div className="pl-6 space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-mono group/code">
-                          <span className="text-[var(--theme-accent)]">&lt;h1&gt;</span>
-                          <span className="text-white bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent" style={{
-                            backgroundSize: '200% auto',
-                            animation: 'gradientShift 3s ease infinite'
-                          }}>
+                        <div className="flex items-center gap-2 text-sm font-mono">
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;h1&gt;</span>
+                          <span className="text-white bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
                             AI-Powered Evolution
                           </span>
-                          <span className="text-[var(--theme-accent)]">&lt;/h1&gt;</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;/h1&gt;</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm font-mono">
-                          <span className="text-[var(--theme-accent)]">&lt;p&gt;</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;p&gt;</span>
                           <span className="text-gray-300 animate-pulse">Building the future of web development</span>
-                          <span className="text-[var(--theme-accent)]">&lt;/p&gt;</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;/p&gt;</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm font-mono">
-                          <span className="text-[var(--theme-accent)]">&lt;button</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;button</span>
                           <span className="text-yellow-400">onClick</span>
                           <span className="text-gray-400">=</span>
                           <span className="text-green-400">"deploy()"</span>
-                          <span className="text-[var(--theme-accent)]">&gt;</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&gt;</span>
                           <span className="text-white">Deploy Now</span>
-                          <span className="text-[var(--theme-accent)]">&lt;/button&gt;</span>
+                          <span style={{ color: 'var(--theme-accent)' }}>&lt;/button&gt;</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-[var(--theme-accent)]">&lt;/div&gt;</span>
+                        <span style={{ color: 'var(--theme-accent)' }}>&lt;/div&gt;</span>
                       </div>
                     </div>
 
-                    {/* Loading bar animation */}
                     <div className="w-64 mt-6 h-1 bg-gray-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style={{
+                      <div className="h-full rounded-full" style={{
+                        background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
                         animation: 'loadingBar 2s ease-in-out infinite'
                       }} />
                     </div>
                   </div>
                 </div>
 
-                {/* Preview Footer */}
                 <div className="mt-4 flex items-center justify-between text-sm">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1 text-green-400">
@@ -562,7 +545,7 @@ const Landing = () => {
                       Live
                     </span>
                     <span className="text-gray-400">•</span>
-                    <span className="flex items-center gap-1 text-[var(--theme-accent)]">
+                    <span className="flex items-center gap-1" style={{ color: 'var(--theme-accent)' }}>
                       <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
@@ -576,8 +559,8 @@ const Landing = () => {
               </div>
             </div>
 
-            {/* Floating Elements */}
-            <div className="absolute -top-6 -right-6 bg-gradient-to-r from-purple-500 to-indigo-500 backdrop-blur-md rounded-xl px-4 py-2 text-xs font-mono text-white shadow-lg" style={{
+            <div className="absolute -top-6 -right-6 backdrop-blur-md rounded-xl px-4 py-2 text-xs font-mono text-white shadow-lg" style={{
+              background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
               animation: 'float3D 3s ease-in-out infinite'
             }}>
               <div className="flex items-center gap-2">
@@ -586,7 +569,8 @@ const Landing = () => {
               </div>
             </div>
             
-            <div className="absolute -bottom-6 -left-6 bg-gradient-to-r from-pink-500 to-purple-500 backdrop-blur-md rounded-xl px-4 py-2 text-xs font-mono text-white shadow-lg" style={{
+            <div className="absolute -bottom-6 -left-6 backdrop-blur-md rounded-xl px-4 py-2 text-xs font-mono text-white shadow-lg" style={{
+              background: `linear-gradient(135deg, #ec4899, var(--theme-gradient-start))`,
               animation: 'float3D 3s ease-in-out infinite',
               animationDelay: '0.7s'
             }}>
@@ -598,7 +582,6 @@ const Landing = () => {
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-purple-400/50 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-purple-400 rounded-full mt-2" style={{
@@ -608,7 +591,7 @@ const Landing = () => {
         </div>
       </motion.section>
 
-      {/* Features Grid Section */}
+      {/* Features Section */}
       <section id="features" className="py-24 px-6 relative scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <motion.div 
@@ -617,7 +600,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>
               Powerful Features
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
@@ -631,12 +614,12 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: "🤖", title: "AI-Powered Generation", desc: "Generate complete website sections with simple text prompts", color: "purple" },
-              { icon: "🎨", title: "Premium Templates", desc: "Access hundreds of professionally designed templates", color: "pink" },
-              { icon: "⚡", title: "Real-time Preview", desc: "See changes instantly as you build your website", color: "blue" },
-              { icon: "🔧", title: "Custom Components", desc: "Build and reuse your own component library", color: "green" },
-              { icon: "📱", title: "Responsive Design", desc: "Websites look perfect on all devices", color: "orange" },
-              { icon: "🚀", title: "One-Click Deploy", desc: "Deploy your site to production instantly", color: "red" },
+              { icon: "🤖", title: "AI-Powered Generation", desc: "Generate complete website sections with simple text prompts" },
+              { icon: "🎨", title: "Premium Templates", desc: "Access hundreds of professionally designed templates" },
+              { icon: "⚡", title: "Real-time Preview", desc: "See changes instantly as you build your website" },
+              { icon: "🔧", title: "Custom Components", desc: "Build and reuse your own component library" },
+              { icon: "📱", title: "Responsive Design", desc: "Websites look perfect on all devices" },
+              { icon: "🚀", title: "One-Click Deploy", desc: "Deploy your site to production instantly" },
             ].map((feature, idx) => (
               <motion.div
                 key={idx}
@@ -647,7 +630,7 @@ const Landing = () => {
                 whileHover={{ y: -10 }}
                 className="glass-card p-8 group cursor-pointer relative overflow-hidden"
               >
-                <div className={`text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300`}>
+                <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
@@ -668,7 +651,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>
               Simple Process
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -679,9 +662,9 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              { step: "01", title: "Describe", desc: "Tell our AI what kind of website you want to build", icon: "💭", color: "purple" },
-              { step: "02", title: "Generate", desc: "Watch as AI creates your website in real-time", icon: "✨", color: "pink" },
-              { step: "03", title: "Launch", desc: "Deploy your website with one click", icon: "🚀", color: "indigo" },
+              { step: "01", title: "Describe", desc: "Tell our AI what kind of website you want to build", icon: "💭" },
+              { step: "02", title: "Generate", desc: "Watch as AI creates your website in real-time", icon: "✨" },
+              { step: "03", title: "Launch", desc: "Deploy your website with one click", icon: "🚀" },
             ].map((step, idx) => (
               <motion.div
                 key={idx}
@@ -694,7 +677,7 @@ const Landing = () => {
                 {idx < 2 && (
                   <div className="hidden md:block absolute top-1/3 -right-6 w-12 h-0.5 bg-gradient-to-r from-purple-500 to-transparent" />
                 )}
-                <div className={`text-7xl font-bold text-black-500/20 mb-4`}>{step.step}</div>
+                <div className="text-7xl font-bold text-purple-500/20 mb-4">{step.step}</div>
                 <div className="text-5xl mb-4 transform hover:scale-110 transition-transform duration-300 inline-block">
                   {step.icon}
                 </div>
@@ -715,7 +698,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>
               Pricing Plans
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
@@ -726,15 +709,17 @@ const Landing = () => {
               Start free and upgrade when you're ready. No hidden fees.
             </p>
             
-            {/* Billing Toggle */}
             <div className="flex items-center justify-center gap-4 mt-8">
               <button
                 onClick={() => setSelectedPlan("monthly")}
                 className={`px-6 py-2 rounded-lg transition-all duration-300 font-semibold ${
                   selectedPlan === "monthly" 
-                    ? "bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) text-white shadow-lg" 
+                    ? "text-white shadow-lg" 
                     : "text-gray-400 hover:text-white"
                 }`}
+                style={selectedPlan === "monthly" ? {
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                } : {}}
               >
                 Monthly
               </button>
@@ -742,9 +727,12 @@ const Landing = () => {
                 onClick={() => setSelectedPlan("yearly")}
                 className={`px-6 py-2 rounded-lg transition-all duration-300 font-semibold ${
                   selectedPlan === "yearly" 
-                    ? "bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) text-white shadow-lg" 
+                    ? "text-white shadow-lg" 
                     : "text-gray-400 hover:text-white"
                 }`}
+                style={selectedPlan === "yearly" ? {
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                } : {}}
               >
                 Yearly
                 <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
@@ -764,12 +752,19 @@ const Landing = () => {
                 transition={{ delay: idx * 0.1 }}
                 whileHover={{ y: -10 }}
                 className={`relative glass-card p-8 group ${
-                  plan.popular ? "border-purple-500/50 shadow-2xl shadow-purple-500/20" : ""
+                  plan.popular ? "shadow-2xl" : ""
                 }`}
+                style={plan.popular ? {
+                  borderColor: 'var(--theme-accent)/50',
+                  boxShadow: `0 0 30px var(--theme-glow)`
+                } : {}}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-1 rounded-full">
+                    <span className="text-white text-xs font-bold px-4 py-1 rounded-full"
+                      style={{
+                        background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
+                      }}>
                       MOST POPULAR
                     </span>
                   </div>
@@ -796,18 +791,22 @@ const Landing = () => {
                 </div>
                 
                 <motion.button 
-  whileHover={{ scale: 1.05, y: -2 }}
-  whileTap={{ scale: 0.95 }}
-  onClick={() => navigate("/register")}
-  className="group relative px-9 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/40 font-bold text-white overflow-hidden"
->
-  <span className="relative z-10 flex items-center gap-2">
-    Get Started
-    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-    </svg>
-  </span>
-</motion.button>
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate("/register")}
+                  className="group relative w-full py-3 rounded-xl transition-all duration-300 font-bold text-white overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                    boxShadow: `0 0 20px var(--theme-glow)`
+                  }}
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Get Started
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                </motion.button>
               </motion.div>
             ))}
           </div>
@@ -823,7 +822,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>
               Testimonials
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -872,7 +871,7 @@ const Landing = () => {
                   animate={{ opacity: hoveredTestimonial === idx ? 1 : 0, scale: hoveredTestimonial === idx ? 1 : 0 }}
                   className="mt-4 flex justify-end"
                 >
-                  <svg className="w-8 h-8 text-[var(--theme-accent)]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8" style={{ color: 'var(--theme-accent)' }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                   </svg>
                 </motion.div>
@@ -891,7 +890,7 @@ const Landing = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-semibold text-[var(--theme-accent)] uppercase tracking-wider">
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>
               FAQ
             </span>
             <h2 className="text-4xl md:text-5xl font-bold mt-4">
@@ -908,7 +907,7 @@ const Landing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="glass-card p-6 group cursor-pointer hover:border-purple-500/30 transition-all duration-300"
+                className="glass-card p-6 group cursor-pointer transition-all duration-300 hover:border-purple-500/30"
               >
                 <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[var(--theme-accent)] transition-colors">
                   {faq.q}
@@ -944,7 +943,11 @@ const Landing = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/register")}
-                className="px-8 py-4 bg-gradient-to-r linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end)) rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="px-8 py-4 rounded-xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
+                style={{
+                  background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`,
+                  boxShadow: `0 0 20px var(--theme-glow)`
+                }}
               >
                 Start Building for Free →
               </motion.button>
@@ -1000,109 +1003,70 @@ const Landing = () => {
         </div>
       </footer>
 
-      {/* Add global styles */}
       <style>{`
         @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-50px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        
         @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(50px); }
+          to { opacity: 1; transform: translateX(0); }
         }
-        
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
         @keyframes float3D {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           33% { transform: translateY(-15px) rotate(2deg); }
           66% { transform: translateY(10px) rotate(-2deg); }
         }
-        
         @keyframes orbit {
           from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
           to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
         }
-        
         @keyframes orbit-reverse {
           from { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
           to { transform: rotate(0deg) translateX(50px) rotate(0deg); }
         }
-        
         @keyframes gradientShift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-        
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
-        
         @keyframes dash {
           to { stroke-dashoffset: -20; }
         }
-        
         @keyframes loadingBar {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
-        
         @keyframes scroll {
           0% { transform: translateY(0); opacity: 1; }
           100% { transform: translateY(10px); opacity: 0; }
         }
-        
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
+        .animate-spin-slow { animation: spin-slow 20s linear infinite; }
+        .glass-card {
+          background: var(--theme-cardBg);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--theme-borderColor);
+          border-radius: 1.5rem;
         }
-        
-       .glass-card {
-  background: var(--theme-cardBg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--theme-borderColor);
-  border-radius: 1.5rem;
-}
-        
         .gradient-text {
-  background: linear-gradient(135deg, var(--theme-gradient-start) 0%, var(--theme-gradient-end) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-        /* Scroll margin for fixed navbar */
-        .scroll-mt-20 {
-          scroll-margin-top: 80px;
+          background: linear-gradient(135deg, var(--theme-gradient-start) 0%, var(--theme-gradient-end) 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
         }
+        .scroll-mt-20 { scroll-margin-top: 80px; }
       `}</style>
     </>
   );
