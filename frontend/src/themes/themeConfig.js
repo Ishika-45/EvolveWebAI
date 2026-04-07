@@ -18,22 +18,36 @@ export const themes = {
   },
 
   midnightPro: {
-    name: "Midnight Pro",
-    bgPrimary: "#000000",
-    bgSecondary: "#111111",
-    accent: "#ffffff",
-    accentHover: "#cccccc",
-    textPrimary: "#ffffff",
-    textSecondary: "#aaaaaa",
-    cardBg: "rgba(17, 17, 17, 0.8)",
-    borderColor: "#222222",
-    glow: "rgba(255,255,255,0.2)",
-    gradientStart: "#333333",
-    gradientEnd: "#666666",
-    success: "#4ade80",
-    error: "#f87171",
-    warning: "#fbbf24"
-  },
+  name: "Midnight Pro",
+
+  // Backgrounds (deep black / soft grey)
+  bgPrimary: "#000000", 
+  bgSecondary: "#111111",
+
+  // Accent (clean white, no purple)
+  accent: "#ffffff",
+  accentHover: "#d9d9d9",
+
+  // Text colors
+  textPrimary: "#ffffff",
+  textSecondary: "#b5b5b5",
+
+  // Card & borders
+  cardBg: "rgba(20, 20, 20, 0.85)",
+  borderColor: "rgba(255, 255, 255, 0.08)",
+
+  // Glow (white soft glow)
+  glow: "rgba(255, 255, 255, 0.25)",
+
+  // Clean monochrome gradient
+  gradientStart: "#222222",
+  gradientEnd: "#555555",
+
+  // State colors (consistent with other themes)
+  success: "#4ade80",
+  error: "#f87171",
+  warning: "#fbbf24"
+},
 
   cyberPurple: {
     name: "Cyber Purple",

@@ -47,13 +47,31 @@ const DashboardHome = () => {
   const [streamingText, setStreamingText] = useState("");
   const [generateError, setGenerateError] = useState("");
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [particles, setParticles] = useState([]);
 
   const stepIntervalRef = useRef(null);
   const typingIntervalRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const totalProjects = projects.length;
   const aiGenerations = projects.length * 3;
   const productivityScore = 94;
+
+  // Create floating particles
+  useEffect(() => {
+    const particleArray = [];
+    for (let i = 0; i < 50; i++) {
+      particleArray.push({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        duration: Math.random() * 10 + 5,
+        delay: Math.random() * 5,
+      });
+    }
+    setParticles(particleArray);
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -265,21 +283,65 @@ const DashboardHome = () => {
 
   return (
     <div className="relative w-full flex flex-col items-center overflow-hidden">
+      
+      {/* Animated Background Effects - Similar to Login Page */}
+      <div className="absolute inset-0 -z-10">
+        {/* Animated gradient orbs that follow mouse */}
+        <div 
+          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] transition-transform duration-300 ease-out"
+          style={{
+            transform: `translate(${mouse.x * 0.02}px, ${mouse.y * 0.02}px)`,
+            background: `radial-gradient(circle, var(--theme-accent)/0.15, transparent)`
+          }}
+        />
+        <div 
+          className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] transition-transform duration-300 ease-out"
+          style={{
+            transform: `translate(${-mouse.x * 0.01}px, ${-mouse.y * 0.01}px)`,
+            background: `radial-gradient(circle, var(--theme-gradient-end)/0.1, transparent)`
+          }}
+        />
+        
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url('data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cdefs%3E%3Cpattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"%3E%3Cpath d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(168, 85, 247, 0.03)" stroke-width="1"/%3E%3C/pattern%3E%3C/defs%3E%3Crect width="100%" height="100%" fill="url(%23grid)"/%3E%3C/svg%3E')`
+        }} />
+        
+        {/* Floating Particles */}
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className="absolute rounded-full"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              backgroundColor: 'var(--theme-accent)',
+              opacity: 0.3,
+              animation: `float ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Animated Cursor Glow */}
       <div
-        className="pointer-events-none fixed w-[400px] h-[400px] rounded-full blur-[100px] bg-[var(--theme-accent)]/15 transition-transform duration-300"
+        className="pointer-events-none fixed w-[400px] h-[400px] rounded-full blur-[100px] transition-transform duration-300"
         style={{
           left: mouse.x - 200,
           top: mouse.y - 200,
+          background: `radial-gradient(circle, var(--theme-accent)/0.15, transparent)`
         }}
       />
 
       {/* Welcome Section */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30 mb-6"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/30 mb-6 backdrop-blur-sm"
         >
           <Sparkles className="w-4 h-4 text-[var(--theme-accent)]" />
           <span className="text-sm text-[var(--theme-accent)]">AI-Powered Website Builder</span>
@@ -292,9 +354,9 @@ const DashboardHome = () => {
           className="text-4xl lg:text-5xl font-bold"
         >
           Welcome back,
-         <span className="bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent ml-3">
-  {userName}
-</span>
+          <span className="bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent ml-3">
+            {userName}
+          </span>
           <motion.span
             animate={{ rotate: [0, 20, -10, 20, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 2 }}
@@ -314,12 +376,13 @@ const DashboardHome = () => {
         </motion.p>
       </div>
 
+      {/* Rest of your component remains the same... */}
       {/* AI Generator Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="w-full max-w-4xl relative mb-12"
+        className="w-full max-w-4xl relative mb-12 z-10"
       >
         <div className="absolute -inset-1 bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] rounded-3xl blur-xl opacity-30" />
         
@@ -330,7 +393,6 @@ const DashboardHome = () => {
             <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">Active</span>
           </div>
 
-          {/* Textarea - FIXED */}
           <textarea
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
@@ -339,7 +401,6 @@ const DashboardHome = () => {
             className="w-full h-32 p-5 rounded-xl bg-[var(--theme-cardBg)] border border-[var(--theme-borderColor)] text-white placeholder-gray-500 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all resize-none"
           />
 
-          {/* Prompt Suggestions */}
           <div className="flex flex-wrap gap-2 mt-4">
             {prompts.map((p, i) => (
               <button
@@ -352,7 +413,6 @@ const DashboardHome = () => {
             ))}
           </div>
 
-          {/* Streaming Text */}
           <AnimatePresence>
             {streamingText && (
               <motion.div
@@ -370,7 +430,6 @@ const DashboardHome = () => {
             )}
           </AnimatePresence>
 
-          {/* Error Message */}
           <AnimatePresence>
             {generateError && (
               <motion.div
@@ -384,7 +443,6 @@ const DashboardHome = () => {
             )}
           </AnimatePresence>
 
-          {/* Generation Steps */}
           <AnimatePresence>
             {isGenerating && (
               <motion.div
@@ -425,16 +483,15 @@ const DashboardHome = () => {
             )}
           </AnimatePresence>
 
-          {/* Generate Button - FIXED with proper gradient */}
           <div className="flex justify-end mt-6">
-           <motion.button
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
-  onClick={handleGenerate}
-  disabled={isGenerating || !idea.trim()}
-  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] text-white font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-  style={{ boxShadow: `0 0 20px var(--theme-glow)` }}
->
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleGenerate}
+              disabled={isGenerating || !idea.trim()}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] text-white font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ boxShadow: `0 0 20px var(--theme-glow)` }}
+            >
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -457,7 +514,7 @@ const DashboardHome = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-5xl mb-12"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-5xl mb-12 z-10"
       >
         <div className="relative group cursor-pointer">
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
@@ -530,7 +587,7 @@ const DashboardHome = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-4xl mb-12"
+            className="w-full max-w-4xl mb-12 z-10"
           >
             <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
@@ -575,7 +632,7 @@ const DashboardHome = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="w-full max-w-6xl mb-12"
+          className="w-full max-w-6xl mb-12 z-10"
         >
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -635,9 +692,9 @@ const DashboardHome = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="w-full max-w-4xl mb-8"
+        className="w-full max-w-4xl mb-8 z-10"
       >
-        <div className="bg-gradient-to-r from-[var(--theme-accent)]/10 to-[var(--theme-gradient-end)]/10 rounded-2xl p-6 border border-[var(--theme-accent)]/20">
+        <div className="bg-gradient-to-r from-[var(--theme-accent)]/10 to-[var(--theme-gradient-end)]/10 rounded-2xl p-6 border border-[var(--theme-accent)]/20 backdrop-blur-sm">
           <h3 className="text-sm font-semibold text-[var(--theme-accent)] mb-3 flex items-center gap-2">
             <Zap className="w-4 h-4" />
             Pro Tips
@@ -658,6 +715,24 @@ const DashboardHome = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Add keyframes for floating animation */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) translateX(0px);
+          }
+          25% {
+            transform: translateY(-20px) translateX(10px);
+          }
+          50% {
+            transform: translateY(10px) translateX(-10px);
+          }
+          75% {
+            transform: translateY(-10px) translateX(5px);
+          }
+        }
+      `}</style>
     </div>
   );
 };

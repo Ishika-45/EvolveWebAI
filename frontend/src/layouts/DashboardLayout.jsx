@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import CursorGlow from "../components/CursorGlow";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import LogoIcon from "../components/LogoIcon";
+import Logo from "../components/Logo";
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -92,27 +94,19 @@ const DashboardLayout = () => {
             {/* Logo Section */}
             <div className="flex items-center justify-between p-5 border-b border-[var(--theme-borderColor)]">
               {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="font-bold bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent">
-                      EvolveWeb
-                    </h1>
-                    <p className="text-[10px] text-gray-500">AI Platform</p>
-                  </div>
-                </motion.div>
-              )}
-              {collapsed && (
-                <div className="w-8 h-8 mx-auto rounded-lg bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-white" />
-                </div>
-              )}
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="flex items-center gap-2"
+  >
+    <Logo/>
+  </motion.div>
+)}
+{collapsed && (
+  <div className="w-8 h-8 mx-auto">
+    <LogoIcon />
+  </div>
+)}
               
               <button
                 onClick={() => setCollapsed(!collapsed)}

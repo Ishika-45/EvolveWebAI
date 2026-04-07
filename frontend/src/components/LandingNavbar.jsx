@@ -2,6 +2,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Logo from "./Logo";
 
 const LandingNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -74,19 +75,9 @@ const LandingNavbar = () => {
                 background: `linear-gradient(135deg, var(--theme-gradient-start), var(--theme-gradient-end))`
               }}
             />
-            <div className="relative">
-              <h1 className="text-2xl font-bold tracking-wide">
-                <span className="bg-gradient-to-r from-[var(--theme-gradient-start)] via-[var(--theme-accent)] to-[var(--theme-gradient-end)] bg-clip-text text-transparent">
-                  EvolveWeb
-                </span>
-                <span className="text-white"> AI</span>
-              </h1>
-              <div className="absolute -top-1 -right-8">
-                <span className="text-[9px] font-bold bg-gradient-to-r from-[var(--theme-gradient-start)] to-[var(--theme-gradient-end)] px-1.5 py-0.5 rounded-full text-white shadow-lg">
-                  BETA
-                </span>
-              </div>
-            </div>
+            <Link to="/" className="group relative">
+  <Logo withText={true} />
+</Link>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">

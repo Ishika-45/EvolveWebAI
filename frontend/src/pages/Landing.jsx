@@ -279,58 +279,65 @@ const Landing = () => {
           
           {/* LEFT SIDE */}
           <div className="space-y-8 relative">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 bg-purple-500/10 backdrop-blur-md border border-purple-500/30 rounded-full px-5 py-2.5"
-            >
-              <div className="relative">
-                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full animate-ping" />
-                <div className="w-2.5 h-2.5 bg-purple-400 rounded-full absolute top-0 animate-pulse" />
-              </div>
-              <span className="text-sm bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent font-semibold tracking-wide">
-                🚀 NEXT-GEN AI PLATFORM
-              </span>
-            </motion.div>
+           <motion.div 
+  initial={{ opacity: 0, x: -50 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6 }}
+  className="inline-flex items-center gap-2 backdrop-blur-md rounded-full px-5 py-2.5"
+  style={{
+    backgroundColor: 'var(--theme-accent)/0.1',
+    borderColor: 'var(--theme-accent)/0.3',
+    borderWidth: '1px'
+  }}
+>
+  <div className="relative">
+    <div className="w-2.5 h-2.5 rounded-full animate-ping" style={{ backgroundColor: 'var(--theme-accent)' }} />
+    <div className="w-2.5 h-2.5 rounded-full absolute top-0 animate-pulse" style={{ backgroundColor: 'var(--theme-accent)' }} />
+  </div>
+  <span className="text-sm font-semibold tracking-wide gradient-text">
+    🚀 NEXT-GEN AI PLATFORM
+  </span>
+</motion.div>
 
-            <motion.h1 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-6xl lg:text-8xl font-bold leading-tight"
-            >
-              Evolve Your
-              <br />
-              Ideas Into{" "}
-              <span className="relative inline-block mt-2">
-                <span className="relative z-10 bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent" style={{
-                  backgroundSize: '200% auto',
-                  animation: 'gradientShift 3s ease infinite'
-                }}>
-                  {typedText}
-                  <span style={{ animation: 'blink 1s step-end infinite' }}>|</span>
-                </span>
-                <svg className="absolute -bottom-4 left-0 w-full h-4 -z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
-                  <path 
-                    d="M0 5 L100 5" 
-                    stroke="url(#gradient)" 
-                    strokeWidth="2" 
-                    strokeDasharray="10 10"
-                    style={{ animation: 'dash 1s linear infinite' }}
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#a855f7" />
-                      <stop offset="50%" stopColor="#ec4899" />
-                      <stop offset="100%" stopColor="#6366f1" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-              <br />
-              Websites
-            </motion.h1>
+<motion.h1 
+  initial={{ opacity: 0, x: -50 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.6, delay: 0.1 }}
+  className="text-6xl lg:text-8xl font-bold leading-tight"
+>
+  <span className="multi-gradient-text">
+    Evolve Your
+    <br />
+    Ideas Into{" "}
+    <span className="relative inline-block mt-2">
+      <span className="relative z-10">
+        {typedText}
+        <span className="inline-block w-[3px] h-[0.8em] ml-1 animate-pulse" 
+          style={{ backgroundColor: 'var(--theme-accent)' }}>|</span>
+      </span>
+      {/* Animated underline SVG */}
+      <svg className="absolute -bottom-4 left-0 w-full h-4 -z-0" preserveAspectRatio="none" viewBox="0 0 100 10">
+        <path 
+          d="M0 5 L100 5" 
+          stroke="url(#multiGradient)" 
+          strokeWidth="2" 
+          strokeDasharray="10 10"
+          style={{ animation: 'dash 1s linear infinite' }}
+        />
+        <defs>
+          <linearGradient id="multiGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="var(--theme-gradient-start)" />
+            <stop offset="30%" stopColor="var(--theme-accent)" />
+            <stop offset="60%" stopColor="var(--theme-gradient-end)" />
+            <stop offset="100%" stopColor="var(--theme-gradient-start)" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </span>
+    <br />
+    Websites
+  </span>
+</motion.h1>
 
             <motion.p 
               initial={{ opacity: 0, y: 30 }}
@@ -396,9 +403,9 @@ const Landing = () => {
                 { value: "24/7", label: "Support" }
               ].map((stat, idx) => (
                 <div key={idx} className="group cursor-pointer">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-white to-purple-300 bg-clip-text text-transparent group-hover:scale-110 transition-transform inline-block">
-                    {stat.value}
-                  </div>
+                  <div className="text-3xl font-bold group-hover:scale-110 transition-transform inline-block gradient-text">
+  {stat.value}
+</div>
                   <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
                 </div>
               ))}
@@ -1067,6 +1074,46 @@ const Landing = () => {
           color: transparent;
         }
         .scroll-mt-20 { scroll-margin-top: 80px; }
+
+        .multi-gradient-text {
+  /* Gradient */
+  background: linear-gradient(
+    135deg,
+    var(--theme-gradient-start) 0%,
+    var(--theme-accent) 20%,
+    #ffffff 40%,
+    var(--theme-accent) 60%,
+    var(--theme-gradient-end) 80%,
+    var(--theme-gradient-start) 100%
+  );
+
+  background-size: 250% 250%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+
+  /* Animation */
+  animation: shimmer 3.5s ease-in-out infinite;
+
+  /* Styling */
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  display: inline-block;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
       `}</style>
     </>
   );
