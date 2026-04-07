@@ -92,29 +92,22 @@ const DashboardLayout = () => {
               transition-all duration-300 flex flex-col`}
           >
             {/* Logo Section */}
-            <div className="flex items-center justify-between p-5 border-b border-[var(--theme-borderColor)]">
-              {!collapsed && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="flex items-center gap-2"
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+  {!collapsed ? (
+    <Logo withText={true} />
+  ) : (
+    <div className="w-full flex justify-center">
+      <LogoIcon className="w-8 h-8" />
+    </div>
+  )}
+  
+  <button
+    onClick={() => setCollapsed(!collapsed)}
+    className="p-1.5 rounded-lg hover:bg-white/10 transition-all duration-300 hover:scale-110"
   >
-    <Logo/>
-  </motion.div>
-)}
-{collapsed && (
-  <div className="w-8 h-8 mx-auto">
-    <LogoIcon />
-  </div>
-)}
-              
-              <button
-                onClick={() => setCollapsed(!collapsed)}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-all duration-300 hover:scale-110"
-              >
-                {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-              </button>
-            </div>
+    {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+  </button>
+</div>
 
             {/* Navigation */}
             <nav className="flex-1 py-6">
