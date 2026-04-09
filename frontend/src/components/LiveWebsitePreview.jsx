@@ -8,6 +8,7 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
   const [deviceMode, setDeviceMode] = useState("desktop");
   const [refreshKey, setRefreshKey] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [showCode, setShowCode] = useState(false);
   let hideControlsTimeout;
 
   useEffect(() => {
@@ -24,12 +25,12 @@ const LiveWebsitePreview = ({ code, focusPreview, setFocusPreview }) => {
   };
 
   const getDeviceDimensions = () => {
-    switch(deviceMode) {
-      case "mobile": return "max-w-[375px]";
-      case "tablet": return "max-w-[768px]";
-      default: return "max-w-full";
-    }
-  };
+  switch (deviceMode) {
+    case "mobile": return "max-w-[420px]";
+    case "tablet": return "max-w-[900px]";
+    default: return "max-w-full";
+  }
+};
 
   const safeCode = useMemo(() => {
     if (!code) return "";
@@ -156,10 +157,10 @@ ${trimmed}
           transition={{ duration: 0.35, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
           className={`relative overflow-hidden rounded-2xl border shadow-2xl ${
-            focusPreview
-              ? "w-[95vw] h-[92vh]"
-              : "w-full mx-auto"
-          } ${!focusPreview && getDeviceDimensions()}`}
+  focusPreview
+    ? "w-[95vw] h-[90vh]"
+    : "w-full h-[500px]" 
+} ${!focusPreview && getDeviceDimensions()}`}
           style={{ borderColor: 'var(--theme-borderColor)', backgroundColor: 'black' }}
         >
           {/* Device Controls Bar */}

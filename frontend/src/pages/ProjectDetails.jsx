@@ -233,9 +233,9 @@ const ProjectDetails = () => {
       setProject((prev) =>
         prev
           ? {
-              ...prev,
-              blueprint: nextBlueprint,
-            }
+            ...prev,
+            blueprint: nextBlueprint,
+          }
           : prev
       );
 
@@ -303,9 +303,9 @@ const ProjectDetails = () => {
       setProject((prev) =>
         prev
           ? {
-              ...prev,
-              generatedWebsite: code,
-            }
+            ...prev,
+            generatedWebsite: code,
+          }
           : prev
       );
 
@@ -315,10 +315,10 @@ const ProjectDetails = () => {
       console.error("Website build failed:", error);
       setBuildError(
         error?.response?.data?.details ||
-          error?.response?.data?.error ||
-          error?.response?.data?.message ||
-          error?.message ||
-          "Website build failed"
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Website build failed"
       );
     } finally {
       setBuildingWebsite(false);
@@ -338,8 +338,8 @@ const ProjectDetails = () => {
       console.error("Delete error:", error);
       setDeleteError(
         error?.response?.data?.message ||
-          error?.message ||
-          "Failed to delete project"
+        error?.message ||
+        "Failed to delete project"
       );
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -473,54 +473,54 @@ const ProjectDetails = () => {
 
   const blueprintCards = blueprint
     ? [
-        {
-          id: "problem",
-          title: "Problem",
-          icon: "⚠️",
-          content: blueprint.problem,
-        },
-        {
-          id: "audience",
-          title: "Target Audience",
-          icon: "👥",
-          content: blueprint.targetAudience,
-        },
-        {
-          id: "solution",
-          title: "Solution",
-          icon: "💡",
-          content: blueprint.uniqueSellingProposition,
-        },
-        {
-          id: "business",
-          title: "Business Model",
-          icon: "💰",
-          content: blueprint.monetizationStrategy,
-        },
-        {
-          id: "features",
-          title: "Core Features",
-          icon: "⚡",
-          content:
-            blueprint.coreFeatures?.length > 0
-              ? blueprint.coreFeatures.join(", ")
-              : "",
-        },
-        {
-          id: "future",
-          title: "Future Scope",
-          icon: "🚀",
-          content: blueprint.futureScope,
-        },
-      ]
+      {
+        id: "problem",
+        title: "Problem",
+        icon: "⚠️",
+        content: blueprint.problem,
+      },
+      {
+        id: "audience",
+        title: "Target Audience",
+        icon: "👥",
+        content: blueprint.targetAudience,
+      },
+      {
+        id: "solution",
+        title: "Solution",
+        icon: "💡",
+        content: blueprint.uniqueSellingProposition,
+      },
+      {
+        id: "business",
+        title: "Business Model",
+        icon: "💰",
+        content: blueprint.monetizationStrategy,
+      },
+      {
+        id: "features",
+        title: "Core Features",
+        icon: "⚡",
+        content:
+          blueprint.coreFeatures?.length > 0
+            ? blueprint.coreFeatures.join(", ")
+            : "",
+      },
+      {
+        id: "future",
+        title: "Future Scope",
+        icon: "🚀",
+        content: blueprint.futureScope,
+      },
+    ]
     : [];
 
   const previewWidthClass =
     deviceMode === "mobile"
       ? "max-w-[380px]"
       : deviceMode === "tablet"
-      ? "max-w-[820px]"
-      : "max-w-full";
+        ? "max-w-[820px]"
+        : "max-w-full";
 
   if (isLoading) {
     return (
@@ -711,9 +711,8 @@ const ProjectDetails = () => {
                             {item.title}
                           </h3>
                           <p
-                            className={`text-[var(--theme-textSecondary)] text-sm leading-relaxed ${
-                              isExpanded ? "" : "line-clamp-2"
-                            }`}
+                            className={`text-[var(--theme-textSecondary)] text-sm leading-relaxed ${isExpanded ? "" : "line-clamp-2"
+                              }`}
                           >
                             {item.content || "Not available yet"}
                           </p>
@@ -765,143 +764,168 @@ const ProjectDetails = () => {
       </section>
 
       <section className="mb-12">
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-semibold text-[var(--theme-accent)] flex items-center gap-2">
-            <Eye className="w-6 h-6" />
-            Website Preview
-          </h2>
+  <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-6">
+    <h2 className="text-2xl font-semibold text-[var(--theme-accent)] flex items-center gap-2">
+      <Eye className="w-6 h-6" />
+      Website Preview
+    </h2>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
-              <button
-                onClick={() => setDeviceMode("desktop")}
-                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
-                  deviceMode === "desktop"
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Monitor size={15} />
-                Desktop
-              </button>
-              <button
-                onClick={() => setDeviceMode("tablet")}
-                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
-                  deviceMode === "tablet"
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Tablet size={15} />
-                Tablet
-              </button>
-              <button
-                onClick={() => setDeviceMode("mobile")}
-                className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
-                  deviceMode === "mobile"
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Smartphone size={15} />
-                Mobile
-              </button>
-            </div>
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Device toggle buttons */}
+      <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
+        <button
+          onClick={() => setDeviceMode("desktop")}
+          className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+            deviceMode === "desktop"
+              ? "bg-white/10 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <Monitor size={15} />
+          Desktop
+        </button>
+        <button
+          onClick={() => setDeviceMode("tablet")}
+          className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+            deviceMode === "tablet"
+              ? "bg-white/10 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <Tablet size={15} />
+          Tablet
+        </button>
+        <button
+          onClick={() => setDeviceMode("mobile")}
+          className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+            deviceMode === "mobile"
+              ? "bg-white/10 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <Smartphone size={15} />
+          Mobile
+        </button>
+      </div>
 
-            <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
-              <button
-                onClick={() => setViewMode("preview")}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
-                  viewMode === "preview"
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <Eye size={15} />
-                Preview
-              </button>
-              <button
-                onClick={() => setViewMode("code")}
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
-                  viewMode === "code"
-                    ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                <FileCode size={15} />
-                Code
-              </button>
+      {/* View mode toggle */}
+      <div className="flex items-center bg-white/5 border border-[var(--theme-borderColor)] rounded-xl p-1">
+        <button
+          onClick={() => setViewMode("preview")}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+            viewMode === "preview"
+              ? "bg-white/10 text-white"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <Eye size={15} />
+          Preview
+        </button>
+        <button
+          onClick={() => setViewMode("code")}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition ${
+            viewMode === "code"
+              ? "bg-[var(--theme-accent)]/20 text-[var(--theme-accent)]"
+              : "text-gray-400 hover:text-white"
+          }`}
+        >
+          <FileCode size={15} />
+          Code
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-4 md:p-6">
+    <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div>
+        <p className="text-sm text-gray-300 font-medium">
+          {generatedCode
+            ? "Generated website is ready"
+            : "No website generated yet"}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          Preview, inspect code, and export files
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={copyCode}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
+        >
+          {copiedCode ? <Check size={15} /> : <Copy size={15} />}
+          {copiedCode ? "Copied" : "Copy Code"}
+        </button>
+
+        <button
+          onClick={downloadCodeFile}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
+        >
+          <Download size={15} />
+          Download Code
+        </button>
+
+        <button
+          onClick={downloadZip}
+          className="px-4 py-2 rounded-xl bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 hover:bg-[var(--theme-accent)]/30 transition text-sm flex items-center gap-2"
+        >
+          <Download size={15} />
+          Download ZIP
+        </button>
+      </div>
+    </div>
+
+    {/* Preview/Code Container - Fixed height */}
+    <div className="w-full h-[500px]">
+      {viewMode === "preview" ? (
+        generatedCode ? (
+          <LiveWebsitePreview
+            code={generatedCode}
+            focusPreview={focusPreview}
+            setFocusPreview={setFocusPreview}
+          />
+        ) : (
+          <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 h-full flex flex-col items-center justify-center">
+            <Wand2 className="w-12 h-12 text-[var(--theme-accent)] mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">
+              Build your first live website
+            </h3>
+            <p className="text-sm text-gray-400 max-w-md text-center px-4">
+              Refine the idea below, save your updates, and generate a premium AI website preview.
+            </p>
+          </div>
+        )
+      ) : (
+        // Scrollable Code View
+        <div className="rounded-2xl overflow-hidden border border-[var(--theme-borderColor)] bg-black/40 h-full flex flex-col">
+          <div className="bg-[var(--theme-cardBg)] px-4 py-2.5 border-b border-[var(--theme-borderColor)] flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+              </div>
+              <span className="text-xs text-gray-400 font-mono ml-2">index.html</span>
             </div>
+            <button
+              onClick={copyCode}
+              className="text-xs px-2 py-1 rounded bg-white/10 hover:bg-white/20 transition flex items-center gap-1"
+            >
+              {copiedCode ? <Check size={12} /> : <Copy size={12} />}
+              {copiedCode ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <pre className="text-green-400 text-sm p-5 font-mono whitespace-pre-wrap break-words">
+              <code>{generatedCode || generateFallbackCode()}</code>
+            </pre>
           </div>
         </div>
-
-        <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-4 md:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-            <div>
-              <p className="text-sm text-gray-300 font-medium">
-                {generatedCode
-                  ? "Generated website is ready"
-                  : "No website generated yet"}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Preview, inspect code, and export files
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={copyCode}
-                className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
-              >
-                {copiedCode ? <Check size={15} /> : <Copy size={15} />}
-                {copiedCode ? "Copied" : "Copy Code"}
-              </button>
-
-              <button
-                onClick={downloadCodeFile}
-                className="px-4 py-2 rounded-xl bg-white/10 border border-[var(--theme-borderColor)] hover:bg-white/20 transition text-sm flex items-center gap-2"
-              >
-                <Download size={15} />
-                Download Code
-              </button>
-
-              <button
-                onClick={downloadZip}
-                className="px-4 py-2 rounded-xl bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 hover:bg-[var(--theme-accent)]/30 transition text-sm flex items-center gap-2"
-              >
-                <Download size={15} />
-                Download ZIP
-              </button>
-            </div>
-          </div>
-
-          <div className={`mx-auto transition-all duration-300 ${previewWidthClass}`}>
-            {viewMode === "preview" ? (
-              generatedCode ? (
-                <LiveWebsitePreview
-                  code={generatedCode}
-                  focusPreview={focusPreview}
-                  setFocusPreview={setFocusPreview}
-                />
-              ) : (
-                <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-14 text-center">
-                  <Wand2 className="w-10 h-10 text-[var(--theme-accent)] mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    Build your first live website
-                  </h3>
-                  <p className="text-sm text-gray-400 max-w-xl mx-auto">
-                    Refine the idea below, save your updates, and generate a premium AI website preview.
-                  </p>
-                </div>
-              )
-            ) : (
-              <pre className="text-green-400 text-sm whitespace-pre-wrap bg-black/40 p-5 rounded-2xl overflow-x-auto border border-[var(--theme-borderColor)] min-h-[300px]">
-                {generatedCode || generateFallbackCode()}
-              </pre>
-            )}
-          </div>
-        </div>
-      </section>
+      )}
+    </div>
+  </div>
+</section>
 
       <section className="mb-12">
         <div className="bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-3xl p-6 md:p-8">
@@ -1022,9 +1046,8 @@ const ProjectDetails = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06 }}
                 whileHover={{ y: -4 }}
-                className={`bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-6 hover:bg-white/10 transition ${
-                  regeneratingIndex === index ? "ring-1 ring-[var(--theme-accent)]/40" : ""
-                }`}
+                className={`bg-[var(--theme-cardBg)] backdrop-blur-xl border border-[var(--theme-borderColor)] rounded-2xl p-6 hover:bg-white/10 transition ${regeneratingIndex === index ? "ring-1 ring-[var(--theme-accent)]/40" : ""
+                  }`}
               >
                 <div className="flex justify-between items-start mb-3 gap-4">
                   <h3 className="text-lg font-semibold text-[var(--theme-accent)]">
