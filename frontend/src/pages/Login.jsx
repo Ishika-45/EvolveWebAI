@@ -56,55 +56,13 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleGithubLogin = async () => {
-    setSocialLoading('github');
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockUser = {
-        token: "github-demo-token-123",
-        name: "GitHub User",
-        email: "github.user@example.com",
-        _id: "github_123"
-      };
-      localStorage.setItem("token", mockUser.token);
-      localStorage.setItem("user", JSON.stringify({
-        name: mockUser.name,
-        email: mockUser.email,
-        _id: mockUser._id
-      }));
-      toast.success(`Welcome ${mockUser.name}! 🎉`);
-      setTimeout(() => navigate("/dashboard"), 1000);
-    } catch (error) {
-      toast.error("GitHub login failed. Please try again.");
-    } finally {
-      setSocialLoading(null);
-    }
-  };
+  const handleGithubLogin = () => {
+  window.location.href = "http://localhost:5000/auth/github";
+};
 
-  const handleGoogleLogin = async () => {
-    setSocialLoading('google');
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockUser = {
-        token: "google-demo-token-456",
-        name: "Google User",
-        email: "google.user@gmail.com",
-        _id: "google_456"
-      };
-      localStorage.setItem("token", mockUser.token);
-      localStorage.setItem("user", JSON.stringify({
-        name: mockUser.name,
-        email: mockUser.email,
-        _id: mockUser._id
-      }));
-      toast.success(`Welcome ${mockUser.name}! 🎉`);
-      setTimeout(() => navigate("/dashboard"), 1000);
-    } catch (error) {
-      toast.error("Google login failed. Please try again.");
-    } finally {
-      setSocialLoading(null);
-    }
-  };
+  const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:5000/auth/google";
+};
 
   const checkStrength = (password) => {
     if (password.length < 6) {

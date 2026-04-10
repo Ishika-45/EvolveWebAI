@@ -13,6 +13,7 @@ import Projects from "./pages/Projects";
 import Templates from "./pages/Templates";
 import Settings from "./pages/Settings";
 import ProjectPage from "./pages/ProjectPage";
+import SocialSuccess from "./pages/SocialSuccess";
 
 function App() {
   return (
@@ -76,8 +77,10 @@ function App() {
         <div className="relative z-10">
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/social-success" element={<SocialSuccess />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
             
             {/* Dashboard Routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>

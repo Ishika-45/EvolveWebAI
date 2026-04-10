@@ -104,7 +104,7 @@ const Register = () => {
       <div 
         className="absolute w-[600px] h-[600px] bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
         style={{
-          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
+          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,opacity: 0.35,
         }}
       />
       <div 
