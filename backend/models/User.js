@@ -17,8 +17,13 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
+      required: false,
+      default: null,
+    },
+    provider: {
+      type: String,
+      enum: ["local", "google", "github"],
+      default: "local",
     },
   },
   {
@@ -26,19 +31,19 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// 🔐 Hash password before saving
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) {
+// THIS IS THE CORRECT VERSION - NO 'next' PARAMETER
+userSchema.pre("save", async function() {
+  // Only hash password if it exists and was modified
+  if (!this.password || !this.isModified("password")) {
     return;
   }
-
+  
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-
-// 🔎 Method to compare passwords during login
 userSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

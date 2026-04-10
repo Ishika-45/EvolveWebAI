@@ -39,6 +39,14 @@ const Register = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   const checkStrength = (password) => {
     let score = 0;
     if (password.length >= 6) score++;
@@ -87,7 +95,8 @@ const Register = () => {
         JSON.stringify({
           name: res.data.name,
           email: res.data.email,
-          _id: res.data._id
+          _id: res.data._id,
+          provider: "local"
         })
       );
       toast.success("Account created successfully 🚀");
@@ -98,13 +107,31 @@ const Register = () => {
     setLoading(false);
   };
 
+  // Social login handlers
+  const handleGoogleRegister = () => {
+    toast.loading("Redirecting to Google...", { duration: 2000 });
+    // Small delay to show toast before redirect
+    setTimeout(() => {
+      window.location.href = "http://localhost:5000/auth/google";
+    }, 500);
+  };
+
+  const handleGithubRegister = () => {
+    toast.loading("Redirecting to GitHub...", { duration: 2000 });
+    // Small delay to show toast before redirect
+    setTimeout(() => {
+      window.location.href = "http://localhost:5000/auth/github";
+    }, 500);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: 'var(--theme-bgPrimary)' }}>
       {/* Animated gradient orbs */}
       <div 
         className="absolute w-[600px] h-[600px] bg-gradient-to-r from-[var(--theme-accent)]/20 to-[var(--theme-gradient-end)]/20 rounded-full blur-[120px] transition-transform duration-300 ease-out"
         style={{
-          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,opacity: 0.35,
+          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
+          opacity: 0.35,
         }}
       />
       <div 
@@ -335,7 +362,7 @@ const Register = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[var(--theme-accent)] transition-colors"
                       >
-                        {showPassword ? <span className="text-2xl">🙈</span> : <span className="text-2xl">🐵</span>}
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
 
@@ -425,12 +452,13 @@ const Register = () => {
                     </div>
                   </div>
 
-                  {/* Social Signup */}
+                  {/* Social Signup - NOW WITH WORKING LINKS */}
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
+                      onClick={handleGithubRegister}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] text-gray-300 hover:text-white hover:border-[var(--theme-accent)]/50 transition-all duration-300"
                     >
                       <Github className="w-4 h-4" />
@@ -440,6 +468,7 @@ const Register = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
+                      onClick={handleGoogleRegister}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 border border-[var(--theme-borderColor)] text-gray-300 hover:text-white hover:border-[var(--theme-accent)]/50 transition-all duration-300"
                     >
                       <Chrome className="w-4 h-4" />
