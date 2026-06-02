@@ -155,23 +155,27 @@ Preview & Export
 
 ## Landing Page
 
-![Landing Page](./screenshots/landing-page.png)
+<img width="1167" height="802" alt="LandingPage" src="https://github.com/user-attachments/assets/d96b1b10-524d-4902-acbf-67ce445d5017" />
 
 ## Dashboard
 
-![Dashboard](./screenshots/dashboard.png)
+<img width="1177" height="805" alt="Dashboard" src="https://github.com/user-attachments/assets/fc97a757-4a46-453e-b870-ef17a799f3fe" />
+
 
 ## Startup Analysis
 
-![Startup Analysis](./screenshots/startup-analysis.png)
+<img width="735" height="813" alt="StartupAnalysis" src="https://github.com/user-attachments/assets/de8debe4-594d-4c2b-8b8d-88a63b26f7ec" />
+
 
 ## Product Blueprint
 
-![Blueprint](./screenshots/blueprint.png)
+<img width="959" height="501" alt="ProductBlueprint" src="https://github.com/user-attachments/assets/f421b242-e119-44b2-929c-70d11139d7c9" />
+
 
 ## Website Builder
 
-![Website Builder](./screenshots/website-builder.png)
+<img width="956" height="593" alt="WebsiteBuilder" src="https://github.com/user-attachments/assets/ed2b2b0f-e4c9-4325-a76f-fc933ca3ec80" />
+
 
 ---
 
