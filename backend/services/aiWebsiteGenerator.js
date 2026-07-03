@@ -28,6 +28,12 @@ ${project.blueprint?.monetizationStrategy || ""}
 Future Scope:
 ${project.blueprint?.futureScope || ""}
 
+Hero Image:
+${project.assets?.heroImage || ""}
+
+Logo:
+${project.assets?.logo || ""}
+
 Rules:
 - Return ONLY clean HTML
 - No markdown

@@ -83,7 +83,7 @@ router.get("/:id/preview", protect, async (req, res) => {
     if (project.user.toString() !== req.user._id.toString())
       return res.status(401).send("Not authorized");
 
-    res.send(project.generatedCode || "<h1>No website generated yet</h1>");
+    res.send(project.generated.html || "<h1>No website generated yet</h1>");
   } catch (error) {
     res.status(500).send("Server Error");
   }
@@ -106,7 +106,7 @@ router.put("/:id", protect, async (req, res) => {
 
     project.title = title || project.title;
     project.idea = idea || project.idea;
-    project.generatedCode = generatedCode || project.generatedCode;
+    project.generated.html = generatedCode || project.generated.html;
 
     const updatedProject = await project.save();
 
@@ -153,7 +153,7 @@ router.post("/:id/generate-website", protect, async (req, res) => {
     // 🤖 Call AI to generate React site
     const code = await generateReactWebsite(project);
 
-    project.generatedCode = code;
+    project.generated.html = code;
 
     await project.save();
 
@@ -180,7 +180,7 @@ router.get("/:id/export-zip", protect, async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
 
     const websiteCode =
-      project.generatedCode ||
+      project.generated.html ||
       "<!DOCTYPE html><html><body><h1>No website generated yet</h1></body></html>";
 
     const safeTitle = (project.title || "website")

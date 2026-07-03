@@ -3,6 +3,7 @@ const express = require("express");
 const Project = require("../models/Project");
 const { protect } = require("../middleware/authMiddleware");
 const { makeAICall, DEFAULT_MODEL, openai } = require("../config/ai");
+const { generateAssets } = require("../services/imageGenerator");
 
 const router = express.Router();
 
@@ -344,6 +345,38 @@ router.post("/build-website", protect, async (req, res) => {
       success: false,
       error: "Website build failed",
       details: error.message,
+    });
+  }
+});
+
+router.post("/generate-assets", protect, async (req, res) => {
+  try {
+    const { projectId } = req.body;
+
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        error: "Project not found",
+      });
+    }
+
+    const assets = await generateAssets(project);
+
+    project.assets = assets;
+
+    await project.save();
+
+    res.json({
+      success: true,
+      assets,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Asset generation failed",
     });
   }
 });

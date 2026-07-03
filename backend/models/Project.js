@@ -56,14 +56,57 @@ const projectSchema = new mongoose.Schema(
       default: [],
     },
 
-    generatedCode: {
-      type: String,
-      default: "",
-    },
+    generated: {
+      html: {
+        type: String,
+        default: "",
+      },
 
-    generatedWebsite: {
-  type: String,
-  default: ""
+      react: {
+        type: String,
+        default: "",
+      },
+
+      nextjs: {
+        type: String,
+        default: "",
+      },
+    },
+    assets: {
+      logo: {
+        type: String,
+        default: "",
+      },
+
+      heroImage: {
+        type: String,
+        default: "",
+      },
+
+      featureImages: {
+        type: [String],
+        default: [],
+      },
+
+      screenshots: {
+        type: [String],
+        default: [],
+      },
+    },
+    generation: {
+  model: {
+    type: String,
+    default: "",
+  },
+
+  generatedAt: {
+    type: Date,
+  },
+
+  version: {
+    type: Number,
+    default: 1,
+  },
 },
   },
   {
