@@ -1,39 +1,30 @@
 const BaseAgent = require("../core/BaseAgent");
-
-const {
-    buildAnalysisPrompt,
-} = require("../prompts/analysisPrompt");
-
+const { buildAnalysisPrompt } = require("../prompts/analysisPrompt");
 const validateAnalysis = require("../validators/analysisValidator");
 
 class AnalysisAgent extends BaseAgent {
-    constructor({ gateway }) {
-        super("AnalysisAgent");
+  constructor({ gateway }) {
+    super("AnalysisAgent");
 
-        this.gateway = gateway;
-    }
+    this.gateway = gateway;
+  }
 
-    async execute(context) {
-        this.start(context);
+  async run(context) {
+    const prompt = buildAnalysisPrompt(context.project);
 
-        try {
-            const prompt = buildAnalysisPrompt(context.project);
+    const analysis = await this.gateway.generate({
+      prompt,
+      responseType: "json",
+      temperature: 0.6,
+      maxTokens: 1200,
+    });
 
-            const analysis = await this.gateway.generateAnalysis(prompt);
+    const validated = validateAnalysis(analysis);
 
-            const validated = validateAnalysis(analysis);
+    context.updateAnalysis(validated);
 
-            context.update("analysis", validated);
-
-            this.success(context);
-
-            return validated;
-        } catch (error) {
-            this.fail(context, error);
-
-            throw error;
-        }
-    }
+    return validated;
+  }
 }
 
 module.exports = AnalysisAgent;

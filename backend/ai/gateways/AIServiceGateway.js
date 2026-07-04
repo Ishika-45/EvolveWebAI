@@ -4,61 +4,49 @@ class AIServiceGateway {
     this.logger = logger;
   }
 
-  async generateAnalysis(prompt) {
-    return this.#request(prompt, {
-      temperature: 0.6,
-      max_tokens: 1200,
-      responseType: "json",
-    });
-  }
-
-  async generateBrand(prompt) {
-    return this.#request(prompt, {
-      temperature: 0.8,
-      max_tokens: 1200,
-      responseType: "json",
-    });
-  }
-
-  async generateWebsite(prompt) {
-    return this.#request(prompt, {
-      temperature: 0.4,
-      max_tokens: 4000,
-      responseType: "text",
-    });
-  }
-
-  async #request(prompt, options = {}) {
+  async generate({
+    prompt,
+    responseType = "text",
+    temperature = 0.7,
+    maxTokens = 2000,
+    systemPrompt = "You are an expert AI assistant.",
+  }) {
     try {
       const response = await this.aiClient(
         [
           {
             role: "system",
-            content: "You are an expert AI assistant.",
+            content: systemPrompt,
           },
           {
             role: "user",
             content: prompt,
           },
         ],
-        options
+        {
+          temperature,
+          max_tokens: maxTokens,
+        }
       );
 
       const cleaned = this.#clean(response);
 
-      if (options.responseType === "json") {
-        return this.#parseJson(cleaned);
-      }
+      await gateway.generate({
+    prompt,
+    output: "json"
+})
 
       return cleaned;
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error("AI Gateway Error:", error);
 
-      throw new Error("AI request failed.");
+      throw new Error("AI generation failed.");
     }
   }
 
   #clean(text) {
+    if (!text) return "";
+
     return text
       .replace(/```json/g, "")
       .replace(/```html/g, "")

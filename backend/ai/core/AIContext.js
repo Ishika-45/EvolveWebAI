@@ -1,6 +1,13 @@
 const { randomUUID } = require("crypto");
 
 class AIContext {
+  static STATUS = {
+    PENDING: "pending",
+    RUNNING: "running",
+    COMPLETED: "completed",
+    FAILED: "failed",
+  };
+
   constructor(project) {
     // ==========================
     // Source of Truth
@@ -13,13 +20,9 @@ class AIContext {
     this.metadata = {
       executionId: randomUUID(),
       startedAt: new Date(),
-
-      status: "pending", // pending | running | completed | failed
-
+      status: AIContext.STATUS.PENDING,
       currentAgent: null,
-
       model: null,
-
       version: 1,
     };
 
@@ -27,55 +30,21 @@ class AIContext {
     // Domain Data
     // ==========================
     this.analysis = {};
-
     this.business = {};
-
     this.design = {};
-
     this.assets = {};
-
     this.website = {};
 
     // ==========================
     // Monitoring
     // ==========================
     this.logs = [];
-
     this.errors = [];
   }
 
-  // ======================================
-  // Logging
-  // ======================================
-
-  addLog(message, level = "info") {
-    this.logs.push({
-      timestamp: new Date(),
-      level,
-      agent: this.metadata.currentAgent,
-      executionId: this.metadata.executionId,
-      message,
-    });
-  }
-
-  // ======================================
-  // Error Tracking
-  // ======================================
-
-  addError(error) {
-    this.errors.push({
-      timestamp: new Date(),
-      agent: this.metadata.currentAgent,
-      executionId: this.metadata.executionId,
-      message: error.message || error,
-    });
-
-    this.metadata.status = "failed";
-  }
-
-  // ======================================
-  // Workflow State
-  // ======================================
+  // ==========================
+  // Metadata
+  // ==========================
 
   setStatus(status) {
     this.metadata.status = status;
@@ -89,67 +58,69 @@ class AIContext {
     this.metadata.model = model;
   }
 
-  // ======================================
+  // ==========================
+  // Logging
+  // ==========================
+
+  addLog(message, level = "info") {
+    this.logs.push({
+      timestamp: new Date(),
+      level,
+      executionId: this.metadata.executionId,
+      agent: this.metadata.currentAgent,
+      message,
+    });
+  }
+
+  // ==========================
+  // Errors
+  // ==========================
+
+  addError(error) {
+    this.errors.push({
+      timestamp: new Date(),
+      executionId: this.metadata.executionId,
+      agent: this.metadata.currentAgent,
+      message: error.message || error,
+    });
+
+    this.setStatus(AIContext.STATUS.FAILED);
+  }
+
+  // ==========================
   // Domain Updates
-  // ======================================
+  // ==========================
 
   updateAnalysis(data) {
-    this.analysis = {
-      ...this.analysis,
-      ...data,
-    };
+    this.analysis = { ...this.analysis, ...data };
   }
 
   updateBusiness(data) {
-    this.business = {
-      ...this.business,
-      ...data,
-    };
+    this.business = { ...this.business, ...data };
   }
 
   updateDesign(data) {
-    this.design = {
-      ...this.design,
-      ...data,
-    };
+    this.design = { ...this.design, ...data };
   }
 
   updateAssets(data) {
-    this.assets = {
-      ...this.assets,
-      ...data,
-    };
+    this.assets = { ...this.assets, ...data };
   }
 
   updateWebsite(data) {
-    this.website = {
-      ...this.website,
-      ...data,
-    };
+    this.website = { ...this.website, ...data };
   }
-
-  // ======================================
-  // Serialization
-  // ======================================
 
   toJSON() {
     return {
       project: this.project,
-
       metadata: this.metadata,
-
       analysis: this.analysis,
-
       business: this.business,
-
       design: this.design,
-
       assets: this.assets,
-
       website: this.website,
-
       logs: this.logs,
-
       errors: this.errors,
     };
   }

@@ -1,49 +1,51 @@
+const AIContext = require("./AIContext");
+
 class BaseAgent {
-  constructor(context) {
-    if (!context) {
-      throw new Error("AIContext is required.");
+  constructor(name) {
+    if (!name) {
+      throw new Error("Agent name is required.");
     }
 
-    this.context = context;
-
-    // Frequently used references
-    this.project = context.project;
-    this.metadata = context.metadata;
-
-    // Shared services
-    this.logger = context.logger;
-    this.gateway = context.gateway;
-    this.validator = context.validator;
+    this.name = name;
   }
 
-  /**
-   * Every child agent must implement this.
-   */
-  async execute() {
-    throw new Error(
-      `${this.constructor.name} must implement execute().`
-    );
+  async execute(context) {
+    this.start(context);
+
+    try {
+      const result = await this.run(context);
+
+      this.success(context);
+
+      return result;
+    } catch (error) {
+      this.fail(context, error);
+
+      throw error;
+    }
   }
 
-  /**
-   * Add a log entry.
-   */
-  log(message) {
-    this.context.addLog(message);
+  async run() {
+    throw new Error(`${this.name} must implement run(context).`);
   }
 
-  /**
-   * Record an error.
-   */
-  fail(error) {
-    this.context.addError(error);
+  start(context) {
+    context.setCurrentAgent(this.name);
+    context.setStatus(AIContext.STATUS.RUNNING);
+
+    context.addLog(`${this.name} started.`);
   }
 
-  /**
-   * Mark the current agent.
-   */
-  setCurrentAgent(name) {
-    this.context.currentAgent = name;
+  success(context) {
+    context.setStatus(AIContext.STATUS.COMPLETED);
+
+    context.addLog(`${this.name} completed.`);
+  }
+
+  fail(context, error) {
+    context.addError(error);
+
+    context.addLog(`${this.name} failed.`, "error");
   }
 }
 
