@@ -1,6 +1,10 @@
 const BaseAgent = require("../core/BaseAgent");
-const { buildAnalysisPrompt } = require("../prompts/analysisPrompt");
-const validateAnalysis = require("../validators/analysisValidator");
+const {
+  buildAnalysisPrompt,
+} = require("../analysis/buildAnalysisPrompt");
+const {
+  validateAnalysis,
+} = require("../analysis/validateAnalysis");
 
 class AnalysisAgent extends BaseAgent {
   constructor({ gateway }) {
@@ -10,7 +14,7 @@ class AnalysisAgent extends BaseAgent {
   }
 
   async run(context) {
-    const prompt = buildAnalysisPrompt(context.project);
+    const prompt = buildAnalysisPrompt(context);
 
     const analysis = await this.gateway.generate({
       prompt,
