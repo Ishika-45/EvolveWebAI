@@ -1,20 +1,32 @@
 require("dotenv").config();
-console.log("API Key Loaded:", process.env.OPENROUTER_API_KEY ? "YES" : "NO");
+
 const orchestrator = require("./index");
 
-(async () => {
-  const project = {
-    id: "1",
-    title: "EvolveWeb AI",
-    idea:
-      "An AI-powered SaaS that converts startup ideas into complete websites, branding, business plans, and marketing assets.",
-  };
-
+async function main() {
   try {
-    const result = await orchestrator.execute(project);
+    const project = {
+      id: "project-001",
 
-    console.log(JSON.stringify(result.toJSON(), null, 2));
+      title: "EvolveWeb AI",
+
+      idea: `
+An AI-powered SaaS platform that helps founders transform startup ideas
+into complete business plans, branding, landing pages, and production-ready websites
+using multiple AI agents.
+      `,
+    };
+
+    console.log("\n🚀 Starting AI Workflow...\n");
+
+    const context = await orchestrator.execute(project);
+
+    console.log("✅ Workflow Completed!\n");
+
+    console.log(JSON.stringify(context.toJSON(), null, 2));
   } catch (error) {
+    console.error("\n❌ Workflow Failed\n");
     console.error(error);
   }
-})();
+}
+
+main();

@@ -1,28 +1,27 @@
 const AIContext = require("./AIContext");
 
 class AIOrchestrator {
-  constructor({ registry, pipeline = [] }) {
+  constructor({ registry }) {
     this.registry = registry;
-    this.pipeline = pipeline;
   }
 
   async execute(project) {
     const context = new AIContext(project);
 
-    try {
-      for (const agentName of this.pipeline) {
-        const agent = this.registry.get(agentName);
+    const pipeline = [
+      "analysis",
+      "branding",
+    ];
 
-        await agent.execute(context);
-      }
+    for (const agentName of pipeline) {
+      const agent = this.registry.get(agentName);
 
-      context.setStatus(AIContext.STATUS.COMPLETED);
-
-      return context;
-    } catch (error) {
-      context.addError(error);
-      throw error;
+      await agent.execute(context);
     }
+
+    context.setStatus("completed");
+
+    return context;
   }
 }
 

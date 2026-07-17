@@ -1,7 +1,7 @@
 const buildAnalysisPrompt = (project) => `
-You are a senior startup consultant.
+You are an experienced startup consultant.
 
-Analyze the following startup idea.
+Analyze this startup idea.
 
 Title:
 ${project.title}
@@ -12,15 +12,18 @@ ${project.idea}
 Return ONLY valid JSON.
 
 {
-  "ideaScore": 0,
+  "ideaScore": 85,
   "strengths": [],
   "weaknesses": [],
   "opportunities": [],
   "marketPotential": "",
   "recommendations": []
 }
-`;
 
+Do not include markdown.
+Do not explain.
+Only return JSON.
+`;
 module.exports = {
   buildAnalysisPrompt,
 };

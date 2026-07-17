@@ -2,30 +2,43 @@ const { makeAICall } = require("../config/ai");
 
 const AIServiceGateway = require("./gateways/AIServiceGateway");
 
-const AnalysisAgent = require("./analysis/AnalysisAgent");
-const BrandAgent = require("./branding/BrandAgent");
-
 const AgentRegistry = require("./core/AgentRegistry");
 const AIOrchestrator = require("./core/AIOrchestrator");
+
+// Domains
+const { AnalysisAgent } = require("./analysis");
+const { BrandAgent } = require("./branding");
+
+// ----------------------------------
+// Infrastructure
+// ----------------------------------
 
 const gateway = new AIServiceGateway({
   aiClient: makeAICall,
 });
 
-const analysisAgent = new AnalysisAgent({ gateway });
-const brandAgent = new BrandAgent({ gateway });
+// ----------------------------------
+// Registry
+// ----------------------------------
 
 const registry = new AgentRegistry();
 
-registry.register(analysisAgent);
-registry.register(brandAgent);
+registry.register(
+  "analysis",
+  new AnalysisAgent({ gateway })
+);
+
+registry.register(
+  "branding",
+  new BrandAgent({ gateway })
+);
+
+// ----------------------------------
+// Orchestrator
+// ----------------------------------
 
 const orchestrator = new AIOrchestrator({
   registry,
-  pipeline: [
-    "AnalysisAgent",
-    "BrandAgent",
-  ],
 });
 
 module.exports = orchestrator;

@@ -30,10 +30,12 @@ class AIContext {
     // Domain Data
     // ==========================
     this.analysis = {};
-    this.business = {};
-    this.design = {};
-    this.assets = {};
-    this.website = {};
+this.branding = {};
+this.assets = {};
+this.website = {};
+this.marketing = {};
+this.review = {};
+this.export = {};
 
     // ==========================
     // Monitoring
@@ -92,38 +94,74 @@ class AIContext {
   // ==========================
 
   updateAnalysis(data) {
-    this.analysis = { ...this.analysis, ...data };
-  }
+  this.analysis = {
+    ...this.analysis,
+    ...data,
+  };
+}
 
-  updateBusiness(data) {
-    this.business = { ...this.business, ...data };
-  }
+updateBranding(data) {
+  this.branding = {
+    ...this.branding,
+    ...data,
+  };
+}
 
-  updateDesign(data) {
-    this.design = { ...this.design, ...data };
-  }
+updateAssets(data) {
+  this.assets = {
+    ...this.assets,
+    ...data,
+  };
+}
 
-  updateAssets(data) {
-    this.assets = { ...this.assets, ...data };
-  }
+updateWebsite(data) {
+  this.website = {
+    ...this.website,
+    ...data,
+  };
+}
 
-  updateWebsite(data) {
-    this.website = { ...this.website, ...data };
-  }
+updateMarketing(data) {
+  this.marketing = {
+    ...this.marketing,
+    ...data,
+  };
+}
 
-  toJSON() {
-    return {
-      project: this.project,
-      metadata: this.metadata,
-      analysis: this.analysis,
-      business: this.business,
-      design: this.design,
-      assets: this.assets,
-      website: this.website,
-      logs: this.logs,
-      errors: this.errors,
-    };
-  }
+updateReview(data) {
+  this.review = {
+    ...this.review,
+    ...data,
+  };
+}
+
+updateExport(data) {
+  this.export = {
+    ...this.export,
+    ...data,
+  };
+}
+getState() {
+  return this.toJSON();
+}
+ toJSON() {
+  return {
+    project: this.project,
+
+    metadata: this.metadata,
+
+    analysis: this.analysis,
+    branding: this.branding,
+    assets: this.assets,
+    website: this.website,
+    marketing: this.marketing,
+    review: this.review,
+    export: this.export,
+
+    logs: this.logs,
+    errors: this.errors,
+  };
+}
 }
 
 module.exports = AIContext;

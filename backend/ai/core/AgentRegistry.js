@@ -3,8 +3,20 @@ class AgentRegistry {
     this.agents = new Map();
   }
 
-  register(agent) {
-    this.agents.set(agent.name, agent);
+  register(name, agent) {
+    if (!name) {
+      throw new Error("Agent name is required.");
+    }
+
+    if (!agent) {
+      throw new Error("Agent instance is required.");
+    }
+
+    if (this.agents.has(name)) {
+      throw new Error(`Agent "${name}" is already registered.`);
+    }
+
+    this.agents.set(name, agent);
   }
 
   get(name) {

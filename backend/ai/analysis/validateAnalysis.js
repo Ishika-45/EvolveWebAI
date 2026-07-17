@@ -3,9 +3,9 @@ function validateAnalysis(data) {
     throw new Error("Empty AI response.");
   }
 
-  if (typeof data !== "object") {
-    throw new Error("Analysis must be an object.");
-  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Analysis must be a JSON object.");
+}
 
   return {
     ideaScore: data.ideaScore ?? 0,
@@ -17,4 +17,6 @@ function validateAnalysis(data) {
   };
 }
 
-module.exports = validateAnalysis;
+module.exports = {
+  validateAnalysis,
+};

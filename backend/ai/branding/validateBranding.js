@@ -19,4 +19,6 @@ function validateBranding(data) {
   };
 }
 
-module.exports = validateBranding;
+module.exports = {
+  validateBranding,
+};
