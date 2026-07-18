@@ -45,19 +45,18 @@ class AIServiceGateway {
 
         this.logger.info(`✅ Model succeeded: ${model}`);
 
-        if (responseType === "json") {
-          return this.#parseJson(cleaned);
-        }
-
-        return cleaned;
+        return {
+          model,
+          data:
+            responseType === "json"
+              ? this.#parseJson(cleaned)
+              : cleaned,
+        };
       } catch (error) {
         lastError = error;
 
         this.logger.warn(`❌ ${model} failed`);
-
         this.logger.warn(error.message);
-
-        continue;
       }
     }
 

@@ -12,6 +12,12 @@ const agentConfigs = require("../config/agentConfigs");
 
 class MarketingAgent extends BaseAgent {
 
+   static dependencies = [
+    "analysis",
+    "branding",
+    "assets",
+  ];
+
   constructor({ gateway }) {
 
     super("MarketingAgent");

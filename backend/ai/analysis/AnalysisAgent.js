@@ -11,6 +11,7 @@ const {
 const agentConfigs = require("../config/agentConfigs");
 
 class AnalysisAgent extends BaseAgent {
+  static dependencies = [];
   constructor({ gateway }) {
     super("AnalysisAgent");
 
@@ -20,27 +21,25 @@ class AnalysisAgent extends BaseAgent {
   }
 
   async run(context) {
-    const prompt = buildAnalysisPrompt(context.project);
 
-    const analysis = await this.gateway.generate({
-      models: this.config.models,
+    const prompt = buildAnalysisPrompt(context);
 
-      prompt,
+   const result = await this.gateway.generate({
+  models: this.config.models,
+  prompt,
+  responseType: this.config.responseType,
+  temperature: this.config.temperature,
+  maxTokens: this.config.maxTokens,
+  systemPrompt: this.config.systemPrompt,
+});
 
-      responseType: this.config.responseType,
+context.setModel(result.model);
 
-      temperature: this.config.temperature,
+const validated = validateAnalysis(result.data);
 
-      maxTokens: this.config.maxTokens,
+context.updateAnalysis(validated);
 
-      systemPrompt: this.config.systemPrompt,
-    });
-
-    const validated = validateAnalysis(analysis);
-
-    context.updateAnalysis(validated);
-
-    return validated;
+return validated;
   }
 }
 

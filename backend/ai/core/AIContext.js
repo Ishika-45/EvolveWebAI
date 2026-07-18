@@ -1,22 +1,24 @@
 const { randomUUID } = require("crypto");
 
 class AIContext {
-  static STATUS = {
+  static STATUS = Object.freeze({
     PENDING: "pending",
     RUNNING: "running",
     COMPLETED: "completed",
     FAILED: "failed",
-  };
+  });
 
   constructor(project) {
-    // ==========================
+    // ==========================================
     // Source of Truth
-    // ==========================
+    // ==========================================
+
     this.project = project;
 
-    // ==========================
+    // ==========================================
     // Workflow Metadata
-    // ==========================
+    // ==========================================
+
     this.metadata = {
       executionId: randomUUID(),
       startedAt: new Date(),
@@ -26,27 +28,29 @@ class AIContext {
       version: 1,
     };
 
-    // ==========================
-    // Domain Data
-    // ==========================
-    this.analysis = {};
-this.branding = {};
-this.assets = {};
-this.website = {};
-this.marketing = {};
-this.review = {};
-this.export = {};
+    // ==========================================
+    // AI Generated Data
+    // ==========================================
 
-    // ==========================
+    this.analysis = {};
+    this.branding = {};
+    this.assets = {};
+    this.website = {};
+    this.marketing = {};
+    this.review = {};
+    this.export = {};
+
+    // ==========================================
     // Monitoring
-    // ==========================
+    // ==========================================
+
     this.logs = [];
     this.errors = [];
   }
 
-  // ==========================
+  // ==================================================
   // Metadata
-  // ==========================
+  // ==================================================
 
   setStatus(status) {
     this.metadata.status = status;
@@ -60,9 +64,25 @@ this.export = {};
     this.metadata.model = model;
   }
 
-  // ==========================
+  getExecutionId() {
+    return this.metadata.executionId;
+  }
+
+  getStatus() {
+    return this.metadata.status;
+  }
+
+  getCurrentAgent() {
+    return this.metadata.currentAgent;
+  }
+
+  getModel() {
+    return this.metadata.model;
+  }
+
+  // ==================================================
   // Logging
-  // ==========================
+  // ==================================================
 
   addLog(message, level = "info") {
     this.logs.push({
@@ -74,94 +94,165 @@ this.export = {};
     });
   }
 
-  // ==========================
+  // ==================================================
   // Errors
-  // ==========================
+  // ==================================================
 
   addError(error) {
     this.errors.push({
       timestamp: new Date(),
       executionId: this.metadata.executionId,
       agent: this.metadata.currentAgent,
-      message: error.message || error,
+      message: error.message || String(error),
     });
 
     this.setStatus(AIContext.STATUS.FAILED);
   }
 
-  // ==========================
-  // Domain Updates
-  // ==========================
+  // ==================================================
+  // Generic Update
+  // ==================================================
+
+  update(section, data) {
+    if (!(section in this)) {
+      throw new Error(`Unknown context section: ${section}`);
+    }
+
+    this[section] = {
+      ...this[section],
+      ...data,
+    };
+  }
+
+  // ==================================================
+  // Convenience Update Methods
+  // ==================================================
 
   updateAnalysis(data) {
-  this.analysis = {
-    ...this.analysis,
-    ...data,
-  };
-}
+    this.update("analysis", data);
+  }
 
-updateBranding(data) {
-  this.branding = {
-    ...this.branding,
-    ...data,
-  };
-}
+  updateBranding(data) {
+    this.update("branding", data);
+  }
 
-updateAssets(data) {
-  this.assets = {
-    ...this.assets,
-    ...data,
-  };
-}
+  updateAssets(data) {
+    this.update("assets", data);
+  }
 
-updateWebsite(data) {
-  this.website = {
-    ...this.website,
-    ...data,
-  };
-}
+  updateWebsite(data) {
+    this.update("website", data);
+  }
 
-updateMarketing(data) {
-  this.marketing = {
-    ...this.marketing,
-    ...data,
-  };
-}
+  updateMarketing(data) {
+    this.update("marketing", data);
+  }
 
-updateReview(data) {
-  this.review = {
-    ...this.review,
-    ...data,
-  };
-}
+  updateReview(data) {
+    this.update("review", data);
+  }
 
-updateExport(data) {
-  this.export = {
-    ...this.export,
-    ...data,
-  };
-}
-getState() {
-  return this.toJSON();
-}
- toJSON() {
-  return {
-    project: this.project,
+  updateExport(data) {
+    this.update("export", data);
+  }
 
-    metadata: this.metadata,
+  // ==================================================
+  // Getters
+  // ==================================================
 
-    analysis: this.analysis,
-    branding: this.branding,
-    assets: this.assets,
-    website: this.website,
-    marketing: this.marketing,
-    review: this.review,
-    export: this.export,
+  getProject() {
+    return this.project;
+  }
 
-    logs: this.logs,
-    errors: this.errors,
-  };
-}
+  getAnalysis() {
+    return this.analysis;
+  }
+
+  getBranding() {
+    return this.branding;
+  }
+
+  getAssets() {
+    return this.assets;
+  }
+
+  getWebsite() {
+    return this.website;
+  }
+
+  getMarketing() {
+    return this.marketing;
+  }
+
+  getReview() {
+    return this.review;
+  }
+
+  getExport() {
+    return this.export;
+  }
+
+  // Generic getter
+
+  get(section) {
+    return this[section];
+  }
+
+  // ==================================================
+  // Prompt Helpers
+  // ==================================================
+
+  getAIState() {
+    return {
+      analysis: this.analysis,
+      branding: this.branding,
+      assets: this.assets,
+      website: this.website,
+      marketing: this.marketing,
+      review: this.review,
+      export: this.export,
+    };
+  }
+
+  getPromptContext() {
+    return {
+      project: this.project,
+      analysis: this.analysis,
+      branding: this.branding,
+      assets: this.assets,
+      website: this.website,
+      marketing: this.marketing,
+      review: this.review,
+      export: this.export,
+    };
+  }
+
+  // ==================================================
+  // Serialization
+  // ==================================================
+
+  getState() {
+    return this.toJSON();
+  }
+
+  toJSON() {
+    return {
+      project: this.project,
+
+      metadata: this.metadata,
+
+      analysis: this.analysis,
+      branding: this.branding,
+      assets: this.assets,
+      website: this.website,
+      marketing: this.marketing,
+      review: this.review,
+      export: this.export,
+
+      logs: this.logs,
+      errors: this.errors,
+    };
+  }
 }
 
 module.exports = AIContext;

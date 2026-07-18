@@ -1,13 +1,13 @@
-const buildAnalysisPrompt = (project) => `
+const buildAnalysisPrompt = (context) => `
 You are an experienced startup consultant.
 
 Analyze this startup idea.
 
 Title:
-${project.title}
+${context.project.title}
 
 Idea:
-${project.idea}
+${context.project.idea}
 
 Return ONLY valid JSON.
 

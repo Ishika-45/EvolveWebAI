@@ -44,7 +44,7 @@ registry.register(
   "marketing",
   new MarketingAgent({ gateway })
 );
-// ----------------------------------
+// ----------------------------------`
 // Orchestrator
 // ----------------------------------
 

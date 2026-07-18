@@ -16,7 +16,11 @@ class AgentRegistry {
       throw new Error(`Agent "${name}" is already registered.`);
     }
 
-    this.agents.set(name, agent);
+    this.agents.set(name, {
+      name,
+      instance: agent,
+      dependencies: agent.constructor.dependencies || [],
+    });
   }
 
   get(name) {
@@ -26,7 +30,17 @@ class AgentRegistry {
       throw new Error(`Agent "${name}" is not registered.`);
     }
 
-    return agent;
+    return agent.instance;
+  }
+
+  getDependencies(name) {
+    const agent = this.agents.get(name);
+
+    if (!agent) {
+      throw new Error(`Agent "${name}" is not registered.`);
+    }
+
+    return agent.dependencies;
   }
 
   has(name) {
@@ -35,6 +49,10 @@ class AgentRegistry {
 
   getAll() {
     return [...this.agents.values()];
+  }
+
+  getNames() {
+    return [...this.agents.keys()];
   }
 }
 

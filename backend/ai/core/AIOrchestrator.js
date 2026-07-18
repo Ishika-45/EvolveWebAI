@@ -7,7 +7,6 @@ class AIOrchestrator {
 
   async execute(project) {
     const context = new AIContext(project);
-
     context.setStatus(AIContext.STATUS.RUNNING);
 
     const pipeline = [

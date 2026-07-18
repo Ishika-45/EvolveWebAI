@@ -11,6 +11,10 @@ const {
 const agentConfigs = require("../config/agentConfigs");
 
 class AssetsAgent extends BaseAgent {
+   static dependencies = [
+    "analysis",
+    "branding",
+  ];
 
   constructor({ gateway }) {
 
