@@ -8,6 +8,8 @@ const AIOrchestrator = require("./core/AIOrchestrator");
 // Domains
 const { AnalysisAgent } = require("./analysis");
 const { BrandAgent } = require("./branding");
+const { AssetsAgent } = require("./assets");
+const { MarketingAgent } = require("./marketing");
 
 // ----------------------------------
 // Infrastructure
@@ -33,6 +35,15 @@ registry.register(
   new BrandAgent({ gateway })
 );
 
+registry.register(
+  "assets",
+  new AssetsAgent({ gateway })
+);
+
+registry.register(
+  "marketing",
+  new MarketingAgent({ gateway })
+);
 // ----------------------------------
 // Orchestrator
 // ----------------------------------

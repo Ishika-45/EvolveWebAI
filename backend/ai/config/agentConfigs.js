@@ -30,6 +30,19 @@ module.exports = {
     systemPrompt:
       "You are an expert UI/UX designer. Return ONLY valid JSON.",
   },
+  marketing: {
+  models: MODEL_PROFILES.DEFAULT_FREE,
+
+  responseType: "json",
+
+  temperature: 0.7,
+
+  maxTokens: 1800,
+
+  systemPrompt:
+    "You are a senior SaaS growth marketer. Return ONLY valid JSON.",
+},
+
 
   website: {
     models: MODEL_PROFILES.DEFAULT_FREE,

@@ -1,0 +1,414 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060810;--bg2:#0b0d17;--bg3:#10121f;--card:#131620;
+  --border:#1e2238;--border2:#272c44;
+  --text:#e4e8ff;--muted:#636b94;--hint:#323758;
+  --lime:#b8ff57;--lime2:#91d93c;--indigo:#6366f1;--indigo2:#4f51d4;
+  --sky:#38bdf8;--pink:#f472b6;--orange:#fb923c;--emerald:#34d399;
+  --bl:rgba(99,102,241,.15);--bg-lime:rgba(184,255,87,.08);--bg-sky:rgba(56,189,248,.1);
+  --bg-pink:rgba(244,114,182,.1);--bg-orange:rgba(251,146,60,.1);
+}
+body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);line-height:1.6}
+.wrap{max-width:760px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+/* HERO */
+.hero{padding:2.5rem 0 2rem;position:relative}
+.hero-kicker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.3rem}
+.kicker{display:inline-flex;align-items:center;gap:5px;font-family:'Fira Code',monospace;font-size:9.5px;padding:4px 11px;border-radius:20px;letter-spacing:.07em;font-weight:500}
+.kicker.ai{color:var(--lime);background:var(--bg-lime);border:0.5px solid rgba(184,255,87,.3)}
+.kicker.saas{color:var(--sky);background:var(--bg-sky);border:0.5px solid rgba(56,189,248,.25)}
+.kicker.dep{color:var(--orange);background:var(--bg-orange);border:0.5px solid rgba(251,146,60,.25)}
+.kicker.ai::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--lime);animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:1;box-shadow:0 0 4px var(--lime)}50%{opacity:.4;box-shadow:none}}
+.hero h1{font-family:'Clash Display',sans-serif;font-size:clamp(2.6rem,7vw,4.4rem);font-weight:700;line-height:1.04;letter-spacing:-.02em;margin-bottom:.85rem}
+.hero h1 .w1{color:var(--text)}
+.hero h1 .w2{background:linear-gradient(100deg,var(--lime) 0%,var(--sky) 55%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:.98rem;color:var(--muted);max-width:560px;line-height:1.75;font-weight:400}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:1.5rem}
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:'Fira Code',monospace;font-size:10px;padding:4px 10px;border-radius:5px;border:0.5px solid var(--border2);color:var(--muted);background:var(--bg2)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:1.8rem 0}
+.stat{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:.9rem;text-align:center}
+.stat-n{font-family:'Clash Display',sans-serif;font-size:1.9rem;font-weight:700;line-height:1}
+.stat-l{font-size:9.5px;color:var(--muted);font-family:'Fira Code',monospace;margin-top:4px;letter-spacing:.05em}
+.stat:nth-child(1) .stat-n{color:var(--lime)}
+.stat:nth-child(2) .stat-n{color:var(--sky)}
+.stat:nth-child(3) .stat-n{color:var(--pink)}
+.stat:nth-child(4) .stat-n{color:var(--orange)}
+
+/* SECTION */
+.sec{margin:2.2rem 0 0}
+.sec-label{display:flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:9px;letter-spacing:.14em;color:var(--hint);text-transform:uppercase;margin-bottom:1rem}
+.sec-label::after{content:'';flex:1;height:0.5px;background:var(--border)}
+
+/* CARD */
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:8px}
+.card-title{font-family:'Clash Display',sans-serif;font-weight:600;font-size:.95rem;margin-bottom:.35rem}
+.card-body{font-size:.83rem;color:var(--muted);line-height:1.7}
+
+/* WORKFLOW STEPS */
+.workflow{display:flex;flex-direction:column;gap:0}
+.wf-step{display:flex;gap:14px;align-items:flex-start}
+.wf-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px}
+.wf-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;flex-shrink:0;border:0.5px solid}
+.wf-connector{width:1px;flex:1;min-height:24px;background:linear-gradient(to bottom,var(--border2),var(--border))}
+.wf-body{padding-bottom:20px;flex:1;padding-top:4px}
+.wf-title{font-family:'Clash Display',sans-serif;font-weight:600;font-size:.9rem;margin-bottom:2px}
+.wf-desc{font-size:.79rem;color:var(--muted);line-height:1.6}
+.wf-tag{display:inline-block;font-size:.65rem;font-family:'Fira Code',monospace;padding:2px 7px;border-radius:4px;margin-top:5px;font-weight:500}
+
+/* TECH */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px}
+.tech-item{background:var(--card);border:0.5px solid var(--border);border-radius:9px;padding:.75rem .95rem;transition:border-color .2s}
+.tech-item:hover{border-color:var(--border2)}
+.tech-layer{font-size:.65rem;font-family:'Fira Code',monospace;color:var(--hint);letter-spacing:.07em;margin-bottom:3px;text-transform:uppercase}
+.tech-name{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:5px}
+.td{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* AI ENGINE */
+.ai-box{background:linear-gradient(135deg,rgba(99,102,241,.06) 0%,rgba(184,255,87,.04) 100%);border:0.5px solid rgba(99,102,241,.25);border-radius:12px;padding:1.2rem 1.4rem}
+.ai-models{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:.75rem}
+.ai-model{background:var(--bg2);border:0.5px solid var(--border);border-radius:9px;padding:.85rem 1rem}
+.ai-model-label{font-size:.65rem;font-family:'Fira Code',monospace;letter-spacing:.08em;margin-bottom:.35rem}
+.ai-model-name{font-size:.82rem;font-weight:600}
+.ai-model.primary .ai-model-label{color:var(--lime)}
+.ai-model.primary .ai-model-name{color:var(--text)}
+.ai-model.fallback .ai-model-label{color:var(--muted)}
+.ai-model.fallback .ai-model-name{color:var(--muted)}
+
+/* API TABLE */
+.api-group{background:var(--card);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px}
+.api-group-head{padding:.55rem 1rem;font-size:.7rem;font-family:'Fira Code',monospace;letter-spacing:.07em;border-bottom:0.5px solid var(--border);font-weight:500;display:flex;align-items:center;gap:6px}
+.api-row{display:flex;align-items:center;gap:10px;padding:.45rem 1rem;border-bottom:0.5px solid var(--border);font-size:.75rem;font-family:'Fira Code',monospace}
+.api-row:last-child{border-bottom:none}
+.method{font-size:.63rem;padding:2px 6px;border-radius:4px;font-weight:600;min-width:40px;text-align:center}
+.method.post{background:rgba(52,211,153,.12);color:var(--emerald)}
+.method.get{background:rgba(56,189,248,.1);color:var(--sky)}
+.method.put{background:rgba(251,146,60,.1);color:var(--orange)}
+.method.del{background:rgba(244,114,182,.1);color:var(--pink)}
+.api-path{color:var(--muted);flex:1}
+.api-path span{color:var(--text)}
+
+/* DB SCHEMA */
+.schema-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.schema-card{background:var(--card);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+.schema-head{padding:.55rem 1rem;font-size:.72rem;font-family:'Fira Code',monospace;letter-spacing:.07em;border-bottom:0.5px solid var(--border);font-weight:500}
+.schema-head.users{color:var(--sky)}
+.schema-head.projects{color:var(--lime)}
+.schema-field{display:flex;align-items:center;gap:8px;padding:.38rem 1rem;border-bottom:0.5px solid var(--border);font-size:.73rem;font-family:'Fira Code',monospace}
+.schema-field:last-child{border-bottom:none}
+.sf-name{color:var(--text);flex:1}
+.sf-type{font-size:.62rem;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,.12);color:var(--indigo)}
+.sf-ai{font-size:.6rem;padding:1px 4px;border-radius:3px;background:rgba(184,255,87,.1);color:var(--lime);margin-left:3px}
+
+/* WEBSITE BUILDER */
+.builder-sections{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:.75rem}
+.bs{background:var(--bg2);border:0.5px solid var(--border);border-radius:7px;padding:.5rem .6rem;font-size:.68rem;font-family:'Fira Code',monospace;color:var(--muted);text-align:center;transition:border-color .2s,color .2s}
+.bs:hover{border-color:var(--lime);color:var(--lime)}
+
+/* AUTH */
+.auth-split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.auth-card{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:1rem 1.1rem}
+.auth-head{display:flex;align-items:center;gap:7px;font-family:'Clash Display',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:.65rem}
+.auth-head i{font-size:15px}
+.auth-card:nth-child(1) .auth-head{color:var(--indigo)}
+.auth-card:nth-child(2) .auth-head{color:var(--orange)}
+.auth-feat{font-size:.76rem;color:var(--muted);padding:4px 0;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:6px}
+.auth-feat:last-child{border-bottom:none}
+.auth-feat::before{content:'◦';color:var(--hint);font-size:.7rem}
+
+/* STRENGTHS */
+.strength-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.strength{background:var(--card);border:0.5px solid var(--border);border-top:2px solid;border-radius:0 0 10px 10px;padding:1rem 1.1rem}
+.strength:nth-child(1){border-top-color:var(--lime)}
+.strength:nth-child(2){border-top-color:var(--sky)}
+.strength:nth-child(3){border-top-color:var(--pink)}
+.strength:nth-child(4){border-top-color:var(--orange)}
+.strength:nth-child(5){border-top-color:var(--emerald)}
+.strength:nth-child(6){border-top-color:var(--indigo)}
+.strength-title{font-family:'Clash Display',sans-serif;font-weight:600;font-size:.87rem;margin-bottom:.3rem}
+.strength-desc{font-size:.77rem;color:var(--muted);line-height:1.6}
+
+/* CODE */
+.code-block{background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:.85rem 1rem;font-family:'Fira Code',monospace;font-size:.72rem;color:#a0a8cc;margin-top:.75rem;line-height:1.7;overflow-x:auto}
+.code-block .k{color:var(--pink)}.code-block .s{color:var(--lime)}.code-block .c{color:var(--hint)}.code-block .f{color:var(--sky)}.code-block .n{color:var(--orange)}
+
+/* PITCH */
+.pitch{background:linear-gradient(140deg,rgba(99,102,241,.07) 0%,rgba(184,255,87,.05) 40%,rgba(56,189,248,.04) 100%);border:0.5px solid rgba(184,255,87,.2);border-radius:13px;padding:1.5rem;position:relative;overflow:hidden}
+.pitch::before{content:'//';position:absolute;top:-5px;right:16px;font-family:'Clash Display',sans-serif;font-size:6rem;font-weight:700;color:rgba(184,255,87,.05);line-height:1;pointer-events:none}
+.pitch-label{font-size:.65rem;font-family:'Fira Code',monospace;color:var(--lime);letter-spacing:.1em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.pitch-text{font-size:.88rem;line-height:1.8;color:var(--text)}
+</style>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-kicker">
+      <div class="kicker ai">AI-POWERED SAAS</div>
+      <div class="kicker saas">FULL STACK</div>
+      <div class="kicker dep">DEPLOYED ON VERCEL</div>
+    </div>
+    <h1><span class="w1">EvolveWeb</span> <span class="w2">AI</span></h1>
+    <p class="hero-sub">Your AI startup co-founder — validates ideas, generates product blueprints, creates marketing content, and builds exportable landing pages end-to-end using OpenRouter AI workflows.</p>
+    <div class="hero-chips">
+      <div class="chip"><i class="ti ti-brand-react" aria-hidden="true"></i> React 19 + Vite</div>
+      <div class="chip"><i class="ti ti-server" aria-hidden="true"></i> Node + Express</div>
+      <div class="chip"><i class="ti ti-database" aria-hidden="true"></i> MongoDB</div>
+      <div class="chip"><i class="ti ti-shield-check" aria-hidden="true"></i> JWT + OAuth</div>
+      <div class="chip"><i class="ti ti-brain" aria-hidden="true"></i> OpenRouter AI</div>
+      <div class="chip"><i class="ti ti-brand-google" aria-hidden="true"></i> Google + GitHub OAuth</div>
+      <div class="chip"><i class="ti ti-download" aria-hidden="true"></i> ZIP Export</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n">10</div><div class="stat-l">WORKFLOW STEPS</div></div>
+    <div class="stat"><div class="stat-n">7</div><div class="stat-l">AI ENDPOINTS</div></div>
+    <div class="stat"><div class="stat-n">2</div><div class="stat-l">AI MODELS</div></div>
+    <div class="stat"><div class="stat-n">10+</div><div class="stat-l">PAGE SECTIONS</div></div>
+  </div>
+
+  <!-- PROBLEM -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-alert-circle" aria-hidden="true"></i> Problem Statement</div>
+    <div class="card">
+      <div class="card-title">The early-stage founder bottleneck</div>
+      <div class="card-body">Most founders have raw ideas but no structured way to validate them, define their audience, or build a web presence quickly. Idea validation, product planning, content writing, and landing page creation are each their own time sinks. EvolveWeb AI collapses all of it into one automated AI workflow — from raw idea to deployed-ready landing page.</div>
+    </div>
+  </div>
+
+  <!-- CORE WORKFLOW -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-git-branch" aria-hidden="true"></i> Core 10-Step Workflow</div>
+    <div class="card">
+      <div class="workflow">
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bl);color:var(--indigo);border-color:rgba(99,102,241,.3)">01</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Authentication</div><div class="wf-desc">Email/password or social login via Google & GitHub OAuth. JWT issued for all protected routes.</div><span class="wf-tag" style="background:var(--bl);color:var(--indigo)">Clerk-free · Passport.js + JWT</span></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-sky);color:var(--sky);border-color:rgba(56,189,248,.25)">02</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Create Startup Project</div><div class="wf-desc">User enters a project title and raw idea (e.g. "AI-powered healthcare analytics platform"). Saved to MongoDB and passed to the AI pipeline.</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-lime);color:var(--lime);border-color:rgba(184,255,87,.25)">03</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">AI Startup Analysis</div><div class="wf-desc">OpenRouter AI scores the idea (0–100) and returns structured strengths, weaknesses, and growth opportunities.</div><span class="wf-tag" style="background:var(--bg-lime);color:var(--lime)">ideaScore · strengths · weaknesses · opportunities</span></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-lime);color:var(--lime2);border-color:rgba(184,255,87,.2)">04</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Idea Evolution Engine</div><div class="wf-desc">AI rewrites the raw concept into a stronger, market-ready version. "Fitness tracking app" → "AI-powered fitness coaching platform with personalized health analytics."</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-sky);color:var(--sky);border-color:rgba(56,189,248,.2)">05</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Product Blueprint Generation</div><div class="wf-desc">Full startup blueprint: problem statement, target audience, core feature list, USP, monetization strategy, and future scope. All AI-generated from the evolved idea.</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-pink);color:var(--pink);border-color:rgba(244,114,182,.25)">06</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Website Structure Generation</div><div class="wf-desc">AI generates full landing page architecture: Hero, Problem, Solution, Features, How It Works, Pricing, Testimonials, FAQ, CTA, Footer.</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-pink);color:var(--pink);border-color:rgba(244,114,182,.2)">07</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Dynamic Section Content</div><div class="wf-desc">Per-section content generation — headlines, sub-headlines, CTAs, feature descriptions, and marketing copy. Each section callable independently via API.</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:var(--bg-orange);color:var(--orange);border-color:rgba(251,146,60,.25)">08</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">AI Website Builder</div><div class="wf-desc">The complete blueprint is fed to a dedicated code-gen prompt. AI returns a full responsive HTML page — navbar, hero, features, CTA, footer — ready to preview.</div><span class="wf-tag" style="background:var(--bg-orange);color:var(--orange)">HTML + CSS · responsive · no-framework output</span></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:rgba(52,211,153,.1);color:var(--emerald);border-color:rgba(52,211,153,.25)">09</div><div class="wf-connector"></div></div>
+          <div class="wf-body"><div class="wf-title">Live Website Preview</div><div class="wf-desc">Generated HTML renders instantly in-platform. Users see layout, content, and structure without touching any code.</div></div>
+        </div>
+
+        <div class="wf-step">
+          <div class="wf-left"><div class="wf-num" style="background:rgba(52,211,153,.1);color:var(--emerald);border-color:rgba(52,211,153,.2)">10</div></div>
+          <div class="wf-body" style="padding-bottom:0"><div class="wf-title">ZIP Export</div><div class="wf-desc">One-click export packages <code style="font-family:'Fira Code',monospace;color:var(--lime);font-size:.75rem">index.html</code> + <code style="font-family:'Fira Code',monospace;color:var(--lime);font-size:.75rem">README.md</code> into a downloadable ZIP. Deploy anywhere, customize freely.</div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ENGINE -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-brain" aria-hidden="true"></i> AI Architecture</div>
+    <div class="ai-box">
+      <div class="card-body">Powered by OpenRouter as a unified AI gateway with a primary + fallback model setup. If Gemini Flash is unavailable, requests automatically route to Llama 3 — no downtime, no user-visible errors.</div>
+      <div class="ai-models">
+        <div class="ai-model primary">
+          <div class="ai-model-label">PRIMARY MODEL</div>
+          <div class="ai-model-name">Gemini 2.0 Flash Lite</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:3px;font-family:'Fira Code',monospace">google/gemini-2.0-flash-lite-preview</div>
+        </div>
+        <div class="ai-model fallback">
+          <div class="ai-model-label">FALLBACK MODEL</div>
+          <div class="ai-model-name">Llama 3.2 3B Instruct</div>
+          <div style="font-size:.72rem;color:var(--hint);margin-top:3px;font-family:'Fira Code',monospace">meta-llama/llama-3.2-3b-instruct:free</div>
+        </div>
+      </div>
+      <div class="code-block" style="margin-top:.75rem">
+<span class="c">// AI website builder prompt payload</span>
+<span class="k">const</span> payload = {
+  idea: project.<span class="f">idea</span>,
+  problem: blueprint.<span class="f">problemStatement</span>,
+  audience: blueprint.<span class="f">targetAudience</span>,
+  features: blueprint.<span class="f">coreFeatures</span>,
+  usp: blueprint.<span class="f">usp</span>,
+  monetization: blueprint.<span class="f">monetizationStrategy</span>
+};
+<span class="c">// Returns: complete responsive HTML string</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEBSITE BUILDER SECTIONS -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-layout" aria-hidden="true"></i> Generated Website Sections</div>
+    <div class="card">
+      <div class="card-body">AI generates all 10 landing page sections from the product blueprint — no manual writing required.</div>
+      <div class="builder-sections">
+        <div class="bs">Hero</div>
+        <div class="bs">Problem</div>
+        <div class="bs">Solution</div>
+        <div class="bs">Features</div>
+        <div class="bs">How It Works</div>
+        <div class="bs">Pricing</div>
+        <div class="bs">Testimonials</div>
+        <div class="bs">FAQ</div>
+        <div class="bs">CTA</div>
+        <div class="bs">Footer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-shield-lock" aria-hidden="true"></i> Authentication</div>
+    <div class="auth-split">
+      <div class="auth-card">
+        <div class="auth-head"><i class="ti ti-lock" aria-hidden="true"></i> Traditional Auth</div>
+        <div class="auth-feat">Email registration + login</div>
+        <div class="auth-feat">bcrypt password hashing</div>
+        <div class="auth-feat">JWT token issuance</div>
+        <div class="auth-feat">Protected route middleware</div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-head"><i class="ti ti-brand-google" aria-hidden="true"></i> OAuth (Passport.js)</div>
+        <div class="auth-feat">Google OAuth 2.0</div>
+        <div class="auth-feat">GitHub OAuth</div>
+        <div class="auth-feat">Auto user creation in MongoDB</div>
+        <div class="auth-feat">Same JWT flow post-OAuth</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DB SCHEMA -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-database" aria-hidden="true"></i> MongoDB Schema</div>
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-head users">collection: users</div>
+        <div class="schema-field"><span class="sf-name">name</span><span class="sf-type">String</span></div>
+        <div class="schema-field"><span class="sf-name">email</span><span class="sf-type">String</span></div>
+        <div class="schema-field"><span class="sf-name">password</span><span class="sf-type">String</span></div>
+        <div class="schema-field"><span class="sf-name">provider</span><span class="sf-type">enum</span></div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-head projects">collection: projects</div>
+        <div class="schema-field"><span class="sf-name">title</span><span class="sf-type">String</span></div>
+        <div class="schema-field"><span class="sf-name">idea</span><span class="sf-type">String</span></div>
+        <div class="schema-field"><span class="sf-name">analysis</span><span class="sf-type">Object</span><span class="sf-ai">AI</span></div>
+        <div class="schema-field"><span class="sf-name">evolvedIdea</span><span class="sf-type">String</span><span class="sf-ai">AI</span></div>
+        <div class="schema-field"><span class="sf-name">blueprint</span><span class="sf-type">Object</span><span class="sf-ai">AI</span></div>
+        <div class="schema-field"><span class="sf-name">websiteStructure</span><span class="sf-type">Object</span><span class="sf-ai">AI</span></div>
+        <div class="schema-field"><span class="sf-name">generatedWebsite</span><span class="sf-type">String</span><span class="sf-ai">AI</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API ROUTES -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-api" aria-hidden="true"></i> API Routes</div>
+    <div class="api-group">
+      <div class="api-group-head" style="color:var(--indigo)"><i class="ti ti-shield" aria-hidden="true"></i> Auth</div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/auth/</span>register</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/auth/</span>login</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path"><span>/auth/</span>google</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path"><span>/auth/</span>github</span></div>
+    </div>
+    <div class="api-group">
+      <div class="api-group-head" style="color:var(--sky)"><i class="ti ti-folder" aria-hidden="true"></i> Projects</div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/</span>projects</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path"><span>/api/</span>projects</span></div>
+      <div class="api-row"><span class="method get">GET</span><span class="api-path"><span>/api/</span>projects/:id</span></div>
+      <div class="api-row"><span class="method put">PUT</span><span class="api-path"><span>/api/</span>projects/:id</span></div>
+      <div class="api-row"><span class="method del">DEL</span><span class="api-path"><span>/api/</span>projects/:id</span></div>
+    </div>
+    <div class="api-group">
+      <div class="api-group-head" style="color:var(--lime)"><i class="ti ti-brain" aria-hidden="true"></i> AI Engine</div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>analyze-idea</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>evolve-idea</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>generate-blueprint</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>generate-website</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>generate-stream</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>generate-section</span></div>
+      <div class="api-row"><span class="method post">POST</span><span class="api-path"><span>/api/ai/</span>build-website</span></div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-stack-2" aria-hidden="true"></i> Tech Stack</div>
+    <div class="tech-grid">
+      <div class="tech-item"><div class="tech-layer">Frontend</div><div class="tech-name"><div class="td" style="background:var(--sky)"></div>React 19 + Vite</div></div>
+      <div class="tech-item"><div class="tech-layer">Styling</div><div class="tech-name"><div class="td" style="background:var(--sky)"></div>Tailwind CSS</div></div>
+      <div class="tech-item"><div class="tech-layer">Animation</div><div class="tech-name"><div class="td" style="background:var(--pink)"></div>Framer Motion</div></div>
+      <div class="tech-item"><div class="tech-layer">HTTP</div><div class="tech-name"><div class="td" style="background:var(--muted)"></div>Axios</div></div>
+      <div class="tech-item"><div class="tech-layer">Backend</div><div class="tech-name"><div class="td" style="background:var(--emerald)"></div>Node + Express</div></div>
+      <div class="tech-item"><div class="tech-layer">Database</div><div class="tech-name"><div class="td" style="background:var(--lime)"></div>MongoDB + Mongoose</div></div>
+      <div class="tech-item"><div class="tech-layer">Auth</div><div class="tech-name"><div class="td" style="background:var(--indigo)"></div>JWT + Passport.js</div></div>
+      <div class="tech-item"><div class="tech-layer">OAuth</div><div class="tech-name"><div class="td" style="background:var(--orange)"></div>Google + GitHub</div></div>
+      <div class="tech-item"><div class="tech-layer">AI Gateway</div><div class="tech-name"><div class="td" style="background:var(--lime)"></div>OpenRouter API</div></div>
+      <div class="tech-item"><div class="tech-layer">AI Models</div><div class="tech-name"><div class="td" style="background:var(--lime2)"></div>Gemini Flash + Llama 3</div></div>
+      <div class="tech-item"><div class="tech-layer">Deployment</div><div class="tech-name"><div class="td" style="background:var(--sky)"></div>Vercel (Frontend)</div></div>
+      <div class="tech-item"><div class="tech-layer">File Handling</div><div class="tech-name"><div class="td" style="background:var(--muted)"></div>jszip + file-saver</div></div>
+    </div>
+  </div>
+
+  <!-- STRENGTHS -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-sparkles" aria-hidden="true"></i> What This Demonstrates</div>
+    <div class="strength-grid">
+      <div class="strength"><div class="strength-title" style="color:var(--lime)">AI Integration</div><div class="strength-desc">Multi-step OpenRouter AI workflows with primary/fallback model routing — not a single API call, a full pipeline.</div></div>
+      <div class="strength"><div class="strength-title" style="color:var(--sky)">SaaS Architecture</div><div class="strength-desc">User-scoped projects, protected APIs, cloud-ready backend — product-grade design, not a demo.</div></div>
+      <div class="strength"><div class="strength-title" style="color:var(--pink)">Prompt Engineering</div><div class="strength-desc">Structured AI prompts that return typed JSON — idea scores, blueprints, HTML code — each tuned for the task.</div></div>
+      <div class="strength"><div class="strength-title" style="color:var(--orange)">Full Auth Stack</div><div class="strength-desc">JWT + Passport.js handling both email auth and two OAuth providers under the same token architecture.</div></div>
+      <div class="strength"><div class="strength-title" style="color:var(--emerald)">Website Code Gen</div><div class="strength-desc">AI generates real HTML output that renders in-browser and exports as a deployable ZIP — a tangible user deliverable.</div></div>
+      <div class="strength"><div class="strength-title" style="color:var(--indigo)">End-to-End Workflow</div><div class="strength-desc">10-step pipeline from raw idea to exported landing page — every stage connected, nothing orphaned.</div></div>
+    </div>
+  </div>
+
+  <!-- PITCH -->
+  <div class="sec">
+    <div class="sec-label"><i class="ti ti-microphone" aria-hidden="true"></i> Interview One-Liner</div>
+    <div class="pitch">
+      <div class="pitch-label"><i class="ti ti-player-play" aria-hidden="true"></i> CANONICAL PITCH</div>
+      <div class="pitch-text">EvolveWeb AI is an AI-powered SaaS platform that acts like a startup co-founder — it helps users validate business ideas, generate product blueprints, create website structures, produce marketing content, and automatically generate exportable landing pages using OpenRouter-powered AI workflows, JWT authentication with Google and GitHub OAuth, MongoDB, React 19, and Node.js Express — deployed on Vercel with a primary Gemini Flash model and Llama 3 fallback for reliability.</div>
+    </div>
+  </div>
+
+</div>
