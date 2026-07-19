@@ -14,6 +14,7 @@ class AIOrchestrator {
       "branding",
       "assets",
       "marketing",
+      "website",
     ];
 
     for (const agentName of pipeline) {

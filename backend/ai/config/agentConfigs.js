@@ -45,14 +45,19 @@ module.exports = {
 
 
   website: {
-    models: MODEL_PROFILES.DEFAULT_FREE,
+  models: [
+    "google/gemini-2.5-flash-lite"
+  ],
 
-    responseType: "text",
-    temperature: 0.3,
-    maxTokens: 5000,
-    systemPrompt:
-      "You are a senior full-stack engineer.",
-  },
+  responseType: "json",
+
+  temperature: 0.5,
+
+  maxTokens: 3500,
+
+  systemPrompt:
+    "You are an expert SaaS Product Designer, UX Architect and Full Stack Website Planner. Always return valid JSON."
+},
 
   review: {
     models: MODEL_PROFILES.DEFAULT_FREE,
