@@ -32,27 +32,22 @@ class MarketingAgent extends BaseAgent {
 
     const prompt = buildMarketingPrompt(context);
 
-    const marketing = await this.gateway.generate({
+    const result = await this.gateway.generate({
+  models: this.config.models,
+  prompt,
+  responseType: this.config.responseType,
+  temperature: this.config.temperature,
+  maxTokens: this.config.maxTokens,
+  systemPrompt: this.config.systemPrompt,
+});
 
-      models: this.config.models,
+context.setModel(result.model);
 
-      prompt,
+const validated = validateMarketing(result.data);
 
-      responseType: this.config.responseType,
+context.updateMarketing(validated);
 
-      temperature: this.config.temperature,
-
-      maxTokens: this.config.maxTokens,
-
-      systemPrompt: this.config.systemPrompt,
-
-    });
-
-    const validated = validateMarketing(marketing);
-
-    context.updateMarketing(validated);
-
-    return validated;
+return validated;
 
   }
 

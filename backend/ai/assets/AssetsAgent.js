@@ -30,27 +30,22 @@ class AssetsAgent extends BaseAgent {
 
     const prompt = buildAssetsPrompt(context);
 
-    const assets = await this.gateway.generate({
+    const result = await this.gateway.generate({
+  models: this.config.models,
+  prompt,
+  responseType: this.config.responseType,
+  temperature: this.config.temperature,
+  maxTokens: this.config.maxTokens,
+  systemPrompt: this.config.systemPrompt,
+});
 
-      models: this.config.models,
+context.setModel(result.model);
 
-      prompt,
+const validated = validateAssets(result.data);
 
-      responseType: this.config.responseType,
+context.updateAssets(validated);
 
-      temperature: this.config.temperature,
-
-      maxTokens: this.config.maxTokens,
-
-      systemPrompt: this.config.systemPrompt,
-
-    });
-
-    const validated = validateAssets(assets);
-
-    context.updateAssets(validated);
-
-    return validated;
+return validated;
 
   }
 

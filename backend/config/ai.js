@@ -17,7 +17,6 @@ const MODELS = {
   GEMINI_FLASH: "google/gemini-2.5-flash-lite",
   DEEPSEEK: "deepseek/deepseek-r1-0528:free",
   LLAMA_3: "meta-llama/llama-3.2-3b-instruct:free",
-  MISTRAL: "mistralai/mistral-7b-instruct:free",
 };
 
 // -------------------------------------
@@ -29,7 +28,6 @@ const MODEL_PROFILES = {
     MODELS.GEMINI_FLASH,
     MODELS.DEEPSEEK,
     MODELS.LLAMA_3,
-    MODELS.MISTRAL,
   ],
 };
 

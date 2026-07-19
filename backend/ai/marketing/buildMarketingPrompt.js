@@ -1,41 +1,71 @@
 const buildMarketingPrompt = (context) => `
-You are an experienced Growth Marketer and SaaS Copywriter.
+You are a senior SaaS Growth Marketer and Conversion Copywriter.
 
-Create complete marketing content for the startup.
+Generate complete marketing content for the startup.
 
-Startup
-
+PROJECT
+-------
 Title:
 ${context.project.title}
 
 Idea:
 ${context.project.idea}
 
-Business Analysis:
+ANALYSIS
+--------
 ${JSON.stringify(context.analysis, null, 2)}
 
-Brand Identity:
+BRANDING
+--------
 ${JSON.stringify(context.branding, null, 2)}
 
-Visual Assets:
+ASSETS
+------
 ${JSON.stringify(context.assets, null, 2)}
 
-Return ONLY valid JSON.
+IMPORTANT RULES
+---------------
+- Return ONLY valid JSON.
+- Do NOT use markdown.
+- Do NOT add explanations.
+- Do NOT add comments.
+- Every field must be present.
+- Use double quotes for all strings.
+- Arrays must contain valid JSON objects or strings only.
+
+Return this exact JSON schema:
 
 {
   "headline": "",
   "subheadline": "",
   "cta": "",
 
-  "features": [],
+  "features": [
+    {
+      "name": "",
+      "description": ""
+    }
+  ],
 
-  "benefits": [],
+  "benefits": [
+    ""
+  ],
 
-  "seoKeywords": [],
+  "seoKeywords": [
+    ""
+  ],
 
   "socialPosts": [
     {
-      "platform": "",
+      "platform": "Twitter",
+      "content": ""
+    },
+    {
+      "platform": "LinkedIn",
+      "content": ""
+    },
+    {
+      "platform": "Facebook",
       "content": ""
     }
   ],
@@ -52,10 +82,6 @@ Return ONLY valid JSON.
     }
   ]
 }
-
-Do not return markdown.
-
-Return ONLY JSON.
 `;
 
 module.exports = {

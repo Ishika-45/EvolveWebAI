@@ -25,25 +25,22 @@ class BrandAgent extends BaseAgent {
   async run(context) {
     const prompt = buildBrandingPrompt(context);
 
-    const branding = await this.gateway.generate({
-      models: this.config.models,
+    const result = await this.gateway.generate({
+  models: this.config.models,
+  prompt,
+  responseType: this.config.responseType,
+  temperature: this.config.temperature,
+  maxTokens: this.config.maxTokens,
+  systemPrompt: this.config.systemPrompt,
+});
 
-      prompt,
+context.setModel(result.model);
 
-      responseType: this.config.responseType,
+const validated = validateBranding(result.data);
 
-      temperature: this.config.temperature,
+context.updateBranding(validated);
 
-      maxTokens: this.config.maxTokens,
-
-      systemPrompt: this.config.systemPrompt,
-    });
-
-    const validated = validateBranding(branding);
-
-    context.updateBranding(validated);
-
-    return validated;
+return validated;
   }
 }
 
