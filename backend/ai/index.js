@@ -9,8 +9,9 @@ const AIOrchestrator = require("./core/AIOrchestrator");
 const { AnalysisAgent } = require("./analysis");
 const { BrandAgent } = require("./branding");
 const { AssetsAgent } = require("./assets");
-const { WebsiteAgent } = require("./website");
 const { MarketingAgent } = require("./marketing");
+const { WebsiteThemeAgent } = require("./website-theme");
+const { WebsitePlannerAgent } = require("./websitePlanner");
 
 // ----------------------------------
 // Infrastructure
@@ -42,8 +43,13 @@ registry.register(
 );
 
 registry.register(
-  "website",
-  new WebsiteAgent({ gateway })
+  "websitePlanner",
+  new WebsitePlannerAgent({ gateway })
+);
+
+registry.register(
+  "websiteTheme",
+  new WebsiteThemeAgent({ gateway })
 );
 
 registry.register(

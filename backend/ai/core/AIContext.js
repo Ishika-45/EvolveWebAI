@@ -35,7 +35,7 @@ class AIContext {
     this.analysis = {};
     this.branding = {};
     this.assets = {};
-    this.website = {};
+    this.websiteTheme = {};
     this.marketing = {};
     this.review = {};
     this.export = {};
@@ -124,6 +124,13 @@ class AIContext {
     };
   }
 
+  updateWebsiteTheme(data) {
+  this.websiteTheme = {
+    ...this.websiteTheme,
+    ...data,
+  };
+}
+
   // ==================================================
   // Convenience Update Methods
   // ==================================================
@@ -138,10 +145,6 @@ class AIContext {
 
   updateAssets(data) {
     this.update("assets", data);
-  }
-
-  updateWebsite(data) {
-    this.update("website", data);
   }
 
   updateMarketing(data) {
@@ -176,9 +179,9 @@ class AIContext {
     return this.assets;
   }
 
-  getWebsite() {
-    return this.website;
-  }
+  getWebsiteTheme() {
+  return this.websiteTheme;
+}
 
   getMarketing() {
     return this.marketing;
@@ -244,7 +247,7 @@ class AIContext {
       analysis: this.analysis,
       branding: this.branding,
       assets: this.assets,
-      website: this.website,
+      websiteTheme: this.websiteTheme,
       marketing: this.marketing,
       review: this.review,
       export: this.export,
