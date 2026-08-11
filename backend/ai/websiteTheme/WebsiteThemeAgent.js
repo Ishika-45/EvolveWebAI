@@ -41,7 +41,7 @@ class WebsiteThemeAgent extends BaseAgent {
 
     const validated = validateWebsiteTheme(result.data);
 
-    context.updateWebsite(validated);
+   context.updateWebsiteTheme(validated);
 
     return validated;
   }
