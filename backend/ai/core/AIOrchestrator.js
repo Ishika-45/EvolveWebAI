@@ -17,6 +17,7 @@ class AIOrchestrator {
       "websitePlanner",
       "websiteStructure",
       "websiteTheme",
+      "websiteSections",
     ];
 
     for (const agentName of pipeline) {

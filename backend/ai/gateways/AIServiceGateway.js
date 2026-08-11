@@ -76,12 +76,18 @@ class AIServiceGateway {
   }
 
   #parseJson(text) {
-    try {
-      return JSON.parse(text);
-    } catch {
-      throw new Error("AI returned invalid JSON.");
-    }
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("\n========== INVALID AI JSON ==========");
+    console.error(text);
+    console.error("=====================================\n");
+
+    throw new Error(
+      `AI returned invalid JSON.\nParse error: ${error.message}`
+    );
   }
+}
 }
 
 module.exports = AIServiceGateway;
