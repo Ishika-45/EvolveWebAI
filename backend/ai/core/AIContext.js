@@ -35,7 +35,9 @@ class AIContext {
     this.analysis = {};
     this.branding = {};
     this.assets = {};
-    this.websiteTheme = {};
+    this.website = {};
+this.websiteTheme = {};
+this.websiteSections = {};
     this.marketing = {};
     this.review = {};
     this.export = {};
@@ -147,6 +149,17 @@ class AIContext {
     this.update("assets", data);
   }
 
+  updateWebsite(data) {
+    this.update("website", data);
+}
+
+updateWebsiteSections(data) {
+  this.websiteSections = {
+    ...this.websiteSections,
+    ...data,
+  };
+}
+
   updateMarketing(data) {
     this.update("marketing", data);
   }
@@ -179,8 +192,16 @@ class AIContext {
     return this.assets;
   }
 
+  getWebsite() {
+    return this.website;
+}
+
   getWebsiteTheme() {
   return this.websiteTheme;
+}
+
+getWebsiteSections() {
+  return this.websiteSections;
 }
 
   getMarketing() {
@@ -248,6 +269,7 @@ class AIContext {
       branding: this.branding,
       assets: this.assets,
       websiteTheme: this.websiteTheme,
+      websiteSections: this.websiteSections,
       marketing: this.marketing,
       review: this.review,
       export: this.export,

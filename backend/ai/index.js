@@ -10,8 +10,10 @@ const { AnalysisAgent } = require("./analysis");
 const { BrandAgent } = require("./branding");
 const { AssetsAgent } = require("./assets");
 const { MarketingAgent } = require("./marketing");
-const { WebsiteThemeAgent } = require("./website-theme");
+const { WebsiteThemeAgent } = require("./websiteTheme");
 const { WebsitePlannerAgent } = require("./websitePlanner");
+const { WebsiteStructureAgent } = require("./websiteStructure");
+const WebsiteSectionAgent = require("./websiteSections/WebsiteSectionAgent");
 
 // ----------------------------------
 // Infrastructure
@@ -45,6 +47,16 @@ registry.register(
 registry.register(
   "websitePlanner",
   new WebsitePlannerAgent({ gateway })
+);
+
+registry.register(
+  "websiteStructure",
+  new WebsiteStructureAgent({ gateway })
+);
+
+registry.register(
+  "websiteSections",
+  new WebsiteSectionAgent({ gateway })
 );
 
 registry.register(

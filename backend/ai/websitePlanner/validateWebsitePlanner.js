@@ -1,55 +1,34 @@
 function validateWebsitePlanner(data) {
-
-  if (!data) {
-    throw new Error("Empty AI response.");
-  }
-
-  if (typeof data !== "object" || Array.isArray(data)) {
-    throw new Error("Website Planner must return a JSON object.");
+  if (!data || typeof data !== "object") {
+    throw new Error("Website planner must return an object.");
   }
 
   return {
-
     websiteType: data.websiteType ?? "",
 
-    theme: data.theme ?? "",
+    goal: data.goal ?? "",
 
-    designStyle: data.designStyle ?? "",
+    framework: data.framework ?? "React",
 
-    colorStrategy: data.colorStrategy ?? "",
+    themeRecommendation:
+      data.themeRecommendation ?? "",
 
-    navigation: data.navigation ?? [],
+    primaryCTA:
+      data.primaryCTA ?? "",
 
-    pages: data.pages ?? [],
+    secondaryCTA:
+      data.secondaryCTA ?? "",
 
-    homepageSections: data.homepageSections ?? [],
+    navigation:
+      Array.isArray(data.navigation)
+        ? data.navigation
+        : [],
 
-    sectionOrder: data.sectionOrder ?? [],
-
-    recommendedComponents: data.recommendedComponents ?? [],
-
-    animations: data.animations ?? [],
-
-    interactions: data.interactions ?? [],
-
-    illustrationStyle: data.illustrationStyle ?? "",
-
-    iconStyle: data.iconStyle ?? "",
-
-    imageStyle: data.imageStyle ?? "",
-
-    recommendedImages: data.recommendedImages ?? [],
-
-    responsiveStrategy: data.responsiveStrategy ?? "",
-
-    userJourney: data.userJourney ?? [],
-
-    conversionGoals: data.conversionGoals ?? [],
-
-    aiRecommendations: data.aiRecommendations ?? [],
-
+    pages:
+      Array.isArray(data.pages)
+        ? data.pages
+        : [],
   };
-
 }
 
 module.exports = {

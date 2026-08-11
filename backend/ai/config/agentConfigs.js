@@ -59,36 +59,67 @@ module.exports = {
     "You are an expert SaaS Product Designer, UX Architect and Full Stack Website Planner. Always return valid JSON."
 },
 websitePlanner: {
-
   models: [
-
     "google/gemini-2.5-flash-lite"
-
   ],
 
   responseType: "json",
 
-  temperature: 0.8,
+  temperature: 0.4,
 
-  maxTokens: 3500,
+  maxTokens: 1200,
 
   systemPrompt:
-    "You are an expert UI/UX Architect and Website Planning AI.",
+    "You are an expert Product Manager and Website Strategist. Return ONLY valid JSON."
+},
+
+websiteStructure: {
+
+  models: [
+    "google/gemini-2.5-flash-lite"
+  ],
+
+  responseType: "json",
+
+  temperature: 0.3,
+
+  maxTokens: 1400,
+
+  systemPrompt:
+    "You are an expert UX Architect. Return ONLY valid JSON."
 
 },
+
 websiteTheme: {
-    models: [
-        "google/gemini-2.5-flash-lite"
-    ],
 
-    responseType: "json",
+  models: [
+    "google/gemini-2.5-flash-lite"
+  ],
 
-    temperature: 0.7,
+  responseType: "json",
 
-    maxTokens: 3500,
+  temperature: 0.7,
 
-    systemPrompt:
-        "You are an award-winning UI/UX designer and Design System Architect. Return ONLY valid JSON."
+  maxTokens: 2500,
+
+  systemPrompt:
+    "You are an award-winning UI/UX Design System Architect. Return ONLY valid JSON."
+
+},
+
+websiteSections: {
+  models: [
+    "google/gemini-2.5-flash-lite"
+  ],
+
+  responseType: "json",
+
+  temperature: 0.6,
+
+  maxTokens: 2500,
+
+  systemPrompt:
+    "You are an expert UX Architect. Return ONLY valid JSON.",
 },
 
   review: {

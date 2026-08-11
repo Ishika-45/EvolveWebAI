@@ -1,32 +1,36 @@
 const BaseAgent = require("../core/BaseAgent");
 
 const {
-  buildWebsitePrompt,
-} = require("./buildWebsitePrompt");
+  buildWebsiteSectionsPrompt,
+} = require("./buildWebsiteSectionsPrompt");
 
 const {
-  validateWebsite,
-} = require("./validateWebsite");
+  validateWebsiteSections,
+} = require("./validateWebsiteSections");
 
 const agentConfigs = require("../config/agentConfigs");
 
-class WebsiteAgent extends BaseAgent {
+class WebsiteSectionAgent extends BaseAgent {
   static dependencies = [
     "analysis",
     "branding",
     "assets",
     "marketing",
+    "websitePlanner",
+    "websiteStructure",
+    "websiteTheme",
   ];
 
   constructor({ gateway }) {
-    super("WebsiteAgent");
+    super("WebsiteSectionAgent");
 
     this.gateway = gateway;
-    this.config = agentConfigs.website;
+
+    this.config = agentConfigs.websiteSections;
   }
 
   async run(context) {
-    const prompt = buildWebsitePrompt(context);
+    const prompt = buildWebsiteSectionsPrompt(context);
 
     const result = await this.gateway.generate({
       models: this.config.models,
@@ -39,12 +43,12 @@ class WebsiteAgent extends BaseAgent {
 
     context.setModel(result.model);
 
-    const validated = validateWebsite(result.data);
+    const validated = validateWebsiteSections(result.data);
 
-    context.updateWebsite(validated);
+    context.updateWebsiteSections(validated);
 
     return validated;
   }
 }
 
-module.exports = WebsiteAgent;
+module.exports = WebsiteSectionAgent;

@@ -1,33 +1,32 @@
 const BaseAgent = require("../core/BaseAgent");
 
 const {
-  buildThemePrompt,
-} = require("./buildThemePrompt");
+  buildWebsiteThemePrompt,
+} = require("./buildWebsiteThemePrompt");
 
 const {
-  validateTheme,
-} = require("./validateTheme");
+  validateWebsiteTheme,
+} = require("./validateWebsiteTheme");
 
 const agentConfigs = require("../config/agentConfigs");
 
 class WebsiteThemeAgent extends BaseAgent {
+
   static dependencies = [
-    "analysis",
-    "branding",
-    "assets",
     "websitePlanner",
+    "websiteStructure",
   ];
 
   constructor({ gateway }) {
     super("WebsiteThemeAgent");
 
     this.gateway = gateway;
-
     this.config = agentConfigs.websiteTheme;
   }
 
   async run(context) {
-    const prompt = buildThemePrompt(context);
+
+    const prompt = buildWebsiteThemePrompt(context);
 
     const result = await this.gateway.generate({
       models: this.config.models,
@@ -40,9 +39,9 @@ class WebsiteThemeAgent extends BaseAgent {
 
     context.setModel(result.model);
 
-    const validated = validateTheme(result.data);
+    const validated = validateWebsiteTheme(result.data);
 
-    context.updateWebsiteTheme(validated);
+    context.updateWebsite(validated);
 
     return validated;
   }

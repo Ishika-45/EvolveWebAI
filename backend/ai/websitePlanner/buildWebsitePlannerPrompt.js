@@ -1,17 +1,28 @@
 const buildWebsitePlannerPrompt = (context) => `
+You are a Senior Product Manager and UX Strategist.
 
-You are a Senior Product Designer,
-Senior UI/UX Designer,
-Senior Frontend Architect,
-and Creative Director.
+Your ONLY task is deciding the overall website plan.
 
-Your task is NOT to generate code.
+DO NOT design sections.
 
-Your task is ONLY to design the complete website blueprint.
+DO NOT generate components.
 
-====================================================
+DO NOT think about animations.
 
-PROJECT
+DO NOT generate code.
+
+Only decide:
+
+- Website type
+- Goal
+- Framework
+- Pages
+- Navigation
+- Theme recommendation
+- Primary CTA
+- Secondary CTA
+
+Project
 
 Title:
 ${context.project.title}
@@ -19,122 +30,38 @@ ${context.project.title}
 Idea:
 ${context.project.idea}
 
-====================================================
+Business Analysis
 
-BUSINESS ANALYSIS
+Target Audience:
+${context.branding.targetAudience}
 
-${JSON.stringify(context.analysis, null, 2)}
+Brand Voice:
+${context.branding.brandVoice}
 
-====================================================
+Primary Marketing Headline:
+${context.marketing.headline}
 
-BRANDING
-
-${JSON.stringify(context.branding, null, 2)}
-
-====================================================
-
-VISUAL ASSETS
-
-${JSON.stringify(context.assets, null, 2)}
-
-====================================================
-
-MARKETING
-
-${JSON.stringify(context.marketing, null, 2)}
-
-====================================================
-
-Design the BEST possible SaaS website.
-
-Think like Apple.
-
-Think like Stripe.
-
-Think like Framer.
-
-Think like Linear.
-
-Think like Vercel.
-
-Think modern.
-
-Think premium.
-
-Think conversion.
-
-====================================================
+Main CTA:
+${context.marketing.cta}
 
 Return ONLY JSON.
 
 {
-  "websiteType": "",
-
-  "theme": "",
-
-  "designStyle": "",
-
-  "colorStrategy": "",
-
-  "navigation":[
-
-  ],
-
-  "pages":[
-
-  ],
-
-  "homepageSections":[
-
-  ],
-
-  "sectionOrder":[
-
-  ],
-
-  "recommendedComponents":[
-
-  ],
-
-  "animations":[
-
-  ],
-
-  "interactions":[
-
-  ],
-
-  "illustrationStyle":"",
-
-  "iconStyle":"",
-
-  "imageStyle":"",
-
-  "recommendedImages":[
-
-  ],
-
-  "responsiveStrategy":"",
-
-  "userJourney":[
-
-  ],
-
-  "conversionGoals":[
-
-  ],
-
-  "aiRecommendations":[
-
-  ]
+  "websiteType":"",
+  "goal":"",
+  "framework":"",
+  "themeRecommendation":"",
+  "primaryCTA":"",
+  "secondaryCTA":"",
+  "navigation":[],
+  "pages":[]
 }
-
-Return ONLY JSON.
 
 No markdown.
 
-No explanations.
+No explanation.
 
+Only JSON.
 `;
 
 module.exports = {
