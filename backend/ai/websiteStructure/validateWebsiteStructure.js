@@ -4,9 +4,7 @@ function validateWebsiteStructure(data) {
     typeof data !== "object" ||
     Array.isArray(data)
   ) {
-    throw new Error(
-      "Website structure must be an object."
-    );
+    throw new Error("Website structure must be an object.");
   }
 
   if (!Array.isArray(data.pages)) {
@@ -22,7 +20,7 @@ function validateWebsiteStructure(data) {
   }
 
   const pageNames = new Set();
-  const pagePaths = new Set();
+  const paths = new Set();
 
   const pages = data.pages.map((page, pageIndex) => {
     if (
@@ -34,6 +32,10 @@ function validateWebsiteStructure(data) {
         `Invalid page at index ${pageIndex}.`
       );
     }
+
+    // --------------------------------------------
+    // Page Name
+    // --------------------------------------------
 
     if (
       typeof page.name !== "string" ||
@@ -54,6 +56,10 @@ function validateWebsiteStructure(data) {
 
     pageNames.add(name);
 
+    // --------------------------------------------
+    // Page Path
+    // --------------------------------------------
+
     if (
       typeof page.path !== "string" ||
       !page.path.trim()
@@ -65,24 +71,25 @@ function validateWebsiteStructure(data) {
 
     const path = page.path.trim();
 
-    if (!path.startsWith("/")) {
-      throw new Error(
-        `Invalid path "${path}" for page "${name}".`
-      );
-    }
-
-    if (pagePaths.has(path)) {
+    if (paths.has(path)) {
       throw new Error(
         `Duplicate page path: ${path}`
       );
     }
 
-    pagePaths.add(path);
+    paths.add(path);
 
-    if (
-      !Array.isArray(page.sections) ||
-      page.sections.length === 0
-    ) {
+    // --------------------------------------------
+    // Sections
+    // --------------------------------------------
+
+    if (!Array.isArray(page.sections)) {
+      throw new Error(
+        `Page "${name}" must contain a sections array.`
+      );
+    }
+
+    if (page.sections.length === 0) {
       throw new Error(
         `Page "${name}" must contain at least one section.`
       );
@@ -90,23 +97,34 @@ function validateWebsiteStructure(data) {
 
     const sections = page.sections.map(
       (section, sectionIndex) => {
-        if (typeof section !== "string") {
+        if (
+          typeof section !== "string" ||
+          !section.trim()
+        ) {
           throw new Error(
-            `Section at ${name}[${sectionIndex}] must be a string.`
+            `Invalid section at "${name}"[${sectionIndex}].`
           );
         }
 
-        const normalizedSection = section.trim();
-
-        if (!normalizedSection) {
-          throw new Error(
-            `Section at ${name}[${sectionIndex}] cannot be empty.`
-          );
-        }
-
-        return normalizedSection;
+        return section.trim();
       }
     );
+
+    // --------------------------------------------
+    // Duplicate Sections
+    // --------------------------------------------
+
+    const sectionNames = new Set();
+
+    for (const section of sections) {
+      if (sectionNames.has(section)) {
+        throw new Error(
+          `Duplicate section "${section}" on page "${name}".`
+        );
+      }
+
+      sectionNames.add(section);
+    }
 
     return {
       name,

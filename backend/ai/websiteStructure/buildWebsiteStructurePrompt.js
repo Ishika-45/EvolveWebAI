@@ -6,7 +6,6 @@ Your ONLY responsibility is defining the structural architecture of the website.
 You are NOT designing the UI.
 
 DO NOT generate:
-
 - UI designs
 - Components
 - Colors
@@ -34,21 +33,40 @@ WEBSITE PLAN
 ${JSON.stringify(context.websitePlanner || {}, null, 2)}
 
 ==================================================
-
-YOUR TASK
+TASK
 ==================================================
 
-Based on the website plan, define the pages and their structural sections.
+Based ONLY on the project information and website plan above:
 
-Each page must contain:
+1. Define the pages required for the website.
+2. Define the structural sections that belong to each page.
+3. Keep the architecture focused on the actual business/product.
+4. Prefer an MVP-friendly structure.
+5. Do not create unnecessary pages.
+6. Do not invent features that are not supported by the website plan.
+7. Do not generate actual website content.
+8. Do not describe UI implementation.
+
+Each page MUST contain:
 
 - name
 - path
 - sections
 
-Sections should describe the structural purpose of the page.
+Each section must be a concise structural label.
 
-Do not write actual website content.
+Examples of section labels:
+
+- Hero
+- Features
+- How It Works
+- Benefits
+- Testimonials
+- FAQ
+- CTA
+- Footer
+
+Do NOT write descriptions inside sections.
 
 ==================================================
 OUTPUT FORMAT
@@ -67,7 +85,6 @@ Return ONLY valid JSON.
         "How It Works",
         "Benefits",
         "Testimonials",
-        "Pricing",
         "FAQ",
         "CTA",
         "Footer"
@@ -77,7 +94,7 @@ Return ONLY valid JSON.
 }
 
 ==================================================
-RULES
+STRICT RULES
 ==================================================
 
 1. Return JSON only.
@@ -87,12 +104,23 @@ RULES
 5. Do not generate components.
 6. Do not generate colors.
 7. Do not generate images.
-8. Do not generate code.
-9. Do not generate website copy.
-10. Every page must have a unique name.
-11. Every page must have a unique path.
-12. Every page must contain at least one section.
-13. Keep sections concise.
+8. Do not generate typography.
+9. Do not generate animations.
+10. Do not generate CSS.
+11. Do not generate code.
+12. Do not generate website copy.
+13. Every page must have a unique name.
+14. Every page must have a unique path.
+15. Every page must contain at least one section.
+16. Every section must be a non-empty string.
+17. Keep section names concise.
+18. Do not add unnecessary pages.
+19. Do not add unnecessary sections.
+20. Do not create Blog, Pricing, Team, Location, Comments, Integrations, or similar pages unless clearly supported by the website plan.
+21. Preserve the distinction between public marketing pages and authenticated product pages when the website plan defines them.
+22. The output must contain only the website's structural architecture.
+
+Return the final JSON now.
 `;
 
 module.exports = {
