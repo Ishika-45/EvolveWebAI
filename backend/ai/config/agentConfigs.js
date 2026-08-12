@@ -113,10 +113,8 @@ websiteSections: {
   ],
 
   responseType: "json",
-
-  temperature: 0.6,
-
-  maxTokens: 2500,
+  temperature: 0.4,
+  maxTokens: 5000,
 
   systemPrompt:
     "You are an expert UX Architect. Return ONLY valid JSON.",

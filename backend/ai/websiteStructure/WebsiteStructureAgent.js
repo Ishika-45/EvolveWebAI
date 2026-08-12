@@ -11,10 +11,7 @@ const {
 const agentConfigs = require("../config/agentConfigs");
 
 class WebsiteStructureAgent extends BaseAgent {
-
-  static dependencies = [
-    "websitePlanner",
-  ];
+  static dependencies = ["websitePlanner"];
 
   constructor({ gateway }) {
     super("WebsiteStructureAgent");
@@ -24,7 +21,6 @@ class WebsiteStructureAgent extends BaseAgent {
   }
 
   async run(context) {
-
     const prompt = buildWebsiteStructurePrompt(context);
 
     const result = await this.gateway.generate({
