@@ -261,22 +261,23 @@ getWebsiteSections() {
 
   toJSON() {
     return {
-      project: this.project,
+  project: this.project,
 
-      metadata: this.metadata,
+  metadata: this.metadata,
 
-      analysis: this.analysis,
-      branding: this.branding,
-      assets: this.assets,
-      websiteTheme: this.websiteTheme,
-      websiteSections: this.websiteSections,
-      marketing: this.marketing,
-      review: this.review,
-      export: this.export,
+  analysis: this.analysis,
+  branding: this.branding,
+  assets: this.assets,
+  website: this.website,
+  websiteTheme: this.websiteTheme,
+  websiteSections: this.websiteSections,
+  marketing: this.marketing,
+  review: this.review,
+  export: this.export,
 
-      logs: this.logs,
-      errors: this.errors,
-    };
+  logs: this.logs,
+  errors: this.errors,
+};
   }
 }
 

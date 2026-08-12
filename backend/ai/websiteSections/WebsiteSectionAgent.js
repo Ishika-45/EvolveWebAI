@@ -12,12 +12,9 @@ const agentConfigs = require("../config/agentConfigs");
 
 class WebsiteSectionAgent extends BaseAgent {
   static dependencies = [
-    "analysis",
-    "branding",
-    "assets",
-    "marketing",
     "websitePlanner",
     "websiteStructure",
+    "marketing",
     "websiteTheme",
   ];
 
@@ -25,7 +22,6 @@ class WebsiteSectionAgent extends BaseAgent {
     super("WebsiteSectionAgent");
 
     this.gateway = gateway;
-
     this.config = agentConfigs.websiteSections;
   }
 
@@ -43,7 +39,10 @@ class WebsiteSectionAgent extends BaseAgent {
 
     context.setModel(result.model);
 
-    const validated = validateWebsiteSections(result.data);
+    const validated = validateWebsiteSections(
+  result.data,
+  context.website?.structure
+);
 
     context.updateWebsiteSections(validated);
 
@@ -52,3 +51,4 @@ class WebsiteSectionAgent extends BaseAgent {
 }
 
 module.exports = WebsiteSectionAgent;
+
