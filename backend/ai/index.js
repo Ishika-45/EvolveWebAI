@@ -14,6 +14,7 @@ const { WebsiteThemeAgent } = require("./websiteTheme");
 const { WebsitePlannerAgent } = require("./websitePlanner");
 const { WebsiteStructureAgent } = require("./websiteStructure");
 const WebsiteSectionAgent = require("./websiteSections/WebsiteSectionAgent");
+const WebsiteContentAgent = require("./websiteContent/websiteContentAgent");
 
 // ----------------------------------
 // Infrastructure
@@ -57,6 +58,11 @@ registry.register(
 registry.register(
   "websiteSections",
   new WebsiteSectionAgent({ gateway })
+);
+
+registry.register(
+  "websiteContent",
+  new WebsiteContentAgent({ gateway })
 );
 
 registry.register(

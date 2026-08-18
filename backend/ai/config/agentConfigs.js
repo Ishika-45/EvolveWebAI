@@ -120,6 +120,21 @@ websiteSections: {
     "You are an expert UX Architect. Return ONLY valid JSON.",
 },
 
+websiteContent: {
+  models: [
+    "google/gemini-2.5-flash-lite"
+  ],
+
+  responseType: "json",
+
+  temperature: 0.6,
+
+  maxTokens: 4000,
+
+  systemPrompt:
+    "You are a senior SaaS copywriter, UX content strategist and conversion expert. Return ONLY valid JSON.",
+},
+
   review: {
     models: MODEL_PROFILES.DEFAULT_FREE,
 

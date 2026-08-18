@@ -35,10 +35,22 @@ class AIContext {
     this.analysis = {};
     this.branding = {};
     this.assets = {};
-    this.website = {};
-this.websiteTheme = {};
-this.websiteSections = {};
     this.marketing = {};
+
+    // ==========================================
+    // Website Pipeline
+    // ==========================================
+
+    this.website = {};
+
+    this.websiteTheme = {};
+    this.websiteSections = {};
+    this.websiteContent = {};
+
+    // ==========================================
+    // Future Pipeline
+    // ==========================================
+
     this.review = {};
     this.export = {};
 
@@ -126,13 +138,6 @@ this.websiteSections = {};
     };
   }
 
-  updateWebsiteTheme(data) {
-  this.websiteTheme = {
-    ...this.websiteTheme,
-    ...data,
-  };
-}
-
   // ==================================================
   // Convenience Update Methods
   // ==================================================
@@ -149,19 +154,24 @@ this.websiteSections = {};
     this.update("assets", data);
   }
 
-  updateWebsite(data) {
-    this.update("website", data);
-}
-
-updateWebsiteSections(data) {
-  this.websiteSections = {
-    ...this.websiteSections,
-    ...data,
-  };
-}
-
   updateMarketing(data) {
     this.update("marketing", data);
+  }
+
+  updateWebsite(data) {
+    this.update("website", data);
+  }
+
+  updateWebsiteTheme(data) {
+    this.update("websiteTheme", data);
+  }
+
+  updateWebsiteSections(data) {
+    this.update("websiteSections", data);
+  }
+
+  updateWebsiteContent(data) {
+    this.update("websiteContent", data);
   }
 
   updateReview(data) {
@@ -192,20 +202,24 @@ updateWebsiteSections(data) {
     return this.assets;
   }
 
-  getWebsite() {
-    return this.website;
-}
-
-  getWebsiteTheme() {
-  return this.websiteTheme;
-}
-
-getWebsiteSections() {
-  return this.websiteSections;
-}
-
   getMarketing() {
     return this.marketing;
+  }
+
+  getWebsite() {
+    return this.website;
+  }
+
+  getWebsiteTheme() {
+    return this.websiteTheme;
+  }
+
+  getWebsiteSections() {
+    return this.websiteSections;
+  }
+
+  getWebsiteContent() {
+    return this.websiteContent;
   }
 
   getReview() {
@@ -216,14 +230,16 @@ getWebsiteSections() {
     return this.export;
   }
 
-  // Generic getter
+  // ==================================================
+  // Generic Getter
+  // ==================================================
 
   get(section) {
     return this[section];
   }
 
   // ==================================================
-  // Prompt Helpers
+  // AI State
   // ==================================================
 
   getAIState() {
@@ -231,21 +247,36 @@ getWebsiteSections() {
       analysis: this.analysis,
       branding: this.branding,
       assets: this.assets,
-      website: this.website,
       marketing: this.marketing,
+
+      website: this.website,
+      websiteTheme: this.websiteTheme,
+      websiteSections: this.websiteSections,
+      websiteContent: this.websiteContent,
+
       review: this.review,
       export: this.export,
     };
   }
 
+  // ==================================================
+  // Prompt Context
+  // ==================================================
+
   getPromptContext() {
     return {
       project: this.project,
+
       analysis: this.analysis,
       branding: this.branding,
       assets: this.assets,
-      website: this.website,
       marketing: this.marketing,
+
+      website: this.website,
+      websiteTheme: this.websiteTheme,
+      websiteSections: this.websiteSections,
+      websiteContent: this.websiteContent,
+
       review: this.review,
       export: this.export,
     };
@@ -261,23 +292,26 @@ getWebsiteSections() {
 
   toJSON() {
     return {
-  project: this.project,
+      project: this.project,
 
-  metadata: this.metadata,
+      metadata: this.metadata,
 
-  analysis: this.analysis,
-  branding: this.branding,
-  assets: this.assets,
-  website: this.website,
-  websiteTheme: this.websiteTheme,
-  websiteSections: this.websiteSections,
-  marketing: this.marketing,
-  review: this.review,
-  export: this.export,
+      analysis: this.analysis,
+      branding: this.branding,
+      assets: this.assets,
+      marketing: this.marketing,
 
-  logs: this.logs,
-  errors: this.errors,
-};
+      website: this.website,
+      websiteTheme: this.websiteTheme,
+      websiteSections: this.websiteSections,
+      websiteContent: this.websiteContent,
+
+      review: this.review,
+      export: this.export,
+
+      logs: this.logs,
+      errors: this.errors,
+    };
   }
 }
 
