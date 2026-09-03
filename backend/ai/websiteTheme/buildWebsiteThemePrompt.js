@@ -1,160 +1,126 @@
 const buildWebsiteThemePrompt = (context) => `
+You are a SaaS UI Design System Architect.
 
-You are a world-class UI Design Director.
-
-Your responsibility is ONLY to create the visual design system.
+Create ONLY a compact visual design system for this product.
 
 Do NOT design pages.
-
-Do NOT generate code.
-
-=================================================
+Do NOT generate HTML, CSS, Tailwind, JSX, or code.
+Do NOT explain your reasoning.
 
 PROJECT
-
-${context.project.title}
-
-${context.project.idea}
-
-=================================================
+Title: ${context.project.title}
+Idea: ${context.project.idea}
 
 BRANDING
-
-${JSON.stringify(context.branding, null, 2)}
-
-=================================================
+${JSON.stringify(context.branding)}
 
 MARKETING
-
-${JSON.stringify(context.marketing, null, 2)}
-
-=================================================
+${JSON.stringify(context.marketing)}
 
 WEBSITE PLAN
+${JSON.stringify(context.website)}
 
-${JSON.stringify(context.website, null, 2)}
+RULES
+- Return ONLY valid JSON.
+- No markdown.
+- No explanations.
+- Keep every string short.
+- Use standard web-safe design values.
+- Use HEX colors.
+- Do not generate CSS code.
+- Do not invent brand claims or statistics.
+- Arrays must be short.
+- Prefer concise design tokens over descriptions.
 
-=================================================
-
-Design a premium SaaS design system.
-
-Take inspiration from
-
-• Apple
-• Stripe
-• Framer
-• Linear
-• Vercel
-• Notion
-
-The design must feel modern,
-minimal,
-premium,
-interactive,
-and highly polished.
-
-Return ONLY valid JSON.
+OUTPUT EXACTLY THIS JSON STRUCTURE:
 
 {
+  "themeName": "",
+  "designStyle": "",
+  "visualMood": "",
 
-"themeName":"",
+  "colorPalette": {
+    "primary": "",
+    "secondary": "",
+    "accent": "",
+    "background": "",
+    "surface": "",
+    "text": "",
+    "muted": "",
+    "success": "",
+    "warning": "",
+    "danger": ""
+  },
 
-"designStyle":"",
+  "gradients": [],
 
-"visualMood":"",
+  "typography": {
+    "headingFont": "",
+    "bodyFont": "",
+    "displayFont": "",
+    "headingWeight": "",
+    "bodyWeight": ""
+  },
 
-"colorPalette":{
+  "spacing": {
+    "base": "",
+    "sectionGap": "",
+    "cardPadding": ""
+  },
 
-"primary":"",
-"secondary":"",
-"accent":"",
-"background":"",
-"surface":"",
-"text":"",
-"muted":"",
-"success":"",
-"warning":"",
-"danger":""
+  "borderRadius": {
+    "small": "",
+    "medium": "",
+    "large": "",
+    "pill": ""
+  },
 
-},
+  "shadows": {
+    "card": "",
+    "button": "",
+    "modal": ""
+  },
 
-"gradients":[
+  "buttons": {
+    "primary": "",
+    "secondary": "",
+    "ghost": ""
+  },
 
-],
+  "cards": {
+    "style": "",
+    "hoverEffect": ""
+  },
 
-"typography":{
+  "animationStyle": "",
 
-"headingFont":"",
-"bodyFont":"",
-"displayFont":"",
+  "microInteractions": [],
 
-"headingWeight":"",
-"bodyWeight":""
+  "iconStyle": "",
 
-},
+  "illustrationStyle": "",
 
-"spacing":{
+  "responsiveStrategy": "",
 
-"base":"",
-"sectionGap":"",
-"cardPadding":""
-
-},
-
-"borderRadius":{
-
-"small":"",
-"medium":"",
-"large":"",
-"pill":""
-
-},
-
-"shadows":{
-
-"card":"",
-"button":"",
-"modal":""
-
-},
-
-"buttons":{
-
-"primary":"",
-"secondary":"",
-"ghost":""
-
-},
-
-"cards":{
-
-"style":"",
-"hoverEffect":""
-
-},
-
-"animationStyle":"",
-
-"microInteractions":[
-
-],
-
-"iconStyle":"",
-
-"illustrationStyle":"",
-
-"responsiveStrategy":"",
-
-"accessibilityNotes":[
-
-]
-
+  "accessibilityNotes": []
 }
 
-Return ONLY JSON.
+LIMITS
+- gradients: maximum 2 items
+- microInteractions: maximum 3 items
+- accessibilityNotes: maximum 3 items
+- Each array item: maximum 8 words
+- themeName: maximum 6 words
+- designStyle: maximum 4 words
+- visualMood: maximum 6 words
+- animationStyle: maximum 8 words
+- iconStyle: maximum 6 words
+- illustrationStyle: maximum 8 words
+- responsiveStrategy: maximum 12 words
+- buttons values: maximum 8 words
+- cards values: maximum 8 words
 
-No markdown.
-
+Return ONLY the JSON object.
 `;
 
 module.exports = {

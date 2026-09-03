@@ -1,92 +1,178 @@
 class AIServiceGateway {
-  constructor({ aiClient, logger = console }) {
-    this.aiClient = aiClient;
-    this.logger = logger;
-  }
+constructor({ aiClient, logger = console }) {
+this.aiClient = aiClient;
+this.logger = logger;
+}
 
-  async generate({
-    models = [],
-    prompt,
-    responseType = "text",
-    temperature = 0.7,
-    maxTokens = 2000,
-    systemPrompt = "You are an expert AI assistant.",
-  }) {
-    if (!models.length) {
-      throw new Error("No AI models configured.");
-    }
+async generate({
+models = [],
+prompt,
+responseType = "text",
+temperature = 0.7,
+maxTokens = 2000,
+systemPrompt = "You are an expert AI assistant.",
+}) {
+if (!models.length) {
+throw new Error("No AI models configured.");
+}
 
-    let lastError = null;
+let lastError = null;
 
-    for (const model of models) {
+for (const model of models) {
+  // First attempt
+  try {
+    const result = await this.#attempt({
+      model,
+      prompt,
+      responseType,
+      temperature,
+      maxTokens,
+      systemPrompt,
+    });
+
+    this.logger.info(`✅ Model succeeded: ${model}`);
+
+    return {
+      model,
+      data: result,
+    };
+  } catch (error) {
+    lastError = error;
+
+    this.logger.warn(`⚠️ First attempt failed: ${model}`);
+    this.logger.warn(error.message);
+
+    // Retry once before moving to another model
+    if (responseType === "json") {
       try {
-        this.logger.info(`🤖 Trying model: ${model}`);
+        this.logger.info(`🔄 Retrying JSON generation: ${model}`);
 
-        const response = await this.aiClient({
+        const retryPrompt = `
+
+
+${prompt}
+
+IMPORTANT:
+Return the COMPLETE response as valid JSON.
+Do not truncate the response.
+Do not add markdown.
+Do not wrap the JSON in code fences.
+Make sure every string is fully closed and every object/array is properly closed.
+Return ONLY the JSON object.
+`;
+
+        const result = await this.#attempt({
           model,
-
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-
-          temperature,
-
-          max_tokens: maxTokens,
+          prompt: retryPrompt,
+          responseType,
+          temperature: 0.2,
+          maxTokens,
+          systemPrompt,
         });
 
-        const cleaned = this.#clean(response);
-
-        this.logger.info(`✅ Model succeeded: ${model}`);
+        this.logger.info(`✅ Retry succeeded: ${model}`);
 
         return {
           model,
-          data:
-            responseType === "json"
-              ? this.#parseJson(cleaned)
-              : cleaned,
+          data: result,
         };
-      } catch (error) {
-        lastError = error;
+      } catch (retryError) {
+        lastError = retryError;
 
-        this.logger.warn(`❌ ${model} failed`);
-        this.logger.warn(error.message);
+        this.logger.warn(`❌ Retry failed: ${model}`);
+        this.logger.warn(retryError.message);
       }
     }
-
-    throw new Error(
-      `All configured AI models failed.\nLast Error: ${lastError?.message}`
-    );
   }
+}
 
-  #clean(text) {
-    if (!text) return "";
+throw new Error(
+  `All configured AI models failed.\nLast Error: ${lastError?.message}`
+);
 
-    return text
-      .replace(/```json/g, "")
-      .replace(/```html/g, "")
-      .replace(/```/g, "")
-      .trim();
-  }
 
-  #parseJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("\n========== INVALID AI JSON ==========");
-    console.error(text);
-    console.error("=====================================\n");
+}
 
-    throw new Error(
-      `AI returned invalid JSON.\nParse error: ${error.message}`
-    );
-  }
+async #attempt({
+model,
+prompt,
+responseType,
+temperature,
+maxTokens,
+systemPrompt,
+}) {
+this.logger.info(`🤖 Trying model: ${model}`);
+
+
+const request = {
+  model,
+  messages: [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+    {
+      role: "user",
+      content: prompt,
+    },
+  ],
+  temperature,
+  max_tokens: maxTokens,
+};
+
+// Ask compatible models to return JSON directly.
+if (responseType === "json") {
+  request.response_format = {
+    type: "json_object",
+  };
+}
+
+const response = await this.aiClient(request);
+
+if (!response) {
+  throw new Error("AI provider returned an empty response.");
+}
+
+const cleaned = this.#clean(response);
+
+if (!cleaned) {
+  throw new Error("AI provider returned empty content.");
+}
+
+if (responseType === "json") {
+  return this.#parseJson(cleaned);
+}
+
+return cleaned;
+
+
+}
+
+#clean(text) {
+if (!text) return "";
+
+return String(text)
+  .replace(/```json/gi, "")
+  .replace(/```html/gi, "")
+  .replace(/```/g, "")
+  .trim();
+
+
+}
+
+#parseJson(text) {
+try {
+return JSON.parse(text);
+} catch (error) {
+console.error("\n========== INVALID AI JSON ==========");
+console.error(text);
+console.error("=====================================\n");
+
+  throw new Error(
+    `AI returned invalid JSON.\nParse error: ${error.message}`
+  );
+}
+
 }
 }
 
