@@ -15,17 +15,6 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 
-const FALLBACK_SECTIONS = [
-  { title: "Hero Section", description: "A strong hero area introducing the product and value proposition." },
-  { title: "Problem Section", description: "Highlight the core pain points users face." },
-  { title: "Solution Section", description: "Explain how the product solves the identified problem." },
-  { title: "Features", description: "Showcase the main product features and benefits." },
-  { title: "Pricing", description: "Present pricing tiers or monetization details clearly." },
-  { title: "Testimonials", description: "Build trust through social proof and user feedback." },
-  { title: "CTA", description: "Drive action with a compelling call to action." },
-  { title: "Footer", description: "Include navigation, links, and essential footer content." },
-];
-
 const generationSteps = [
   { icon: "🧠", title: "Understanding your idea", desc: "Analyzing requirements and goals" },
   { icon: "🧩", title: "Structuring layout", desc: "Creating optimal information architecture" },
@@ -44,7 +33,6 @@ const DashboardHome = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [typedSections, setTypedSections] = useState([]);
   const [userName, setUserName] = useState("User");
-  const [streamingText, setStreamingText] = useState("");
   const [generateError, setGenerateError] = useState("");
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [particles, setParticles] = useState([]);
@@ -149,130 +137,123 @@ const DashboardHome = () => {
     }, 700);
   };
 
-  const streamGenerationText = async (promptIdea) => {
-    const response = await fetch("http://localhost:5000/api/ai/generate-stream", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ idea: promptIdea }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Streaming failed with status ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error("Streaming response body is missing");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    let result = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      result += chunk;
-      setStreamingText(result);
-    }
-
-    return result;
-  };
+  
 
   const handleGenerate = async () => {
-    if (!idea.trim() || isGenerating) return;
+  if (!idea.trim() || isGenerating) return;
 
-    setIsGenerating(true);
-    setGenerateError("");
-    setStreamingText("");
-    setTypedSections([]);
+  setIsGenerating(true);
+  setGenerateError("");
+  setTypedSections([]);
 
-    beginStepAnimation();
+  beginStepAnimation();
 
-    try {
-      try {
-        await streamGenerationText(idea);
-      } catch (streamError) {
-        console.error("Streaming error:", streamError);
-      }
+  try {
+    // --------------------------------------------------
+    // STEP 1: Create the project
+    // --------------------------------------------------
+    const projectRes = await api.post("/projects", {
+      title: idea.length > 30 ? `${idea.slice(0, 30)}...` : idea,
+      idea: idea.trim(),
+    });
 
-      const aiRes = await api.post("/ai/generate-website", { idea });
-      const rawSections = aiRes.data?.sections;
-      
-      let normalizedSections = [];
-      if (Array.isArray(rawSections) && rawSections.length > 0) {
-        normalizedSections = rawSections.map((section, index) => {
-          if (typeof section === "string") {
-            return { title: section.trim() || `Section ${index + 1}`, description: "" };
-          }
-          if (section && typeof section === "object") {
-            return {
-              title: section.title?.trim() || section.name?.trim() || section.heading?.trim() || `Section ${index + 1}`,
-              description: section.description?.trim() || section.content?.trim() || section.summary?.trim() || "",
-            };
-          }
-          return { title: `Section ${index + 1}`, description: "" };
-        });
-      } else {
-        normalizedSections = FALLBACK_SECTIONS;
-      }
+    const newProject = projectRes.data?.project || projectRes.data;
 
-      normalizedSections = normalizedSections.filter(section => section && section.title);
+    if (!newProject?._id) {
+      throw new Error("Project was created but no project id was returned.");
+    }
 
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
-      
+    // --------------------------------------------------
+    // STEP 2: Run the NEW multi-agent AI pipeline
+    // --------------------------------------------------
+    const generationRes = await api.post(
+      `/projects/${newProject._id}/generate-website`
+    );
+
+    const generatedProject =
+      generationRes.data?.project ||
+      generationRes.data?.data ||
+      generationRes.data;
+
+    // --------------------------------------------------
+    // STEP 3: Extract generated website structure
+    // --------------------------------------------------
+    const websiteSections =
+      generatedProject?.websiteSections?.pages ||
+      generationRes.data?.websiteSections?.pages ||
+      [];
+
+    const normalizedSections = websiteSections.flatMap((page) =>
+      Array.isArray(page.sections)
+        ? page.sections.map((section) => ({
+            title: section.title || section.id || "Section",
+            description: section.purpose || "",
+          }))
+        : []
+    );
+
+    // --------------------------------------------------
+    // STEP 4: Show generated structure in dashboard
+    // --------------------------------------------------
+    if (normalizedSections.length > 0) {
       let i = 0;
-      setTypedSections([]);
-      
+
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+
       const interval = setInterval(() => {
         if (i < normalizedSections.length) {
-          setTypedSections(prev => [...prev, normalizedSections[i]]);
+          setTypedSections((prev) => [
+            ...prev,
+            normalizedSections[i],
+          ]);
+
           i++;
         } else {
           clearInterval(interval);
         }
       }, 350);
-      
+
       typingIntervalRef.current = interval;
-
-      const payload = {
-        title: idea.length > 30 ? `${idea.slice(0, 30)}...` : idea,
-        idea: idea.trim(),
-        sections: normalizedSections,
-      };
-
-      const res = await api.post("/projects", payload);
-      const newProject = res.data?.project || res.data;
-
-      if (!newProject?._id) {
-        throw new Error("Project was created but no project id was returned");
-      }
-
-      setProjects((prev) => [newProject, ...prev]);
-
-      setTimeout(() => {
-        navigate(`/dashboard/project/${newProject._id}`);
-      }, 500);
-    } catch (error) {
-      console.error("Generation error:", error);
-
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong while generating your project.";
-
-      setGenerateError(message);
-    } finally {
-      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
-      setCurrentStep(generationSteps.length - 1);
-      setTimeout(() => setIsGenerating(false), 500);
     }
-  };
+
+    // --------------------------------------------------
+    // STEP 5: Update project list
+    // --------------------------------------------------
+   setProjects((prev) => [
+  newProject,
+  ...prev.filter((project) => project._id !== newProject._id),
+]);
+    // --------------------------------------------------
+    // STEP 6: Open project editor
+    // --------------------------------------------------
+    setTimeout(() => {
+      navigate(`/dashboard/project/${newProject._id}`);
+    }, 500);
+
+  } catch (error) {
+    console.error("Website generation error:", error);
+
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.message ||
+      "Something went wrong while generating your website.";
+
+    setGenerateError(message);
+  } finally {
+    if (stepIntervalRef.current) {
+      clearInterval(stepIntervalRef.current);
+    }
+
+    setCurrentStep(generationSteps.length - 1);
+
+    setTimeout(() => {
+      setIsGenerating(false);
+    }, 500);
+  }
+};
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -412,23 +393,6 @@ const DashboardHome = () => {
               </button>
             ))}
           </div>
-
-          <AnimatePresence>
-            {streamingText && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-6 bg-[var(--theme-cardBg)] p-5 rounded-xl border border-[var(--theme-borderColor)]"
-              >
-                <p className="text-[var(--theme-accent)] text-sm mb-2 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  AI Generating Website Blueprint
-                </p>
-                <pre className="text-gray-300 text-sm whitespace-pre-wrap font-mono">{streamingText}</pre>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <AnimatePresence>
             {generateError && (

@@ -68,7 +68,7 @@ ${JSON.stringify(context.marketing || {}, null, 2)}
 WEBSITE PLANNER
 ==================================================
 
-${JSON.stringify(context.websitePlanner || {}, null, 2)}
+${JSON.stringify(context.website || {}, null, 2)}
 
 ==================================================
 WEBSITE STRUCTURE
