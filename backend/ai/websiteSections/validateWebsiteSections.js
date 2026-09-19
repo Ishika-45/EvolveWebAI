@@ -1,212 +1,119 @@
+const { toArray, toObject, toStringValue, slugify } = require("../utils/jsonParser");
+
+const PRIORITIES = ["high", "medium", "low"];
+
 function validateWebsiteSections(data, websiteStructure) {
-  if (
-    !data ||
-    typeof data !== "object" ||
-    Array.isArray(data)
-  ) {
-    throw new Error("Website Sections must be an object.");
+const obj = toObject(data);
+const structure = toObject(websiteStructure);
+
+const expectedPages = toArray(structure.pages).map((page) =>
+toObject(page)
+);
+
+if (expectedPages.length === 0) {
+return { pages: [] };
+}
+
+const dataPages = toArray(obj.pages).map((page) =>
+toObject(page)
+);
+
+const dataPageByName = new Map(
+dataPages.map((page) => [
+toStringValue(page.name).trim().toLowerCase(),
+page,
+])
+);
+
+const pages = expectedPages.map((expectedPage) => {
+const name =
+toStringValue(expectedPage.name).trim() || "Home";
+
+
+const path =
+  toStringValue(expectedPage.path).trim() || "/";
+
+const expectedSectionNames = toArray(expectedPage.sections).map(
+  (section) => toStringValue(section).trim()
+);
+
+const matchedDataPage =
+  dataPageByName.get(name.toLowerCase()) || {};
+
+const dataSections = toArray(matchedDataPage.sections).map(
+  (section) => toObject(section)
+);
+
+const dataSectionByKey = new Map();
+
+for (const section of dataSections) {
+  const id = toStringValue(section.id)
+    .trim()
+    .toLowerCase();
+
+  const title = toStringValue(section.title)
+    .trim()
+    .toLowerCase();
+
+  if (id) {
+    dataSectionByKey.set(id, section);
   }
 
-  if (!Array.isArray(data.pages)) {
-    throw new Error(
-      "Website Sections must contain a pages array."
-    );
+  if (title) {
+    dataSectionByKey.set(title, section);
+  }
+}
+
+const usedIds = new Set();
+
+const sections = expectedSectionNames.map((sectionName) => {
+  const canonicalId = slugify(sectionName) || "section";
+
+  let id = canonicalId;
+  let counter = 2;
+
+  while (usedIds.has(id)) {
+    id = `${canonicalId}-${counter++}`;
   }
 
-  if (
-    !websiteStructure ||
-    typeof websiteStructure !== "object" ||
-    !Array.isArray(websiteStructure.pages)
-  ) {
-    throw new Error(
-      "Website structure is required to validate website sections."
-    );
-  }
+  usedIds.add(id);
 
-  // -----------------------------------------
-  // Expected pages from WebsiteStructureAgent
-  // -----------------------------------------
+  const match =
+    dataSectionByKey.get(sectionName.toLowerCase()) ||
+    dataSectionByKey.get(canonicalId);
 
-  const expectedPages = websiteStructure.pages;
+  const purpose =
+    toStringValue(match?.purpose).trim() ||
+    `Present the ${sectionName.toLowerCase()} of the product.`;
 
-  if (data.pages.length !== expectedPages.length) {
-    throw new Error(
-      `Website Sections must contain exactly ${expectedPages.length} pages.`
-    );
-  }
+  const rawPriority = toStringValue(match?.priority)
+    .trim()
+    .toLowerCase();
 
-  const expectedPageNames = new Set(
-    expectedPages.map((page) => page.name.trim())
-  );
-
-  const pageNames = new Set();
-
-  // -----------------------------------------
-  // Validate pages
-  // -----------------------------------------
-
-  const pages = data.pages.map((page, pageIndex) => {
-    if (
-      !page ||
-      typeof page !== "object" ||
-      Array.isArray(page)
-    ) {
-      throw new Error(
-        `Invalid page at index ${pageIndex}.`
-      );
-    }
-
-    if (
-      typeof page.name !== "string" ||
-      !page.name.trim()
-    ) {
-      throw new Error(
-        `Page at index ${pageIndex} must have a valid name.`
-      );
-    }
-
-    const pageName = page.name.trim();
-
-    // Duplicate page names
-    if (pageNames.has(pageName)) {
-      throw new Error(
-        `Duplicate page name: ${pageName}`
-      );
-    }
-
-    pageNames.add(pageName);
-
-    // Page must already exist in WebsiteStructure
-    if (!expectedPageNames.has(pageName)) {
-      throw new Error(
-        `Unexpected page "${pageName}". Section Agent cannot create new pages.`
-      );
-    }
-
-    // -----------------------------------------
-    // Sections
-    // -----------------------------------------
-
-    if (
-      !Array.isArray(page.sections) ||
-      page.sections.length === 0
-    ) {
-      throw new Error(
-        `Page "${pageName}" must contain at least one section.`
-      );
-    }
-
-    const sectionIds = new Set();
-
-    const sections = page.sections.map(
-      (section, sectionIndex) => {
-        if (
-          !section ||
-          typeof section !== "object" ||
-          Array.isArray(section)
-        ) {
-          throw new Error(
-            `Invalid section at ${pageName}[${sectionIndex}].`
-          );
-        }
-
-        // -----------------------------------------
-        // Section ID
-        // -----------------------------------------
-
-        if (
-          typeof section.id !== "string" ||
-          !section.id.trim()
-        ) {
-          throw new Error(
-            `Section at ${pageName}[${sectionIndex}] must have a valid id.`
-          );
-        }
-
-        const sectionId = section.id.trim();
-
-        if (sectionIds.has(sectionId)) {
-          throw new Error(
-            `Duplicate section id "${sectionId}" on page "${pageName}".`
-          );
-        }
-
-        sectionIds.add(sectionId);
-
-        // -----------------------------------------
-        // Section title
-        // -----------------------------------------
-
-        if (
-          typeof section.title !== "string" ||
-          !section.title.trim()
-        ) {
-          throw new Error(
-            `Section "${sectionId}" must have a valid title.`
-          );
-        }
-
-        // -----------------------------------------
-        // Section purpose
-        // -----------------------------------------
-
-        if (
-          typeof section.purpose !== "string" ||
-          !section.purpose.trim()
-        ) {
-          throw new Error(
-            `Section "${sectionId}" must have a valid purpose.`
-          );
-        }
-
-        // -----------------------------------------
-        // Priority
-        // -----------------------------------------
-
-        const priority = section.priority ?? "medium";
-
-        if (
-          !["high", "medium", "low"].includes(priority)
-        ) {
-          throw new Error(
-            `Invalid priority "${priority}" for section "${sectionId}".`
-          );
-        }
-
-        return {
-          id: sectionId,
-          title: section.title.trim(),
-          purpose: section.purpose.trim(),
-          priority,
-        };
-      }
-    );
-
-    return {
-      name: pageName,
-      sections,
-    };
-  });
-
-  // -----------------------------------------
-  // Ensure no expected page is missing
-  // -----------------------------------------
-
-  for (const expectedPage of expectedPages) {
-    const expectedName = expectedPage.name.trim();
-
-    if (!pageNames.has(expectedName)) {
-      throw new Error(
-        `Missing page "${expectedName}" from Website Sections output.`
-      );
-    }
-  }
+  const priority = PRIORITIES.includes(rawPriority)
+    ? rawPriority
+    : "medium";
 
   return {
-    pages,
+    id,
+    title: sectionName,
+    purpose,
+    priority,
   };
+});
+
+return {
+  name,
+  path,
+  sections,
+};
+
+
+});
+
+return { pages };
 }
 
 module.exports = {
-  validateWebsiteSections,
+validateWebsiteSections,
 };

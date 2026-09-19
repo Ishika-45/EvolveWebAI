@@ -1,74 +1,34 @@
+const { toArray, toObject, toStringValue } = require("../utils/jsonParser");
+
 function validateWebsiteTheme(data) {
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error("Website Theme must be an object.");
-  }
-
-  const requiredObjects = [
-    "colorPalette",
-    "typography",
-    "spacing",
-    "borderRadius",
-    "shadows",
-    "buttons",
-    "cards",
-  ];
-
-  for (const field of requiredObjects) {
-    if (
-      data[field] !== undefined &&
-      (typeof data[field] !== "object" || Array.isArray(data[field]))
-    ) {
-      throw new Error(`Website Theme field "${field}" must be an object.`);
-    }
-  }
-
-  const requiredArrays = [
-    "gradients",
-    "microInteractions",
-    "accessibilityNotes",
-  ];
-
-  for (const field of requiredArrays) {
-    if (
-      data[field] !== undefined &&
-      !Array.isArray(data[field])
-    ) {
-      throw new Error(`Website Theme field "${field}" must be an array.`);
-    }
-  }
+  const obj = toObject(data);
 
   return {
-    themeName: data.themeName ?? "",
-    designStyle: data.designStyle ?? "",
-    visualMood: data.visualMood ?? "",
+    themeName: toStringValue(obj.themeName),
+    designStyle: toStringValue(obj.designStyle),
+    visualMood: toStringValue(obj.visualMood),
 
-    colorPalette: data.colorPalette ?? {},
+    colorPalette: toObject(obj.colorPalette),
 
-    gradients: Array.isArray(data.gradients)
-      ? data.gradients.slice(0, 2)
-      : [],
+    gradients: toArray(obj.gradients).slice(0, 2),
 
-    typography: data.typography ?? {},
-    spacing: data.spacing ?? {},
-    borderRadius: data.borderRadius ?? {},
+    typography: toObject(obj.typography),
+    spacing: toObject(obj.spacing),
+    borderRadius: toObject(obj.borderRadius),
 
-    shadows: data.shadows ?? {},
-    buttons: data.buttons ?? {},
-    cards: data.cards ?? {},
+    shadows: toObject(obj.shadows),
+    buttons: toObject(obj.buttons),
+    cards: toObject(obj.cards),
 
-    animationStyle: data.animationStyle ?? "",
+    animationStyle: toStringValue(obj.animationStyle),
 
-    microInteractions: Array.isArray(data.microInteractions)
-      ? data.microInteractions.slice(0, 3)
-      : [],
+    microInteractions: toArray(obj.microInteractions).slice(0, 3),
 
-    iconStyle: data.iconStyle ?? "",
-    illustrationStyle: data.illustrationStyle ?? "",
-    responsiveStrategy: data.responsiveStrategy ?? "",
+    iconStyle: toStringValue(obj.iconStyle),
+    illustrationStyle: toStringValue(obj.illustrationStyle),
+    responsiveStrategy: toStringValue(obj.responsiveStrategy),
 
-    accessibilityNotes: Array.isArray(data.accessibilityNotes)
-      ? data.accessibilityNotes.slice(0, 3)
-      : [],
+    accessibilityNotes: toArray(obj.accessibilityNotes).slice(0, 3),
   };
 }
 

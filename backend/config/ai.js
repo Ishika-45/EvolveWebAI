@@ -3,7 +3,6 @@ const OpenAI = require("openai");
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
-
   defaultHeaders: {
     "HTTP-Referer": "http://localhost:5173",
     "X-Title": "EvolveWeb AI",
@@ -15,29 +14,18 @@ const openai = new OpenAI({
 // -------------------------------------
 
 const MODELS = {
-  FREE_ROUTER: "openrouter/free",
-  LLAMA_3_3_8B: "meta-llama/llama-3.3-8b-instruct:free",
-  MISTRAL_7B: "mistralai/mistral-7b-instruct:free",
-  QWEN_3_4B: "qwen/qwen3-4b:free",
+  NEX_N2_PRO: "nex-agi/nex-n2.5-pro:free",
+  // FREE_ROUTER: "openrouter/free",
 };
 
 // -------------------------------------
 // Model Profiles
 // -------------------------------------
-//
-// DEFAULT_FREE tries the random free-model router first (fast, usually
-// fine), then falls back to specific, known-reliable instruct models if
-// that fails or returns unusable output (reasoning traces instead of
-// JSON, rate limits, etc). Plain instruct models are used for the
-// fallbacks specifically because they don't emit chain-of-thought text,
-// unlike some models the random router can select.
 
 const MODEL_PROFILES = {
   DEFAULT_FREE: [
-    MODELS.FREE_ROUTER,
-    MODELS.LLAMA_3_3_8B,
-    MODELS.MISTRAL_7B,
-    MODELS.QWEN_3_4B,
+    MODELS.NEX_N2_PRO,
+    // MODELS.FREE_ROUTER,
   ],
 };
 
@@ -45,29 +33,35 @@ const MODEL_PROFILES = {
 // Default Model
 // -------------------------------------
 
-const DEFAULT_MODEL = MODELS.FREE_ROUTER;
+const DEFAULT_MODEL = MODELS.NEX_N2_PRO;
 
 // -------------------------------------
 // Generic AI Call
 // -------------------------------------
-//
-// Supports two calling conventions used across this codebase:
-//   1) makeAICall(messagesArray, { model, temperature, max_tokens, response_format })
-//   2) makeAICall({ model, messages, temperature, max_tokens, response_format })
 
 async function makeAICall(arg1, arg2 = {}) {
-  let model, messages, temperature, max_tokens, response_format;
+  let model;
+  let messages;
+  let temperature;
+  let max_tokens;
+  let response_format;
 
+  // Convention 1:
+  // makeAICall(messages, options)
   if (Array.isArray(arg1)) {
-    // Convention 1: makeAICall(messages, options)
     messages = arg1;
+
     const options = arg2 || {};
+
     model = options.model || DEFAULT_MODEL;
     temperature = options.temperature ?? 0.7;
     max_tokens = options.max_tokens ?? 2000;
     response_format = options.response_format;
-  } else if (arg1 && typeof arg1 === "object") {
-    // Convention 2: makeAICall({ model, messages, temperature, max_tokens, response_format })
+  }
+
+  // Convention 2:
+  // makeAICall({ model, messages, ... })
+  else if (arg1 && typeof arg1 === "object") {
     ({
       model,
       messages,
@@ -75,8 +69,11 @@ async function makeAICall(arg1, arg2 = {}) {
       max_tokens = 2000,
       response_format,
     } = arg1);
+
     model = model || DEFAULT_MODEL;
-  } else {
+  }
+
+  else {
     throw new Error(
       "makeAICall: expected either (messages[], options) or ({ model, messages, ... })"
     );
@@ -91,10 +88,26 @@ async function makeAICall(arg1, arg2 = {}) {
     messages,
     temperature,
     max_tokens,
-    ...(response_format ? { response_format } : {}),
+    ...(response_format
+      ? { response_format }
+      : {}),
   });
 
-  return completion.choices[0].message.content;
+  const message = completion?.choices?.[0]?.message;
+
+  if (!message) {
+    throw new Error("AI provider returned no message.");
+  }
+
+  if (!message.content) {
+    throw new Error(
+      `AI provider returned no content. Finish reason: ${
+        completion?.choices?.[0]?.finish_reason || "unknown"
+      }`
+    );
+  }
+
+  return message.content;
 }
 
 module.exports = {

@@ -1,149 +1,78 @@
 const buildWebsiteSectionsPrompt = (context) => `
-You are a Senior UX Architect and Conversion Expert.
+You are a Senior UX Architect.
 
-Your ONLY responsibility is defining the sections for the pages that already exist
-in the WEBSITE STRUCTURE.
+Your task is a STRUCTURE TRANSFORMATION task.
 
-You are NOT designing the UI.
+Convert the existing WEBSITE STRUCTURE into structured section objects.
 
-DO NOT:
+DO NOT redesign the website.
+DO NOT make strategic decisions.
+DO NOT explain your reasoning.
 
-* create new pages
-* remove pages
-* rename pages
-* change page paths
-* generate UI designs
-* generate components
-* generate website copy
-* generate code
-* generate colors
-* generate images
-* generate animations
-* invent unrelated features
+PROJECT:
+Title: ${context.project.title}
+Idea: ${context.project.idea}
 
-==================================================
-PROJECT
-=======
+WEBSITE STRUCTURE:
+${JSON.stringify(context.website?.structure || {})}
 
-Title:
-${context.project.title}
+STRICT RULES:
 
-Idea:
-${context.project.idea}
+1. Return EVERY page from WEBSITE STRUCTURE.
+2. Keep every page name exactly unchanged.
+3. Keep every page path exactly unchanged.
+4. Keep the existing sections exactly as provided.
+5. Do NOT add pages.
+6. Do NOT remove pages.
+7. Do NOT add sections.
+8. Do NOT remove sections.
+9. Do NOT rename section titles.
+10. Convert each existing section string into an object.
+11. Every section object MUST contain exactly:
 
-==================================================
-WEBSITE PLANNER
-===============
+* id
+* title
+* purpose
+* priority
 
-${JSON.stringify(context.website || {}, null, 2)}
+12. id must be lowercase kebab-case.
+13. id must be unique within its page.
+14. title must exactly match the existing section name.
+15. purpose must be a SHORT description of what that section does.
+16. purpose must be maximum 12 words.
+17. priority must be exactly one of:
+    "high"
+    "medium"
+    "low"
+18. Use "high" for sections essential to the page's main purpose.
+19. Use "medium" for useful supporting sections.
+20. Use "low" for optional/supporting sections.
+21. Do not generate website copy.
+22. Do not generate UI instructions.
+23. Do not generate components.
+24. Do not generate code.
+25. Do not generate colors.
+26. Do not generate images.
+27. Do not generate animations.
+28. Do not use markdown.
+29. Do not explain anything.
+30. Do not output reasoning or analysis.
+31. Output ONLY the final JSON.
+32. The output must be valid JSON.
+33. Do not add any fields outside the required schema.
 
-==================================================
-WEBSITE STRUCTURE
-=================
-
-${JSON.stringify(context.website?.structure || {}, null, 2)}
-
-==================================================
-MARKETING
-=========
-
-${JSON.stringify(context.marketing || {}, null, 2)}
-
-==================================================
-WEBSITE THEME
-=============
-
-${JSON.stringify(context.websiteTheme || {}, null, 2)}
-
-==================================================
-TASK
-====
-
-For EVERY page present in WEBSITE STRUCTURE:
-
-1. Return the same pages.
-2. Keep every page name exactly the same.
-3. Do not add pages.
-4. Do not remove pages.
-5. Do not change page paths.
-6. Convert the existing structural sections into structured section objects.
-7. Every section must contain:
-
-   * id
-   * title
-   * purpose
-   * priority
-8. Keep section IDs short, readable, lowercase, and kebab-case.
-9. Section IDs must be unique within each page.
-10. Keep the existing section intent.
-11. Refine sections only when necessary for business goals or conversion.
-12. Prefer MVP-friendly structures.
-13. Avoid unnecessary sections.
-14. Do not invent features that are not supported by the provided context.
-15. Do not generate actual website copy.
-16. Do not provide UI implementation instructions.
-
-==================================================
-SECTION GUIDELINES
-==================
-
-Typical landing pages should generally contain only the sections
-needed to explain the product, build trust, and drive conversion.
-
-Do NOT automatically add:
-
-* Blog
-* Pricing
-* Team
-* Location
-* Comments
-* Integrations
-* Newsletter
-* Careers
-* Partners
-* Extra CTAs
-
-unless the WEBSITE STRUCTURE, WEBSITE PLANNER, or MARKETING data clearly
-supports them.
-
-For simple pages, use fewer sections.
-
-For authenticated application pages such as Dashboard or creation flows,
-focus on functional sections rather than marketing sections.
-
-==================================================
-PRIORITY
-========
-
-Use only:
-
-"high"
-"medium"
-"low"
-
-Use:
-
-high = essential to the page's purpose
-medium = useful but not essential
-low = optional / supporting
-
-==================================================
-OUTPUT
-======
-
-Return ONLY valid JSON.
-
-The output must have exactly this shape:
+OUTPUT FORMAT:
 
 {
 "pages": [
 {
 "name": "Home",
+"path": "/",
 "sections": [
 {
 "id": "hero",
 "title": "Hero",
-"purpose": "Explain the main value proposition and guide users toward the primary action.",
+"purpose": "Explain the main value proposition.",
 "priority": "high"
 }
 ]
@@ -151,16 +80,8 @@ The output must have exactly this shape:
 ]
 }
 
-IMPORTANT:
-
-* JSON only.
-* No markdown.
-* No explanation.
-* No comments.
-* No trailing commas.
-* Do not wrap JSON in a code block.
-* Do not output anything before or after the JSON.
-  `;
+Return ONLY JSON.
+`;
 
 module.exports = {
 buildWebsiteSectionsPrompt,

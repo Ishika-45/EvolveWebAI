@@ -311,44 +311,6 @@ Keep it concise, professional, and engaging (2-3 sentences or bullet points).`,
   }
 });
 
-// 🏗️ BUILD WEBSITE (uses generateWebsiteHtml service)
-const generateWebsiteHtml = require("../services/aiWebsiteGenerator");
-
-router.post("/build-website", protect, async (req, res) => {
-  try {
-    const { projectId } = req.body;
-
-    if (!projectId) {
-      return res.status(400).json({ error: "projectId is required" });
-    }
-
-    const project = await Project.findById(projectId);
-    if (!project) {
-      return res.status(404).json({ error: "Project not found" });
-    }
-
-    const websiteCode = await generateWebsiteHtml(project);
-    if (!websiteCode || typeof websiteCode !== "string") {
-      return res.status(500).json({ error: "Invalid website code generated" });
-    }
-
-    project.generatedWebsite = websiteCode;
-    await project.save();
-
-    return res.json({
-      success: true,
-      code: websiteCode,
-    });
-  } catch (error) {
-    console.error("BUILD WEBSITE ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Website build failed",
-      details: error.message,
-    });
-  }
-});
-
 router.post("/generate-assets", protect, async (req, res) => {
   try {
     const { projectId } = req.body;
