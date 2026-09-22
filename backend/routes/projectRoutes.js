@@ -6,6 +6,7 @@ const archiver = require("archiver");
 const router = express.Router();
 const orchestrator = require("../ai");
 const { renderWebsite } = require("../services/websiteRenderer");
+const { generateMvpWebsite, applyMvpGeneration } = require("../mvp/generateMvpWebsite");
 
 ////////////////////////////////////////////////////
 // 🆕 CREATE PROJECT
@@ -69,7 +70,10 @@ router.get("/:id", protect, async (req, res) => {
       return res.status(401).json({ message: "Not authorized" });
     }
 
-    res.json(project);
+    res.json({
+      success: true,
+      project,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -139,6 +143,43 @@ router.delete("/:id", protect, async (req, res) => {
     res.json({ message: "Project removed" });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
+  }
+});
+
+////////////////////////////////////////////////////
+// 🚀 GENERATE WEBSITE FROM COMPACT MVP CORE
+// Kept separate from the existing nine-agent route while the new core is
+// validated in production-like use.
+////////////////////////////////////////////////////
+router.post("/:id/generate-website-mvp", protect, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (project.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    const result = await generateMvpWebsite(project);
+    applyMvpGeneration(project, result);
+    await project.save();
+
+    return res.json({
+      success: true,
+      message: "MVP website generation completed",
+      project,
+      generation: project.generation,
+      warnings: result.generation.warnings,
+    });
+  } catch (error) {
+    console.error("MVP WEBSITE GENERATION ERROR:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "MVP website generation failed",
+    });
   }
 });
 
@@ -228,6 +269,11 @@ project.generated.html = websiteHtml;
       message: "AI website pipeline completed successfully",
 
       projectId: project._id,
+
+      // Canonical generated website response. Consumers must read
+      // project.generated.html; AI metadata below is retained temporarily for
+      // compatibility with the existing dashboard flow.
+      project,
 
       generation: project.generation,
 

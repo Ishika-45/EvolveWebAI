@@ -119,7 +119,7 @@ const Projects = () => {
   const getProjectStats = (project) => {
     const sectionsCount = project.sections?.length || 0;
     const hasBlueprint = project.blueprint ? true : false;
-    const hasWebsite = project.generatedWebsite ? true : false;
+    const hasWebsite = Boolean(project.generated?.html);
     return { sectionsCount, hasBlueprint, hasWebsite };
   };
 

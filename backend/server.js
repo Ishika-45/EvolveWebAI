@@ -46,9 +46,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Logging middleware for debugging
+// Logging middleware for debugging. Do not log query strings because they can
+// contain credentials from third-party authentication providers.
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(`${req.method} ${req.path}`);
   next();
 });
 

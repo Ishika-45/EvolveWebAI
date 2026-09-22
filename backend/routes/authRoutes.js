@@ -4,12 +4,56 @@ const User = require("../models/User");
 
 const router = express.Router();
 
+const getCookieValue = (req, name) => {
+  const cookies = req.headers.cookie || "";
+  const prefix = `${name}=`;
+
+  const entry = cookies
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(prefix));
+
+  return entry ? decodeURIComponent(entry.slice(prefix.length)) : "";
+};
+
+const socialCookieOptions = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  path: "/api/auth",
+};
+
 // 🔑 Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
 };
+
+// Exchanges the short-lived, HttpOnly social-login handoff cookies created by
+// the OAuth callback. This preserves the app's existing local-storage token
+// contract without putting a JWT in the redirect URL.
+router.get("/social-session", (req, res) => {
+  const token = getCookieValue(req, "social_auth_token");
+  const encodedUser = getCookieValue(req, "social_auth_user");
+
+  res.clearCookie("social_auth_token", socialCookieOptions);
+  res.clearCookie("social_auth_user", socialCookieOptions);
+
+  if (!token || !encodedUser) {
+    return res.status(401).json({ message: "Social login session not found" });
+  }
+
+  try {
+    const user = JSON.parse(
+      Buffer.from(encodedUser, "base64url").toString("utf8")
+    );
+
+    return res.json({ token, user });
+  } catch (error) {
+    return res.status(400).json({ message: "Social login session is invalid" });
+  }
+});
 
 // 📝 REGISTER USER
 router.post("/register", async (req, res) => {

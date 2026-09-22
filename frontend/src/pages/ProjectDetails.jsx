@@ -131,7 +131,7 @@ const ProjectDetails = () => {
       setProject(normalizedProject);
       setEditedIdea(normalizedProject.idea || "");
       setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
-      setGeneratedCode(normalizedProject.generatedWebsite ?? "");
+      setGeneratedCode(normalizedProject.generated?.html ?? "");
     }
   }, [passedProject, project]);
 
@@ -154,7 +154,7 @@ const ProjectDetails = () => {
         setProject(normalizedProject);
         setEditedIdea(normalizedProject.idea || "");
         setBlueprint(normalizeBlueprint(normalizedProject.blueprint));
-        setGeneratedCode(normalizedProject.generatedWebsite ?? "");
+        setGeneratedCode(normalizedProject.generated?.html ?? "");
       } catch (error) {
         console.error("Failed to load project:", error);
         setPageError(
@@ -197,7 +197,7 @@ const ProjectDetails = () => {
     setProject(normalizedSavedProject);
     setEditedIdea(normalizedSavedProject.idea || "");
     setBlueprint(normalizeBlueprint(normalizedSavedProject.blueprint));
-    setGeneratedCode(normalizedSavedProject.generatedWebsite ?? "");
+    setGeneratedCode(normalizedSavedProject.generated?.html ?? "");
 
     return normalizedSavedProject;
   };
@@ -268,7 +268,10 @@ const ProjectDetails = () => {
       ...project,
       idea: trimmedIdea,
       blueprint: null,
-      generatedWebsite: "",
+      generated: {
+        ...(project.generated || {}),
+        html: "",
+      },
       versions: [...(project.versions || []), previousVersion],
     };
 
@@ -281,49 +284,49 @@ const ProjectDetails = () => {
   };
 
   const buildWebsite = async () => {
-    try {
-      setBuildingWebsite(true);
-      setBuildError("");
+  try {
+    setBuildingWebsite(true);
+    setBuildError("");
 
-      const res = await api.post("/ai/build-website", {
-        projectId: id,
-      });
+    const res = await api.post(`/projects/${id}/generate-website`);
 
-      const code =
-        res.data?.code ||
-        res.data?.generatedWebsite ||
-        res.data?.websiteCode ||
-        "";
+    const generatedProject = res.data?.project;
+    const code = generatedProject?.generated?.html ?? "";
 
-      if (!code) {
-        throw new Error("No code returned from backend");
-      }
+    if (!code) {
+      throw new Error("Website generated, but no HTML was returned.");
+    }
 
-      setGeneratedCode(code);
-      setProject((prev) =>
-        prev
-          ? {
+    setGeneratedCode(code);
+
+    setProject((prev) =>
+      prev
+        ? {
             ...prev,
-            generatedWebsite: code,
+            generated: {
+              ...(prev.generated || {}),
+              html: code,
+            },
           }
-          : prev
-      );
+        : prev
+    );
 
-      setViewMode("preview");
-      setFocusPreview(true);
-    } catch (error) {
-      console.error("Website build failed:", error);
-      setBuildError(
-        error?.response?.data?.details ||
-        error?.response?.data?.error ||
+    setViewMode("preview");
+    setFocusPreview(true);
+  } catch (error) {
+    console.error("Website build failed:", error);
+
+    setBuildError(
+      error?.response?.data?.details ||
         error?.response?.data?.message ||
+        error?.response?.data?.error ||
         error?.message ||
         "Website build failed"
-      );
-    } finally {
-      setBuildingWebsite(false);
-    }
-  };
+    );
+  } finally {
+    setBuildingWebsite(false);
+  }
+};
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -1139,7 +1142,10 @@ const ProjectDetails = () => {
                           idea: version.idea,
                           sections: normalizeSections(version.sections),
                           blueprint: null,
-                          generatedWebsite: "",
+                          generated: {
+                            ...(project.generated || {}),
+                            html: "",
+                          },
                           versions: project.versions,
                         };
 

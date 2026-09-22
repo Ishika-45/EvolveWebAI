@@ -4,7 +4,10 @@ const User = require("../models/User");
 const protect = async (req, res, next) => {
   let token;
 
-  console.log("Authorization Header:", req.headers.authorization);
+  console.log("Auth request metadata:", {
+    path: req.path,
+    hasAuthorizationHeader: Boolean(req.headers.authorization),
+  });
 
   if (
     req.headers.authorization &&

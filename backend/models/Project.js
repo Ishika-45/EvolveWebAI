@@ -567,6 +567,57 @@ const projectSchema = new mongoose.Schema(
     },
 
     // =========================================================
+    // MVP WEBSITE GENERATION CORE
+    // Additive schema; legacy agent outputs above remain intact.
+    // =========================================================
+
+    website: {
+      version: {
+        type: Number,
+        default: 1,
+      },
+
+      productBrief: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+
+      blueprint: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+
+      theme: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+
+      pages: {
+        home: {
+          content: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {},
+          },
+          status: {
+            type: String,
+            default: "",
+          },
+          source: {
+            type: String,
+            default: "",
+          },
+          updatedAt: {
+            type: Date,
+          },
+          warnings: {
+            type: [String],
+            default: [],
+          },
+        },
+      },
+    },
+
+    // =========================================================
     // GENERATED WEBSITE OUTPUT
     // =========================================================
 
@@ -592,6 +643,11 @@ const projectSchema = new mongoose.Schema(
     // =========================================================
 
     generation: {
+      status: {
+        type: String,
+        default: "",
+      },
+
       model: {
         type: String,
         default: "",
@@ -604,6 +660,16 @@ const projectSchema = new mongoose.Schema(
       version: {
         type: Number,
         default: 1,
+      },
+
+      units: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+
+      warnings: {
+        type: [String],
+        default: [],
       },
     },
   },

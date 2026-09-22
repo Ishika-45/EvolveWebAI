@@ -319,7 +319,8 @@ ${trimmed}
               title="ai-preview"
               srcDoc={safeCode}
               className="w-full h-full border-none"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              sandbox="allow-scripts allow-forms"
+              referrerPolicy="no-referrer"
               onLoad={() => setLoaded(true)}
               onError={() => setFrameError("Failed to load preview")}
             />

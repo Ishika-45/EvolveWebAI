@@ -3,6 +3,32 @@ const router = require("express").Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const createSocialUser = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  provider: user.provider,
+});
+
+const setSocialHandoffCookies = (res, token, user) => {
+  const options = {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isProduction,
+    maxAge: 5 * 60 * 1000,
+    path: "/api/auth",
+  };
+
+  res.cookie("social_auth_token", token, options);
+  res.cookie(
+    "social_auth_user",
+    Buffer.from(JSON.stringify(createSocialUser(user))).toString("base64url"),
+    options
+  );
+};
+
 // GOOGLE START
 router.get("/google", 
   passport.authenticate("google", { 
@@ -32,16 +58,11 @@ router.get(
         { expiresIn: '30d' }
       );
       
-      // Encode user data for URL
-      const userData = encodeURIComponent(JSON.stringify({
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        provider: req.user.provider
-      }));
-      
-      // Redirect with both token and user data
-      res.redirect(`${process.env.CLIENT_URL}/social-success?token=${token}&user=${userData}`);
+      setSocialHandoffCookies(res, token, req.user);
+
+      // The token is exchanged once through an HttpOnly handoff cookie rather
+      // than being exposed in the redirect URL, history, or referrer.
+      res.redirect(`${process.env.CLIENT_URL}/social-success`);
     } catch (error) {
       console.error("Token error:", error);
       res.redirect(`${process.env.CLIENT_URL}/login?error=token_error`);
@@ -77,16 +98,11 @@ router.get(
         { expiresIn: '30d' }
       );
       
-      // Encode user data for URL
-      const userData = encodeURIComponent(JSON.stringify({
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        provider: req.user.provider
-      }));
-      
-      // Redirect with both token and user data
-      res.redirect(`${process.env.CLIENT_URL}/social-success?token=${token}&user=${userData}`);
+      setSocialHandoffCookies(res, token, req.user);
+
+      // The token is exchanged once through an HttpOnly handoff cookie rather
+      // than being exposed in the redirect URL, history, or referrer.
+      res.redirect(`${process.env.CLIENT_URL}/social-success`);
     } catch (error) {
       console.error("Token error:", error);
       res.redirect(`${process.env.CLIENT_URL}/login?error=token_error`);

@@ -1,6 +1,7 @@
 // src/pages/SocialSuccess.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const SocialSuccess = () => {
   const navigate = useNavigate();
@@ -8,52 +9,34 @@ const SocialSuccess = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const userParam = params.get("user");
     const errorParam = params.get("error");
-    
-    console.log("SocialSuccess - Full URL:", window.location.href);
-    console.log("SocialSuccess - Token from URL:", token ? "Yes" : "No");
-    console.log("SocialSuccess - User param from URL:", userParam ? "Yes" : "No");
-    
+
     if (errorParam) {
       setError(`Authentication failed: ${errorParam}`);
       setTimeout(() => navigate("/login"), 3000);
       return;
     }
-    
-    if (token && userParam) {
+
+    const completeSocialLogin = async () => {
       try {
-        // Parse user data
-        const userData = JSON.parse(decodeURIComponent(userParam));
-        console.log("SocialSuccess - User data:", userData);
-        
-        // Save both token and user data
+        const response = await api.get("/auth/social-session");
+        const { token, user } = response.data || {};
+
+        if (!token || !user) {
+          throw new Error("Missing authentication data");
+        }
+
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(userData));
-        console.log("SocialSuccess - Token and user saved to localStorage");
-        
-        // Verify data was saved
-        const savedToken = localStorage.getItem("token");
-        const savedUser = localStorage.getItem("user");
-        console.log("SocialSuccess - Verified token:", savedToken ? "Yes" : "No");
-        console.log("SocialSuccess - Verified user:", savedUser ? "Yes" : "No");
-        
-        // Small delay to ensure storage is complete
-        setTimeout(() => {
-          console.log("SocialSuccess - Redirecting to dashboard");
-          navigate("/dashboard", { replace: true });
-        }, 500);
+        localStorage.setItem("user", JSON.stringify(user));
+        navigate("/dashboard", { replace: true });
       } catch (err) {
-        console.error("SocialSuccess - Error saving data:", err);
-        setError("Failed to save authentication data");
+        console.error("Social login completion failed:", err?.message || "unknown error");
+        setError("Failed to complete authentication");
         setTimeout(() => navigate("/login"), 3000);
       }
-    } else {
-      console.error("SocialSuccess - Missing token or user data");
-      setError("Missing authentication data");
-      setTimeout(() => navigate("/login"), 3000);
-    }
+    };
+
+    completeSocialLogin();
   }, [navigate]);
 
   if (error) {
