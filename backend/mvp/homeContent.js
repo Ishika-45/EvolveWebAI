@@ -195,9 +195,10 @@ async function generateHomeContent(project, productBrief, blueprint, { aiCall = 
     candidate = validateHomeContent(JSON.parse(response));
     model = DEFAULT_MODEL;
     if (!candidate) callWarning = "Home Content AI output was invalid; unavailable sections used safe fallbacks.";
-  } catch (error) {
-    callWarning = "Home Content AI output was unavailable; used safe fallbacks where needed.";
-  }
+ } catch (error) {
+  console.error("[HomeContent] AI call failed:", error?.message || error);
+  callWarning = "Home Content AI output was unavailable; used safe fallbacks where needed.";
+}
 
   const resolved = resolveHomeContent(candidate, project?.website?.pages?.home?.content, productBrief, project);
   if (callWarning) resolved.warnings.unshift(callWarning);

@@ -288,16 +288,22 @@ const ProjectDetails = () => {
     setBuildingWebsite(true);
     setBuildError("");
 
-    const res = await api.post(`/projects/${id}/generate-website`);
+    const res = await api.post(`/projects/${id}/generate-website-mvp`);
 
     const generatedProject = res.data?.project;
-    const code = generatedProject?.generated?.html ?? "";
+const code = generatedProject?.generated?.html ?? "";
+const generationStatus = res.data?.generation?.status || "completed";
 
     if (!code) {
       throw new Error("Website generated, but no HTML was returned.");
     }
 
     setGeneratedCode(code);
+    if (generationStatus === "partial") {
+  setBuildError(
+    "Website generated successfully, but some AI content used safe fallback content."
+  );
+}
 
     setProject((prev) =>
       prev
